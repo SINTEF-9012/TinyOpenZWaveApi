@@ -11,3 +11,6 @@
 *.lai
 *.la
 *.a
+
+./tiny-open-zwave-api/*.txt
+./tiny-open-zwave-api/*.xml
