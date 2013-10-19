@@ -32,8 +32,10 @@ extern uint8 cclassNum(char const *str);
 extern const char *controllerErrorStr(Driver::ControllerError err);
 
 namespace TinyOpenZWaveApi{
-
 	using namespace std;
+
+	#define MAX_NODES 255
+	#define SWITCH_BINARY "SWITCH BINARY"
 
 	class Api
 	{
@@ -45,14 +47,13 @@ namespace TinyOpenZWaveApi{
 
 		public:
 			static Api* Init(string port);
-
 			static Api* Get() {return s_instance;};
-
 			static void Destroy();
 
-			void turnOn();
-			void turnOff();
-
+		public:
+			//commands
+			void turnOn(uint8 const _nodeId, uint8 const _instance, uint8 const _index);
+			void turnOff(uint8 const _nodeId, uint8 const _instance, uint8 const _index);
 	};
 };
 

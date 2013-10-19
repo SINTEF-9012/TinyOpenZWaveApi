@@ -14,6 +14,7 @@
 
 
 #include "Api.h"
+#include "./libs/znode.h"
 
 #include "Options.h"
 #include "Manager.h"
@@ -25,8 +26,13 @@
 using namespace TinyOpenZWaveApi;
 using namespace OpenZWave;
 
+uint32 homeId = 0;
+uint8 nodeId = 0;
+pthread_mutex_t nlock = PTHREAD_MUTEX_INITIALIZER;
+
 void OnNotification (Notification const* _notification, void* _context)
 {
+
   ValueID id = _notification->GetValueID();
   switch (_notification->GetType()) {
 	  case Notification::Type_ValueAdded:
@@ -70,6 +76,9 @@ void OnNotification (Notification const* _notification, void* _context)
 			   _notification->GetHomeId(), _notification->GetNodeId(),
 			   valueGenreStr(id.GetGenre()), cclassStr(id.GetCommandClassId()), id.GetInstance(),
 			   id.GetIndex(), valueTypeStr(id.GetType()));
+	    pthread_mutex_lock(&nlock);
+	    new ZNode(_notification->GetNodeId());
+	    pthread_mutex_unlock(&nlock);
 		break;
 	  case Notification::Type_NodeRemoved:
 		Log::Write(LogLevel_Info, "Notification: Node Removed Home %08x Node %d Genre %s Class %s Instance %d Index %d Type %s",
@@ -132,6 +141,8 @@ void OnNotification (Notification const* _notification, void* _context)
 	  case Notification::Type_DriverReady:
 		Log::Write(LogLevel_Info, "Notification: Driver Ready, homeId %08x, nodeId %d", _notification->GetHomeId(),
 			   _notification->GetNodeId());
+	    homeId = _notification->GetHomeId();
+	    nodeId = _notification->GetNodeId();
 		break;
 	  case Notification::Type_DriverFailed:
 		Log::Write(LogLevel_Info, "Notification: Driver Failed, homeId %08x", _notification->GetHomeId());
@@ -196,7 +207,8 @@ void OnNotification (Notification const* _notification, void* _context)
 }
 
 void exit_main_handler(int s){
-	printf("Caught signal %d\n",s);
+	Log::Write(LogLevel_Info, "Caught signal %d",s);
+	Log::Write(LogLevel_Info, "We have registered %d nodes", ZNode::getNodeCount());
 	Api* api = Api::Get();
 	api->Destroy();
     exit(1);
@@ -208,7 +220,7 @@ string Api::port = "";
 int main(int argc, char* argv[]){
 	string port = "/dev/ttyUSB0";
 	Api* api = Api::Init(port);
-	api->turnOn();
+	api->turnOn(0,0,0);
 
 	struct sigaction sigIntHandler;
 	sigIntHandler.sa_handler = exit_main_handler;
@@ -277,10 +289,20 @@ Api::~Api() {
 	Options::Destroy();
 }
 
-void Api::turnOn(){
+void Api::turnOn(uint8 const _nodeId, uint8 const _instance, uint8 const _index){
+	/*int8 cclasN = uint8(SWITCH_BINARY);
+	ValueID::ValueType type = ValueID::ValueType_Bool;
+	ValueID::ValueGenre genre = ValueID::ValueGenre_User;
+	ValueID valueId(homeId, _nodeId, genre, cclasN, _instance, _index, type);*/
+
 	Log::Write(LogLevel_Info, "turn on");
 }
 
-void Api::turnOff(){
+void Api::turnOff(uint8 const _nodeId, uint8 const _instance, uint8 const _index){
+	/*int8 cclasN = uint8(SWITCH_BINARY);
+	ValueID::ValueType type = ValueID::ValueType_Bool;
+	ValueID::ValueGenre genre = ValueID::ValueGenre_User;
+	ValueID valueId(homeId, _nodeId, genre, cclasN, _instance, _index, type);*/
+
 	Log::Write(LogLevel_Info, "turn off");
 }
