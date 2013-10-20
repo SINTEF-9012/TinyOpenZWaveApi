@@ -209,18 +209,29 @@ void OnNotification (Notification const* _notification, void* _context)
 void exit_main_handler(int s){
 	Log::Write(LogLevel_Info, "Caught signal %d",s);
 	Log::Write(LogLevel_Info, "We have registered %d nodes", ZNode::getNodeCount());
-	Api* api = Api::Get();
+	TinyController* api = TinyController::Get();
 	api->Destroy();
     exit(1);
 }
 
-Api* Api::s_instance = NULL;
-string Api::port = "";
+TinyController* TinyController::s_instance = NULL;
+string TinyController::port = "";
 
 int main(int argc, char* argv[]){
 	string port = "/dev/ttyUSB0";
-	Api* api = Api::Init(port);
-	api->turnOn(0,0,0);
+	TinyController* api = TinyController::Init(port);
+
+	BinarySwitch* s = new BinarySwitch();
+	s = s->BinarySwitch::Init(api,0,0,0);
+	s->turnOn();
+
+	//wait for 2 seconds
+	struct timeval tv;
+        tv.tv_sec = 2;
+        tv.tv_usec = 0;
+        select(0, NULL, NULL, NULL, &tv);
+
+	s->turnOff();
 
 	struct sigaction sigIntHandler;
 	sigIntHandler.sa_handler = exit_main_handler;
@@ -231,41 +242,50 @@ int main(int argc, char* argv[]){
 	return 0;
 }
 
-Api* Api::Init(string port){
-	Api::port = port;
+//TinyController
+
+TinyController* TinyController::Init(string port){
+	TinyController::port = port;
 	if(s_instance == NULL){
-		Log::Write(LogLevel_Info, "initializing api");
-		cout << "initializing api" << endl;
-		s_instance = new Api();
+		Log::Write(LogLevel_Info, "initializing TinyController");
+		cout << "initializing TinyController" << endl;
+		s_instance = new TinyController();
 	}
 	return s_instance;
 }
 
 //-----------------------------------------------------------------------------
-//	<Api::Destroy>
+//	<TinyController::Destroy>
 //	Static method to destroy the singleton.
 //-----------------------------------------------------------------------------
-void Api::Destroy()
+void TinyController::Destroy()
 {
 	delete s_instance;
 	s_instance = NULL;
 }
 
+void TinyController::execute(string const command, void* device, CallbackType callback)
+{
+	cout << "executing: " << command << endl;
+	//Log::Write(LogLevel_Info, command);
+	callback(device);
+}
+
 //-----------------------------------------------------------------------------
-// <Api::Api>
+// <TinyController::TinyController>
 // Constructor
 //-----------------------------------------------------------------------------
-Api::Api() {
+TinyController::TinyController() {
 
 	Options::Create("./config/", "", "--SaveConfiguration=true --DumpTriggerLevel=0");
 	Options::Get()->Lock();
 
 	Manager::Create();
-	Log::Write(LogLevel_Info, "initializing api");
+	Log::Write(LogLevel_Info, "initializing TinyController");
 	Manager::Get()->AddWatcher(OnNotification, NULL);
 
 	if(strcasecmp(port.c_str(), "usb") == 0) {
-		Manager::Get()->AddDriver("HID Controller", Driver::ControllerInterface_Hid);
+		Manager::Get()->AddDriver("HID TinyController", Driver::ControllerInterface_Hid);
 	}else{
 		Manager::Get()->AddDriver(port);
 	}
@@ -274,13 +294,13 @@ Api::Api() {
 }
 
 //-----------------------------------------------------------------------------
-// <Api::Api>
+// <TinyController::TinyController>
 // Destructor
 //-----------------------------------------------------------------------------
-Api::~Api() {
-	Log::Write(LogLevel_Info, "destroying API object");
+TinyController::~TinyController() {
+	Log::Write(LogLevel_Info, "destroying TinyController object");
 	if(strcasecmp(port.c_str(), "usb") == 0){
-		Manager::Get()->RemoveDriver("HID Controller");
+		Manager::Get()->RemoveDriver("HID TinyController");
 	}else{
 		Manager::Get()->RemoveDriver(port);
 	}
@@ -289,20 +309,63 @@ Api::~Api() {
 	Options::Destroy();
 }
 
-void Api::turnOn(uint8 const _nodeId, uint8 const _instance, uint8 const _index){
-	/*int8 cclasN = uint8(SWITCH_BINARY);
-	ValueID::ValueType type = ValueID::ValueType_Bool;
-	ValueID::ValueGenre genre = ValueID::ValueGenre_User;
-	ValueID valueId(homeId, _nodeId, genre, cclasN, _instance, _index, type);*/
+//BinarySwitch
 
-	Log::Write(LogLevel_Info, "turn on");
+Device* Device::Init(TinyController* const controller, uint8 const _nodeId, uint8 const _instance, uint8 const _index){
+	this->controller = controller;	
+	this->_nodeId = _nodeId;
+	this->_instance = _instance;
+	this->_index = _index;
+	return this;
 }
 
-void Api::turnOff(uint8 const _nodeId, uint8 const _instance, uint8 const _index){
+//-----------------------------------------------------------------------------
+//	<BinarySwitch::Destroy>
+//	Static method to destroy the singleton.
+//-----------------------------------------------------------------------------
+void BinarySwitch::Destroy()
+{
+	delete this;
+}
+
+//-----------------------------------------------------------------------------
+// <BinarySwitch::BinarySwitch>
+// Constructor
+//-----------------------------------------------------------------------------
+BinarySwitch::BinarySwitch() {
+
+}
+
+//-----------------------------------------------------------------------------
+// <BinarySwitch::BinarySwitch>
+// Destructor
+//-----------------------------------------------------------------------------
+BinarySwitch::~BinarySwitch() {
+	BinarySwitch::Destroy();
+}
+
+void BinarySwitch::turnOn(){
+	/*int8 cclasN = uint8(SWITCH_BINARY);
+	ValueID::ValueType type = ValueID::ValueType_Bool;
+	ValueID::ValueGenre genre = ValueID::ValueGenre_User;
+	ValueID valueId(homeId, _nodeId, genre, cclasN, _instance, _index, type);*/
+	
+	controller->execute("turn on", (void*)this, &BinarySwitch::turnedOn);
+}
+
+void BinarySwitch::turnOff(){
 	/*int8 cclasN = uint8(SWITCH_BINARY);
 	ValueID::ValueType type = ValueID::ValueType_Bool;
 	ValueID::ValueGenre genre = ValueID::ValueGenre_User;
 	ValueID valueId(homeId, _nodeId, genre, cclasN, _instance, _index, type);*/
 
-	Log::Write(LogLevel_Info, "turn off");
+	controller->execute("turn off", (void*) this, &BinarySwitch::turnedOff);
+}
+
+void BinarySwitch::turnedOn_i(){
+	cout << "turned on" << endl;
+}
+
+void BinarySwitch::turnedOff_i(){
+	cout << "turned off" << endl;
 }
