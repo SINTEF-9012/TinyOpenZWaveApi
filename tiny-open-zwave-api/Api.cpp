@@ -29,6 +29,7 @@ using namespace OpenZWave;
 uint32 homeId = 0;
 uint8 nodeId = 0;
 pthread_mutex_t nlock = PTHREAD_MUTEX_INITIALIZER;
+//static pthread_mutex_t g_criticalSection;
 
 void OnNotification (Notification const* _notification, void* _context)
 {
@@ -264,13 +265,6 @@ void TinyController::Destroy()
 	s_instance = NULL;
 }
 
-void TinyController::execute(string const command, void* device, CallbackType callback)
-{
-	cout << "executing: " << command << endl;
-	//Log::Write(LogLevel_Info, command);
-	callback(device);
-}
-
 //-----------------------------------------------------------------------------
 // <TinyController::TinyController>
 // Constructor
@@ -344,28 +338,18 @@ BinarySwitch::~BinarySwitch() {
 	BinarySwitch::Destroy();
 }
 
-void BinarySwitch::turnOn(){
-	/*int8 cclasN = uint8(SWITCH_BINARY);
-	ValueID::ValueType type = ValueID::ValueType_Bool;
-	ValueID::ValueGenre genre = ValueID::ValueGenre_User;
-	ValueID valueId(homeId, _nodeId, genre, cclasN, _instance, _index, type);*/
-	
-	controller->execute("turn on", (void*)this, &BinarySwitch::turnedOn);
+void BinarySwitch::turnOn(){	
+	/*pthread_mutex_lock(&g_criticalSection);
+	Manager::Get()->SetNodeOn(_index, _nodeId);
+	pthread_mutex_unlock(&g_criticalSection);*/
+
+	cout << "turn on" << endl;
 }
 
 void BinarySwitch::turnOff(){
-	/*int8 cclasN = uint8(SWITCH_BINARY);
-	ValueID::ValueType type = ValueID::ValueType_Bool;
-	ValueID::ValueGenre genre = ValueID::ValueGenre_User;
-	ValueID valueId(homeId, _nodeId, genre, cclasN, _instance, _index, type);*/
+	/*pthread_mutex_lock(&g_criticalSection);
+	Manager::Get()->SetNodeOff(_index, _nodeId);
+	pthread_mutex_unlock(&g_criticalSection);*/
 
-	controller->execute("turn off", (void*) this, &BinarySwitch::turnedOff);
-}
-
-void BinarySwitch::turnedOn_i(){
-	cout << "turned on" << endl;
-}
-
-void BinarySwitch::turnedOff_i(){
-	cout << "turned off" << endl;
+	cout << "turn off" << endl;
 }

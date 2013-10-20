@@ -37,8 +37,6 @@ namespace TinyOpenZWaveApi{
 	#define MAX_NODES 255
 	#define SWITCH_BINARY "SWITCH BINARY"
 
-	typedef void (*CallbackType)(void*);  
-
 	class TinyController
 	{
 		private:
@@ -51,8 +49,7 @@ namespace TinyOpenZWaveApi{
 			static TinyController* Init(string port);
 			static TinyController* Get() {return s_instance;};
 			static void Destroy();
-			static void execute(string const command, void* device, CallbackType callback);
-
+			
 	};
 
 	class Device
@@ -80,15 +77,6 @@ namespace TinyOpenZWaveApi{
 			//commands
 			void turnOn();
 			void turnOff();
-
-			//instance callbacks
-			static void turnedOn_i();
-			static void turnedOff_i();			
-
-			//callbacks
-			static void turnedOn(void* device) {((BinarySwitch*)device)->turnedOn_i();};
-			static void turnedOff(void* device) {((BinarySwitch*)device)->turnedOff_i();};
-
 			
 	};
 };
