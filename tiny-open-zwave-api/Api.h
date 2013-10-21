@@ -37,23 +37,47 @@ namespace TinyOpenZWaveApi{
 	#define MAX_NODES 255
 	#define SWITCH_BINARY "SWITCH BINARY"
 
-	class Api
+	class TinyController
 	{
 		private:
-			Api();
-			virtual ~Api();
-			static Api* s_instance;
+			TinyController();
+			virtual ~TinyController();
+			static TinyController* s_instance;
 			static string port;
 
 		public:
-			static Api* Init(string port);
-			static Api* Get() {return s_instance;};
+			static TinyController* Init(string port);
+			static TinyController* Get() {return s_instance;};
 			static void Destroy();
+			
+	};
+
+	class Device
+	{
+		protected:
+			uint8 _nodeId;
+			uint8 _instance;
+			uint8 _index;
+			TinyController* controller;
 
 		public:
+			Device* Init(TinyController* const controller, uint8 const _nodeId, uint8 const _instance, uint8 const _index);
+	};
+
+	class BinarySwitch: public Device
+	{
+
+			
+		public:
+			BinarySwitch* Init(TinyController* const controller, uint8 const _nodeId, uint8 const _instance, uint8 const _index) {return (BinarySwitch*)Device::Init(controller, _nodeId, _instance, _index);};
+			BinarySwitch();
+			void Destroy();
+			virtual ~BinarySwitch();
+			
 			//commands
-			void turnOn(uint8 const _nodeId, uint8 const _instance, uint8 const _index);
-			void turnOff(uint8 const _nodeId, uint8 const _instance, uint8 const _index);
+			void turnOn();
+			void turnOff();
+			
 	};
 };
 
