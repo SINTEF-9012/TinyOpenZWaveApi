@@ -23,7 +23,14 @@ ZValue::~ZValue(){
 	delete this;
 }
 
+void ZNode::Destroy(){
+	for(int i=0; i<MAX_NODES; i++){
+		delete nodes[i];
+	}
+}
+
 ZNode::~ZNode(){
+	Log::Write(LogLevel_Info, "~ZNode(): clearing data for the node %d...", this->getNodeId());
 	while (!values.empty()) {
 		ZValue *v = values.back();
 	    values.pop_back();
@@ -77,6 +84,10 @@ ZValue* ZNode::getValueAt(uint8 n){
 		return NULL;
 	}
 	return values[n];
+}
+
+int32 ZNode::getNodeId(){
+	return node_id;
 }
 
 

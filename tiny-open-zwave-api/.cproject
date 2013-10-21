@@ -34,6 +34,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/open-zwave/cpp/src/platform/unix}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/open-zwave/cpp/src/value_classes}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/open-zwave/cpp/tinyxml}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/tiny-open-zwave-api/libs}&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.553015911" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>

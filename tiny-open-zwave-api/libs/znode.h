@@ -28,6 +28,7 @@ class ZNode {
 	public:
 		ZNode(int32 const _node_id);
 		~ZNode();
+		static void Destroy();
 
 	private:
 		static int32 nodecount;
@@ -40,6 +41,7 @@ class ZNode {
 		void addZValue(ValueID id);
 		int32 getValueCount();
 		ZValue *getValueAt(uint8 n);
+		int32 getNodeId();
 };
 
 

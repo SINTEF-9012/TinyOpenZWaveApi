@@ -247,6 +247,7 @@ Api* Api::Init(string port){
 //-----------------------------------------------------------------------------
 void Api::Destroy()
 {
+	ZNode::Destroy();
 	delete s_instance;
 	s_instance = NULL;
 }
