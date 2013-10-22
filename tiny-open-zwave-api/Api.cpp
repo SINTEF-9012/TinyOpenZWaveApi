@@ -14,7 +14,6 @@
 
 
 #include "Api.h"
-#include "./libs/znode.h"
 
 #include "Options.h"
 #include "Manager.h"
@@ -24,29 +23,43 @@
 #include "Log.h"
 
 using namespace TinyOpenZWaveApi;
-using namespace OpenZWave;
 
 uint32 homeId = 0;
 uint8 nodeId = 0;
 pthread_mutex_t nlock = PTHREAD_MUTEX_INITIALIZER;
 //static pthread_mutex_t g_criticalSection;
 
+int32 ZNode::nodecount = 0;
+ZNode *nodes[MAX_NODES];
+
+const char *Device::COMMAND_CLASS = "";
+const char *BinarySwitch::COMMAND_CLASS = SWITCH_BINARY;
+
 void OnNotification (Notification const* _notification, void* _context)
 {
 
   ValueID id = _notification->GetValueID();
+  ZNode *node = NULL;
   switch (_notification->GetType()) {
 	  case Notification::Type_ValueAdded:
 		Log::Write(LogLevel_Info, "Notification: Value Added Home 0x%08x Node %d Genre %s Class %s Instance %d Index %d Type %s",
 			   _notification->GetHomeId(), _notification->GetNodeId(),
 			   valueGenreStr(id.GetGenre()), cclassStr(id.GetCommandClassId()), id.GetInstance(),
 			   id.GetIndex(), valueTypeStr(id.GetType()));
+		pthread_mutex_lock(&nlock);
+		node = ZNode::getNode(_notification->GetNodeId());
+		node->addZValue(id);
+		pthread_mutex_unlock(&nlock);
 		break;
 	  case Notification::Type_ValueRemoved:
 		Log::Write(LogLevel_Info, "Notification: Value Removed Home 0x%08x Node %d Genre %s Class %s Instance %d Index %d Type %s",
 			   _notification->GetHomeId(), _notification->GetNodeId(),
 			   valueGenreStr(id.GetGenre()), cclassStr(id.GetCommandClassId()), id.GetInstance(),
 			   id.GetIndex(), valueTypeStr(id.GetType()));
+		pthread_mutex_lock(&nlock);
+		node = ZNode::getNode(_notification->GetNodeId());
+		node->dropZValue(id);
+		pthread_mutex_unlock(&nlock);
 		break;
 	  case Notification::Type_ValueChanged:
 		Log::Write(LogLevel_Info, "Notification: Value Changed Home 0x%08x Node %d Genre %s Class %s Instance %d Index %d Type %s",
@@ -156,6 +169,9 @@ void OnNotification (Notification const* _notification, void* _context)
 		break;
 	  case Notification::Type_NodeQueriesComplete:
 		Log::Write(LogLevel_Info, "Notification: Node %d Queries Complete", _notification->GetNodeId());
+
+		TinyController::testOnOff();
+
 		break;
 	  case Notification::Type_AwakeNodesQueried:
 		Log::Write(LogLevel_Info, "Notification: Awake Nodes Queried");
@@ -220,19 +236,7 @@ string TinyController::port = "";
 
 int main(int argc, char* argv[]){
 	string port = "/dev/ttyUSB0";
-	TinyController* api = TinyController::Init(port);
-
-	BinarySwitch* s = new BinarySwitch();
-	s = s->BinarySwitch::Init(api,0,0,0);
-	s->turnOn();
-
-	//wait for 2 seconds
-	struct timeval tv;
-        tv.tv_sec = 2;
-        tv.tv_usec = 0;
-        select(0, NULL, NULL, NULL, &tv);
-
-	s->turnOff();
+	TinyController::Init(port);
 
 	struct sigaction sigIntHandler;
 	sigIntHandler.sa_handler = exit_main_handler;
@@ -241,6 +245,118 @@ int main(int argc, char* argv[]){
 	sigaction(SIGINT, &sigIntHandler, NULL);
 	while (1);
 	return 0;
+}
+
+
+//
+
+
+ZValue::ZValue(ValueID _id) : id(_id) {};
+
+ValueID ZValue::getId(){
+	return id;
+}
+
+ZValue::~ZValue(){}
+
+void ZNode::Destroy(){
+	for(int i=0; i<MAX_NODES; i++){
+		delete nodes[i];
+	}
+}
+
+ZNode::~ZNode(){
+	Log::Write(LogLevel_Info, "~ZNode(): clearing data for the node %d...", this->getNodeId());
+	while (!values.empty()) {
+		ZValue *v = values.back();
+		values.pop_back();
+		ValueID valueId =  v->getId();
+	    Log::Write(LogLevel_Info, "Dropping value: Home 0x%08x Node %d Genre %s Class %s Instance %d Index %d Type %s",
+	    					valueId.GetHomeId(), valueId.GetNodeId(), valueGenreStr(valueId.GetGenre()),
+	    					cclassStr(valueId.GetCommandClassId()), valueId.GetInstance(),
+	    					valueId.GetIndex(), valueTypeStr(valueId.GetType()));
+	    delete v;
+	}
+}
+
+ZNode::ZNode(int32 const _node_id){
+	node_id = _node_id;
+	if (_node_id < 1 || _node_id >= MAX_NODES) {
+		Log::Write(LogLevel_Info, "ZNode(): bad node value %d, ignoring...", _node_id);
+		delete this;
+		return;
+	}
+	Log::Write(LogLevel_Info, "ZNode(): adding node value %d", _node_id);
+	nodes[node_id] = this;
+	nodecount ++;
+}
+
+int32 ZNode::getNodeCount(){
+	return nodecount;
+}
+
+ZNode *ZNode::getNode(int32 const _nodeId){
+	return nodes[_nodeId];
+}
+
+void ZNode::addZValue(ValueID _valueId){
+	ZValue *zvalue = new ZValue(_valueId);
+	values.push_back(zvalue);
+}
+
+void ZNode::dropZValueAt(uint8 n){
+	uint8 size = values.size();
+	if(size > n){
+		Log::Write(LogLevel_Info, "cannot drop value at %d, current size is %d ignoring...", n, size);
+		return;
+	}
+	vector<ZValue*>::iterator it;
+	uint8 i = 0;
+	while(it!=values.end() && i != n){
+		if(i == size){
+			values.erase(it);
+			break;
+		}
+		it++;
+		i++;
+	}
+}
+
+void ZNode::dropZValue(ValueID valueId){
+	vector<ZValue*>::iterator it;
+	bool deleted = false;
+	for(it = values.begin(); it != values.end(); it++){
+		if((*it)->getId() == valueId){
+			delete *it;
+			values.erase(it);
+			deleted = true;
+			break;
+		}
+	}
+	if(!deleted){
+		Log::Write(LogLevel_Info, "valueId %d does not exist in the values list..."
+				"Value: Home 0x%08x Node %d Genre %s Class %s Instance %d Index %d Type %s", valueId,
+					valueId.GetHomeId(), valueId.GetNodeId(), valueGenreStr(valueId.GetGenre()),
+					cclassStr(valueId.GetCommandClassId()), valueId.GetInstance(),
+					valueId.GetIndex(), valueTypeStr(valueId.GetType()));
+	}
+}
+
+ZValue* ZNode::getValueAt(uint8 n){
+	uint8 size = values.size();
+	if(size > n){
+		Log::Write(LogLevel_Info, "cannot get value at %d, current size is %d ignoring...", n, size);
+		return NULL;
+	}
+	return values[n];
+}
+
+int32 ZNode::getNodeId(){
+	return node_id;
+}
+
+vector<ZValue*> ZNode::getValueValues(){
+	return values;
 }
 
 //TinyController
@@ -306,20 +422,56 @@ TinyController::~TinyController() {
 
 //BinarySwitch
 
-Device* Device::Init(TinyController* const controller, uint8 const _nodeId, uint8 const _instance, uint8 const _index){
-	this->controller = controller;	
-	this->_nodeId = _nodeId;
-	this->_instance = _instance;
-	this->_index = _index;
+Device* Device::Init(TinyController* const controller, uint8 const _nodeId, uint8 const _instance, uint8 const _index) {
+	this->value = NULL;
+	this->controller = controller;
+	this->nodeId = _nodeId;
+	this->instance = _instance;
+	this->index = _index;
+	this->node = nodes[this->nodeId];
+	vector<ZValue*>::iterator it;
+	if(this->node != NULL){
+		vector<ZValue*> values = this->node->getValueValues();
+		for(it = values.begin(); it != values.end(); it++){
+			ValueID id = (*it)->getId();
+			if(id.GetCommandClassId() == getComandClass() &&
+					id.GetInstance() == this->instance &&
+					id.GetIndex() == this->index){
+				this->value = (*it);
+				break;
+			}
+		}
+		if(this->value == NULL){
+			Log::Write(LogLevel_Info, "DEVICE INIT: node with id %d does not implement command %s with instance %d and index %d",
+					this->nodeId, cclassStr(getComandClass()), this->instance, this->index);
+		}
+	}else{
+		Log::Write(LogLevel_Info, "DEVICE INIT: can not find node with id %d", this->nodeId);
+	}
 	return this;
+}
+
+void TinyController::testOnOff(){
+	Log::Write(LogLevel_Info, "testOnOff TEST");
+	BinarySwitch* s = new BinarySwitch();
+	s = s->BinarySwitch::Init(TinyController::Get(),4,1,0);
+
+	s->turnOff();
+}
+
+uint8 Device::getComandClass(){
+	return cclassNum(COMMAND_CLASS);
+}
+
+Device::~Device() {
+	delete this;
 }
 
 //-----------------------------------------------------------------------------
 //	<BinarySwitch::Destroy>
 //	Static method to destroy the singleton.
 //-----------------------------------------------------------------------------
-void BinarySwitch::Destroy()
-{
+void BinarySwitch::Destroy() {
 	delete this;
 }
 
@@ -327,9 +479,7 @@ void BinarySwitch::Destroy()
 // <BinarySwitch::BinarySwitch>
 // Constructor
 //-----------------------------------------------------------------------------
-BinarySwitch::BinarySwitch() {
-
-}
+BinarySwitch::BinarySwitch() {}
 
 //-----------------------------------------------------------------------------
 // <BinarySwitch::BinarySwitch>
@@ -339,18 +489,44 @@ BinarySwitch::~BinarySwitch() {
 	BinarySwitch::Destroy();
 }
 
-void BinarySwitch::turnOn(){	
-	/*pthread_mutex_lock(&g_criticalSection);
-	Manager::Get()->SetNodeOn(_index, _nodeId);
-	pthread_mutex_unlock(&g_criticalSection);*/
+uint8 BinarySwitch::getComandClass(){
+	return cclassNum(COMMAND_CLASS);
+}
 
-	cout << "turn on" << endl;
+void BinarySwitch::turnOn(){
+	Log::Write(LogLevel_Info, "BinarySwitch::turnOn(): turning on...");
+	if(this->node != NULL && this->value != NULL){
+		ValueID valueId = this->value->getId();
+		if (ValueID::ValueType_Bool == valueId.GetType()){
+			bool bool_value = true;
+			Manager::Get()->SetValue(valueId, bool_value);
+		}else{
+			Log::Write(LogLevel_Info, "BinarySwitch::turnOn(): command value is not of the bool type, ignoring..."
+					"Value: Home 0x%08x Node %d Genre %s Class %s Instance %d Index %d Type %s", valueId,
+										valueId.GetHomeId(), valueId.GetNodeId(), valueGenreStr(valueId.GetGenre()),
+										cclassStr(valueId.GetCommandClassId()), valueId.GetInstance(),
+										valueId.GetIndex(), valueTypeStr(valueId.GetType()));
+		}
+	}else{
+		Log::Write(LogLevel_Info, "BinarySwitch::turnOn(): node or valueid for turn on/off command is NULL, ignoring...");
+	};
 }
 
 void BinarySwitch::turnOff(){
-	/*pthread_mutex_lock(&g_criticalSection);
-	Manager::Get()->SetNodeOff(_index, _nodeId);
-	pthread_mutex_unlock(&g_criticalSection);*/
-
-	cout << "turn off" << endl;
+	Log::Write(LogLevel_Info, "BinarySwitch::turnOff(): turning off...");
+	if(this->node != NULL && this->value != NULL){
+		ValueID valueId = this->value->getId();
+		if (ValueID::ValueType_Bool == valueId.GetType()){
+			bool bool_value = false;
+			Manager::Get()->SetValue(valueId, bool_value);
+		}else{
+			Log::Write(LogLevel_Info, "BinarySwitch::turnOff(): command value is not of the bool type, ignoring..."
+					"Value: Home 0x%08x Node %d Genre %s Class %s Instance %d Index %d Type %s", valueId,
+										valueId.GetHomeId(), valueId.GetNodeId(), valueGenreStr(valueId.GetGenre()),
+										cclassStr(valueId.GetCommandClassId()), valueId.GetInstance(),
+										valueId.GetIndex(), valueTypeStr(valueId.GetType()));
+		}
+	}else{
+		Log::Write(LogLevel_Info, "BinarySwitch::turnOff(): node or valueid for turn on/off command is NULL, ignoring...");
+	};
 }

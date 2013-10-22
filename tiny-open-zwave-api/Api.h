@@ -37,6 +37,42 @@ namespace TinyOpenZWaveApi{
 	#define MAX_NODES 255
 	#define SWITCH_BINARY "SWITCH BINARY"
 
+	class ZValue {
+	  friend class ZNode;
+
+	 public:
+	  ZValue(ValueID _id);
+	  ~ZValue();
+	  ValueID getId();
+	 private:
+	  ValueID id;
+	};
+
+	class ZNode {
+		public:
+			ZNode(int32 const _node_id);
+			~ZNode();
+			static void Destroy();
+
+		private:
+			static int32 nodecount;
+			int32 node_id;
+			vector<ZValue*> values;
+
+		public:
+			static int32 getNodeCount();
+			static ZNode* getNode(int32 const _node_id);
+			void dropZValueAt(uint8 n);
+			void dropZValue(ValueID id);
+			void addZValue(ValueID id);
+			int32 getValueCount();
+			ZValue *getValueAt(uint8 n);
+			int32 getNodeId();
+
+			//delete this
+			vector<ZValue*> getValueValues();
+	};
+
 	class TinyController
 	{
 		private:
@@ -50,25 +86,37 @@ namespace TinyOpenZWaveApi{
 			static TinyController* Get() {return s_instance;};
 			static void Destroy();
 			
+			//this should be deleted: just for initial testing
+			static void testOnOff();
+
 	};
 
 	class Device
 	{
 		protected:
-			uint8 _nodeId;
-			uint8 _instance;
-			uint8 _index;
+			uint8 nodeId;
+			uint8 instance;
+			uint8 index;
 			TinyController* controller;
+			ZNode* node;
+			ZValue* value;
+			virtual uint8 getComandClass();
 
 		public:
+			static const char *COMMAND_CLASS;
 			Device* Init(TinyController* const controller, uint8 const _nodeId, uint8 const _instance, uint8 const _index);
+
+			virtual ~Device();
 	};
 
 	class BinarySwitch: public Device
 	{
+		protected:
+			virtual uint8 getComandClass();
 
-			
 		public:
+			static const char *COMMAND_CLASS;
+
 			BinarySwitch* Init(TinyController* const controller, uint8 const _nodeId, uint8 const _instance, uint8 const _index) {return (BinarySwitch*)Device::Init(controller, _nodeId, _instance, _index);};
 			BinarySwitch();
 			void Destroy();

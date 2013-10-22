@@ -50,10 +50,8 @@ Api.o : Api.h $(OPENZWAVE)/cpp/src/Options.h $(OPENZWAVE)/cpp/src/Manager.h \
 	$(OPENZWAVE)/cpp/src/Node.h $(OPENZWAVE)/cpp/src/Group.h \
 	$(OPENZWAVE)/cpp/src/Notification.h $(OPENZWAVE)/cpp/src/platform/Log.h \
 
-./libs/znode.o : Api.h ./libs/znode.h $(OPENZWAVE)/cpp/src/platform/Log.h \
-
-api : Api.o ./libs/zwavelib.o ./libs/znode.o
-	$(LD) -o $@ $(LDFLAGS) Api.o  ./libs/zwavelib.o ./libs/znode.o $(LIBS)
+api : Api.o ./libs/zwavelib.o
+	$(LD) -o $@ $(LDFLAGS) Api.o  ./libs/zwavelib.o $(LIBS)
 	
 clean:
 	rm -rf api *.o ./libs/*.o *.xml *.txt
