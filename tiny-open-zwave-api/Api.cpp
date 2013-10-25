@@ -169,9 +169,6 @@ void OnNotification (Notification const* _notification, void* _context)
 		break;
 	  case Notification::Type_NodeQueriesComplete:
 		Log::Write(LogLevel_Info, "Notification: Node %d Queries Complete", _notification->GetNodeId());
-
-		TinyController::testOnOff();
-
 		break;
 	  case Notification::Type_AwakeNodesQueried:
 		Log::Write(LogLevel_Info, "Notification: Awake Nodes Queried");
@@ -181,6 +178,9 @@ void OnNotification (Notification const* _notification, void* _context)
 		break;
 	  case Notification::Type_AllNodesQueried:
 		Log::Write(LogLevel_Info, "Notification: All Nodes Queried");
+
+		TinyController::testOnOff();
+
 		break;
 	  case Notification::Type_Notification:
 		switch (_notification->GetNotification()) {
@@ -231,9 +231,11 @@ void exit_main_handler(int s){
     exit(1);
 }
 
+
 TinyController* TinyController::s_instance = NULL;
 string TinyController::port = "";
 
+BinarySwitch* s;
 int main(int argc, char* argv[]){
 	string port = "/dev/ttyUSB0";
 	TinyController::Init(port);
@@ -243,7 +245,31 @@ int main(int argc, char* argv[]){
 	sigemptyset(&sigIntHandler.sa_mask);
 	sigIntHandler.sa_flags = 0;
 	sigaction(SIGINT, &sigIntHandler, NULL);
-	while (1);
+
+	char ch;
+	while (1){
+		cin >> ch;
+		if(ch == 'o'){
+			s->turnOn();
+		}
+		if(ch == 'f'){
+			s->turnOff();
+		}
+		if(ch == 'i'){
+			Log::Write(LogLevel_Info, "BinarySwitch: is value polled %d ...", Manager::Get()->isPolled(s->getValueToPull()->getId()));
+		}
+		if(ch == 'g'){
+			Log::Write(LogLevel_Info, "BinarySwitch: the poll interval is  %d ...", Manager::Get()->GetPollInterval());
+		}
+		if(ch == 'e'){
+			Log::Write(LogLevel_Info, "BinarySwitch: enabling  poll");
+			Manager::Get()->EnablePoll(s->getValueToPull()->getId(), 1);
+		}
+		if(ch == 's'){
+			Log::Write(LogLevel_Info, "BinarySwitch: setting poll interval");
+			Manager::Get()->SetPollInterval(5000, false);
+		}
+	}
 	return 0;
 }
 
@@ -389,6 +415,12 @@ void TinyController::Destroy()
 TinyController::TinyController() {
 
 	Options::Create("./config/", "", "--SaveConfiguration=true --DumpTriggerLevel=0");
+    Options::Get()->AddOptionInt("PollInterval", 5000);
+    Options::Get()->AddOptionBool("IntervalBetweenPolls", true);
+    Options::Get()->AddOptionBool( "SuppressValueRefresh", false );
+    Options::Get()->AddOptionBool( "PerformReturnRoutes", false );
+
+
 	Options::Get()->Lock();
 
 	Manager::Create();
@@ -452,11 +484,11 @@ Device* Device::Init(TinyController* const controller, uint8 const _nodeId, uint
 }
 
 void TinyController::testOnOff(){
-	Log::Write(LogLevel_Info, "testOnOff TEST");
-	BinarySwitch* s = new BinarySwitch();
+	Log::Write(LogLevel_Info, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! testOnOff TEST");
+	s = new BinarySwitch();
 	s = s->BinarySwitch::Init(TinyController::Get(),4,1,0);
 
-	s->turnOff();
+	//s->turnOn();
 }
 
 uint8 Device::getComandClass(){
@@ -529,4 +561,8 @@ void BinarySwitch::turnOff(){
 	}else{
 		Log::Write(LogLevel_Info, "BinarySwitch::turnOff(): node or valueid for turn on/off command is NULL, ignoring...");
 	};
+}
+
+ZValue* BinarySwitch::getValueToPull(){
+	return this->value;
 }
