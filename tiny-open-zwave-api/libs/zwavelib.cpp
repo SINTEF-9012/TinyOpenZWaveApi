@@ -35,7 +35,21 @@
 //-----------------------------------------------------------------------------
 
 #include <string.h>
-#include "../Api.h"
+
+#include "Driver.h"
+#include "Notification.h"
+#include "ValueStore.h"
+#include "Value.h"
+#include "ValueBool.h"
+#include "ValueByte.h"
+#include "ValueDecimal.h"
+#include "ValueInt.h"
+#include "ValueList.h"
+#include "ValueShort.h"
+#include "ValueString.h"
+
+
+using namespace OpenZWave;
 
 const char *valueGenreStr (ValueID::ValueGenre vg)
 {

@@ -50,23 +50,11 @@
 #include "ValueShort.h"
 #include "ValueString.h"
 
+#include "types.h"
+
 // wrapper
 #include "DomoZWave.h"
 using namespace OpenZWave;
-
-//-----------------------------------------------------------------------------
-// Internal enum types
-//-----------------------------------------------------------------------------
-
-enum TypeNodeState
-{
-	DZType_Unknown = 0,
-	DZType_Alive,
-	DZType_Dead,
-	DZType_Sleep,
-	DZType_Awake,
-	DZType_Timeout
-};
 
 //-----------------------------------------------------------------------------
 // Variables
@@ -77,9 +65,6 @@ string logfile_prefix;
 string logfile_name;
 ofstream logfile;
 
-// Define serialport string, we require the serialport if we want to stop the
-// Open Z-Wave library properly
-list<string> serialPortName;
 
 char url[35];
 bool debugging;
@@ -87,42 +72,6 @@ bool running;
 
 static pthread_mutex_t g_criticalSection;
 
-///////////////////////////////////////////////////////////////////////////////
-// Basic Command Class Mapping
-///////////////////////////////////////////////////////////////////////////////
-
-// Define map/hash to store COMMAND_CLASS_BASIC to other COMMAND_CLASS mapping
-// This prevents multi ValueChanged events for a single event
-// NOTE: This information is known in the Open Z-Wave library, but not accessible
-//       for us. Maybe in the future this is possible? 
-std::map<string, int> MapCommandClassBasic;
-
-///////////////////////////////////////////////////////////////////////////////
-// Controller/homeId information, includes multiple controller support
-///////////////////////////////////////////////////////////////////////////////
-
-typedef struct
-{
-	uint8		m_command;
-	uint8		m_nodeId;
-	time_t		m_time;
-} m_cmdItem;
-
-
-typedef struct
-{
-	uint32		m_homeId;
-	uint8		m_controllerId;
-	uint32		m_controllerAllQueried;
-	bool		m_controllerBusy;
-	uint8		m_nodeId;
-	list<m_cmdItem>	m_cmd;
-	uint8		m_userCodeEnrollNode;
-	time_t		m_userCodeEnrollTime;
-	time_t		m_lastWriteXML;
-} m_structCtrl;
-
-static list<m_structCtrl*> g_allControllers;
 
 ///////////////////////////////////////////////////////////////////////////////
 // ControllerInfo Functions for Open Z-Wave
@@ -145,29 +94,6 @@ m_structCtrl* GetControllerInfo
 	return NULL;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// Structure of internal Open Z-Wave node information
-///////////////////////////////////////////////////////////////////////////////
-
-// To enable polling we need a nodeId->ValueID mapping. I asked on the mailing
-// list and the only suggestion I got was to store them off when the values are
-// added. So we store a list of structs to hold this mapping.
-
-typedef struct
-{
-	uint32		m_homeId;
-	uint8		m_nodeId;
-	uint8		basicmapping;
-	uint8		instancecount;
-	string		commandclass;
-	time_t		m_LastSeen;
-	TypeNodeState	m_DeviceState;
-	std::map<int,string> instancecommandclass;
-	std::map<int,string> instanceLabel;
-	list<ValueID>	m_values;
-} NodeInfo;
-
-static list<NodeInfo*> g_nodes;
 
 ///////////////////////////////////////////////////////////////////////////////
 // NodeInfo Functions for Open Z-Wave
