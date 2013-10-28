@@ -14,6 +14,7 @@
 
 
 #include "Api.h"
+#include "libs/types.h"
 
 #include "Options.h"
 #include "Manager.h"
@@ -28,9 +29,6 @@ uint32 homeId = 0;
 uint8 nodeId = 0;
 pthread_mutex_t nlock = PTHREAD_MUTEX_INITIALIZER;
 //static pthread_mutex_t g_criticalSection;
-
-int32 ZNode::nodecount = 0;
-ZNode *nodes[MAX_NODES];
 
 const char *Device::COMMAND_CLASS = "";
 const char *BinarySwitch::COMMAND_CLASS = SWITCH_BINARY;

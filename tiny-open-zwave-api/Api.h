@@ -36,8 +36,6 @@ extern const char *controllerErrorStr(Driver::ControllerError err);
 namespace TinyOpenZWaveApi{
 	using namespace std;
 
-	#define MAX_NODES 255
-	#define SWITCH_BINARY "SWITCH BINARY"
 
 	class TinyController
 	{

@@ -22,41 +22,8 @@
 
 using namespace OpenZWave;
 
-	class ZValue {
-	  friend class ZNode;
-
-	 public:
-	  ZValue(ValueID _id);
-	  ~ZValue();
-	  ValueID getId();
-	 private:
-	  ValueID id;
-	};
-
-	class ZNode {
-		public:
-			ZNode(int32 const _node_id);
-			~ZNode();
-			static void Destroy();
-
-		private:
-			static int32 nodecount;
-			int32 node_id;
-			vector<ZValue*> values;
-
-		public:
-			static int32 getNodeCount();
-			static ZNode* getNode(int32 const _node_id);
-			void dropZValueAt(uint8 n);
-			void dropZValue(ValueID id);
-			void addZValue(ValueID id);
-			int32 getValueCount();
-			ZValue *getValueAt(uint8 n);
-			int32 getNodeId();
-
-			//delete this
-			vector<ZValue*> getValueValues();
-	};
+	#define MAX_NODES 255
+	#define SWITCH_BINARY "SWITCH BINARY"
 
 	//-----------------------------------------------------------------------------
 	// Internal enum types
@@ -116,6 +83,44 @@ using namespace OpenZWave;
 		list<ValueID>	m_values;
 	} NodeInfo;
 
+	class ZValue {
+	  friend class ZNode;
+
+	 public:
+	  ZValue(ValueID _id);
+	  ~ZValue();
+	  ValueID getId();
+	 private:
+	  ValueID id;
+	};
+
+	class ZNode {
+		public:
+			ZNode(int32 const _node_id);
+			~ZNode();
+			static void Destroy();
+
+		private:
+			NodeInfo* nodeInfo;
+
+			static int32 nodecount;
+			int32 node_id;
+			vector<ZValue*> values;
+
+		public:
+			static int32 getNodeCount();
+			static ZNode* getNode(int32 const _node_id);
+			void dropZValueAt(uint8 n);
+			void dropZValue(ValueID id);
+			void addZValue(ValueID id);
+			int32 getValueCount();
+			ZValue *getValueAt(uint8 n);
+			int32 getNodeId();
+
+			//delete this
+			vector<ZValue*> getValueValues();
+	};
+
 	// Define serialport string, we require the serialport if we want to stop the
 	// Open Z-Wave library properly
 	list<string> serialPortName;
@@ -139,6 +144,9 @@ using namespace OpenZWave;
 	///////////////////////////////////////////////////////////////////////////////
 
 	static list<NodeInfo*> g_nodes;
+
+	int32 ZNode::nodecount = 0;
+	ZNode *nodes[MAX_NODES];
 
 
 #endif /* TYPES_H_ */
