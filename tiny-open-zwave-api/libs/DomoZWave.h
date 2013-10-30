@@ -21,6 +21,8 @@
 //
 //-----------------------------------------------------------------------------
 
+#include "Log.h"
+
 #define COMMAND_CLASS_NO_OPERATION 0x00
 #define COMMAND_CLASS_BASIC 0x20
 #define COMMAND_CLASS_CONTROLLER_REPLICATION 0x21
@@ -134,7 +136,8 @@
 
 // Initialize and destroy the wrapper
 void DomoZWave_AddSerialPort( const char* serialPort );
-void DomoZWave_Destroy( );
+void DomoZWave_Init(const char* logname, bool enableLog);
+void DomoZWave_Destroy();
 
 // Write zwcfg*xml, normally this happens automatically when the open-wave initialized or exits
 void DomoZWave_WriteConfig( int32 home );
@@ -244,4 +247,27 @@ const char* DomoZWave_CommandClassIdName( int class_value );
 const char* DomoZWave_GenreIdName( int genre );
 const char* DomoZWave_BasicTypeName( int basictype );
 const char* DomoZWave_GenericTypeName( int generictype );
+
+
+list<NodeInfo*>& DomoZWave_GetGNodes();
+list<m_structCtrl*>& DomoZWave_GetGControllers();
+NodeInfo* DomoZWave_GetNodeInfo(Notification const* notification);
+NodeInfo* DomoZWave_GetNodeInfo(uint32 const homeId, uint8 const nodeId);
+m_structCtrl* DomoZWave_GetControllerInfo(uint32 const homeId);
+
+//RPC
+void DomoZWave_RPC_ValueRemoved( int homeID, int nodeID, ValueID valueID );
+void DomoZWave_RPC_ValueChanged( int homeID, int nodeID, ValueID valueID, bool add );
+void DomoZWave_RPC_NodeRemoved( int homeID, int nodeID );
+void DomoZWave_RPC_NodeNew( int homeID, int nodeID );
+void DomoZWave_RPC_NodeProtocolInfo( int homeID, int nodeID );
+void DomoZWave_RPC_Group( int homeID, int nodeID );
+void DomoZWave_RPC_NodeEvent( int homeID, int nodeID, ValueID valueID, int value );
+void DomoZWave_RPC_PollingEnabled( int homeID, int nodeID );
+void DomoZWave_RPC_PollingDisabled( int homeID, int nodeID );
+void DomoZWave_RPC_NodeNaming( int homeID, int nodeID );
+void DomoZWave_RPC_DriverReady( int homeID, int nodeID );
+
+//log
+void DomoZWave_WriteLog(LogLevel _log, bool	_newline, char const* _format, ...);
 

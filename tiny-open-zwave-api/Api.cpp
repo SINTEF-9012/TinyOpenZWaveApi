@@ -15,6 +15,7 @@
 
 #include "Api.h"
 #include "libs/types.h"
+#include "libs/DomoZWave.h"
 
 #include "Options.h"
 #include "Manager.h"
@@ -25,28 +26,26 @@
 
 using namespace TinyOpenZWaveApi;
 
-uint32 homeId = 0;
-uint8 nodeId = 0;
+uint32 currentControllerHomeId = 0;
+uint8 currentControllerNodeId = 0;
 pthread_mutex_t nlock = PTHREAD_MUTEX_INITIALIZER;
-//static pthread_mutex_t g_criticalSection;
 
-const char *Device::COMMAND_CLASS = "";
-const char *BinarySwitch::COMMAND_CLASS = SWITCH_BINARY;
+uint8 Device::COMMAND_CLASS = COMMAND_CLASS_NO_OPERATION;
+uint8 BinarySwitch::COMMAND_CLASS = COMMAND_CLASS_SWITCH_BINARY;
+TinyController* TinyController::s_instance = NULL;
 
 void OnNotification (Notification const* _notification, void* _context)
 {
 
   ValueID id = _notification->GetValueID();
-  ZNode *node = NULL;
   switch (_notification->GetType()) {
 	  case Notification::Type_ValueAdded:
 		Log::Write(LogLevel_Info, "Notification: Value Added Home 0x%08x Node %d Genre %s Class %s Instance %d Index %d Type %s",
 			   _notification->GetHomeId(), _notification->GetNodeId(),
 			   valueGenreStr(id.GetGenre()), cclassStr(id.GetCommandClassId()), id.GetInstance(),
 			   id.GetIndex(), valueTypeStr(id.GetType()));
-		pthread_mutex_lock(&nlock);
-		node = ZNode::getNode(_notification->GetNodeId());
-		node->addZValue(id);
+		pthread_mutex_lock(&nlock);;
+		ZNode::addValue(_notification);
 		pthread_mutex_unlock(&nlock);
 		break;
 	  case Notification::Type_ValueRemoved:
@@ -55,8 +54,7 @@ void OnNotification (Notification const* _notification, void* _context)
 			   valueGenreStr(id.GetGenre()), cclassStr(id.GetCommandClassId()), id.GetInstance(),
 			   id.GetIndex(), valueTypeStr(id.GetType()));
 		pthread_mutex_lock(&nlock);
-		node = ZNode::getNode(_notification->GetNodeId());
-		node->dropZValue(id);
+		ZNode::removeValue(_notification);
 		pthread_mutex_unlock(&nlock);
 		break;
 	  case Notification::Type_ValueChanged:
@@ -64,6 +62,9 @@ void OnNotification (Notification const* _notification, void* _context)
 			   _notification->GetHomeId(), _notification->GetNodeId(),
 			   valueGenreStr(id.GetGenre()), cclassStr(id.GetCommandClassId()), id.GetInstance(),
 			   id.GetIndex(), valueTypeStr(id.GetType()));
+		pthread_mutex_lock(&nlock);
+		ZNode::changeValue(_notification);
+		pthread_mutex_unlock(&nlock);
 		break;
 	  case Notification::Type_ValueRefreshed:
 		Log::Write(LogLevel_Info, "Notification: Value Refreshed Home 0x%08x Node %d Genre %s Class %s Instance %d Index %d Type %s",
@@ -89,7 +90,7 @@ void OnNotification (Notification const* _notification, void* _context)
 			   valueGenreStr(id.GetGenre()), cclassStr(id.GetCommandClassId()), id.GetInstance(),
 			   id.GetIndex(), valueTypeStr(id.GetType()));
 	    pthread_mutex_lock(&nlock);
-	    new ZNode(_notification->GetNodeId());
+	    ZNode::addNode(_notification);
 	    pthread_mutex_unlock(&nlock);
 		break;
 	  case Notification::Type_NodeRemoved:
@@ -97,6 +98,9 @@ void OnNotification (Notification const* _notification, void* _context)
 			   _notification->GetHomeId(), _notification->GetNodeId(),
 			   valueGenreStr(id.GetGenre()), cclassStr(id.GetCommandClassId()), id.GetInstance(),
 			   id.GetIndex(), valueTypeStr(id.GetType()));
+		pthread_mutex_lock(&nlock);
+		ZNode::removeNode(_notification);
+		pthread_mutex_unlock(&nlock);
 		break;
 	  case Notification::Type_NodeProtocolInfo:
 		Log::Write(LogLevel_Info, "Notification: Node Protocol Info Home %08x Node %d Genre %s Class %s Instance %d Index %d Type %s",
@@ -153,8 +157,9 @@ void OnNotification (Notification const* _notification, void* _context)
 	  case Notification::Type_DriverReady:
 		Log::Write(LogLevel_Info, "Notification: Driver Ready, homeId %08x, nodeId %d", _notification->GetHomeId(),
 			   _notification->GetNodeId());
-	    homeId = _notification->GetHomeId();
-	    nodeId = _notification->GetNodeId();
+		pthread_mutex_lock(&nlock);
+		ZNode::controllerReady(_notification);
+		pthread_mutex_unlock(&nlock);
 		break;
 	  case Notification::Type_DriverFailed:
 		Log::Write(LogLevel_Info, "Notification: Driver Failed, homeId %08x", _notification->GetHomeId());
@@ -229,14 +234,11 @@ void exit_main_handler(int s){
     exit(1);
 }
 
-
-TinyController* TinyController::s_instance = NULL;
-string TinyController::port = "";
-
 BinarySwitch* s;
 int main(int argc, char* argv[]){
-	string port = "/dev/ttyUSB0";
-	TinyController::Init(port);
+	const char* port = "/dev/ttyUSB0";
+	TinyController::Init();
+	TinyController::AddController(port);
 
 	struct sigaction sigIntHandler;
 	sigIntHandler.sa_handler = exit_main_handler;
@@ -254,14 +256,18 @@ int main(int argc, char* argv[]){
 			s->turnOff();
 		}
 		if(ch == 'i'){
-			Log::Write(LogLevel_Info, "BinarySwitch: is value polled %d ...", Manager::Get()->isPolled(s->getValueToPull()->getId()));
+			//Log::Write(LogLevel_Info, "BinarySwitch: is value polled %d ...", Manager::Get()->isPolled(s->getValueToPull()->getId()));
+			Log::Write(LogLevel_Info, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! init");
+			TinyController::Get()->setCurrentController("/dev/ttyUSB0");
+			s = new BinarySwitch();
+			s = s->BinarySwitch::Init(TinyController::Get(),4,1,0);
 		}
 		if(ch == 'g'){
 			Log::Write(LogLevel_Info, "BinarySwitch: the poll interval is  %d ...", Manager::Get()->GetPollInterval());
 		}
 		if(ch == 'e'){
 			Log::Write(LogLevel_Info, "BinarySwitch: enabling  poll");
-			Manager::Get()->EnablePoll(s->getValueToPull()->getId(), 1);
+			//Manager::Get()->EnablePoll(s->getValueToPull()->getId(), 1);
 		}
 		if(ch == 's'){
 			Log::Write(LogLevel_Info, "BinarySwitch: setting poll interval");
@@ -271,128 +277,136 @@ int main(int argc, char* argv[]){
 	return 0;
 }
 
-
-//
-
-
-ZValue::ZValue(ValueID _id) : id(_id) {};
-
-ValueID ZValue::getId(){
-	return id;
-}
-
-ZValue::~ZValue(){}
-
-void ZNode::Destroy(){
-	for(int i=0; i<MAX_NODES; i++){
-		delete nodes[i];
-	}
-}
-
-ZNode::~ZNode(){
-	Log::Write(LogLevel_Info, "~ZNode(): clearing data for the node %d...", this->getNodeId());
-	while (!values.empty()) {
-		ZValue *v = values.back();
-		values.pop_back();
-		ValueID valueId =  v->getId();
-	    Log::Write(LogLevel_Info, "Dropping value: Home 0x%08x Node %d Genre %s Class %s Instance %d Index %d Type %s",
-	    					valueId.GetHomeId(), valueId.GetNodeId(), valueGenreStr(valueId.GetGenre()),
-	    					cclassStr(valueId.GetCommandClassId()), valueId.GetInstance(),
-	    					valueId.GetIndex(), valueTypeStr(valueId.GetType()));
-	    delete v;
-	}
-}
-
-ZNode::ZNode(int32 const _node_id){
-	node_id = _node_id;
-	if (_node_id < 1 || _node_id >= MAX_NODES) {
-		Log::Write(LogLevel_Info, "ZNode(): bad node value %d, ignoring...", _node_id);
-		delete this;
-		return;
-	}
-	Log::Write(LogLevel_Info, "ZNode(): adding node value %d", _node_id);
-	nodes[node_id] = this;
-	nodecount ++;
+void ZNode::addNode(Notification const* _notification){
+	NodeInfo* nodeInfo = new NodeInfo();
+	nodeInfo->m_nodeId = _notification->GetNodeId();
+	nodeInfo->m_homeId = _notification->GetHomeId();
+	nodeInfo->m_DeviceState = DZType_Unknown;
+	nodeInfo->m_LastSeen = 0;
+	DomoZWave_GetGNodes().push_back(nodeInfo);
+	Log::Write(LogLevel_Info, "ZNode(): adding node value %d", nodeInfo->m_nodeId);
 }
 
 int32 ZNode::getNodeCount(){
-	return nodecount;
+	return DomoZWave_GetGNodes().size();
 }
 
-ZNode *ZNode::getNode(int32 const _nodeId){
-	return nodes[_nodeId];
+NodeInfo *ZNode::getNodeInfo(Notification const* _data){
+	return DomoZWave_GetNodeInfo(_data);
 }
 
-void ZNode::addZValue(ValueID _valueId){
-	ZValue *zvalue = new ZValue(_valueId);
-	values.push_back(zvalue);
-}
-
-void ZNode::dropZValueAt(uint8 n){
-	uint8 size = values.size();
-	if(size > n){
-		Log::Write(LogLevel_Info, "cannot drop value at %d, current size is %d ignoring...", n, size);
-		return;
+void ZNode::addValue(Notification const* _data){
+	NodeInfo *nodeInfo = getNodeInfo(_data);
+	if(nodeInfo != NULL){
+		nodeInfo->m_values.push_back(_data->GetValueID());
 	}
-	vector<ZValue*>::iterator it;
-	uint8 i = 0;
-	while(it!=values.end() && i != n){
-		if(i == size){
-			values.erase(it);
-			break;
-		}
-		it++;
-		i++;
-	}
+	DomoZWave_RPC_ValueChanged( (int)_data->GetHomeId(), (int)_data->GetNodeId(), _data->GetValueID(), true );
 }
 
-void ZNode::dropZValue(ValueID valueId){
-	vector<ZValue*>::iterator it;
-	bool deleted = false;
-	for(it = values.begin(); it != values.end(); it++){
-		if((*it)->getId() == valueId){
-			delete *it;
-			values.erase(it);
-			deleted = true;
+void ZNode::removeNode(Notification const* _data){
+	uint32 const homeId = _data->GetHomeId();
+	uint8 const nodeId = _data->GetNodeId();
+	list<NodeInfo*>& g_nodes = DomoZWave_GetGNodes();
+
+	for ( list<NodeInfo*>::iterator it = g_nodes.begin(); it != g_nodes.end(); ++it ) {
+		NodeInfo* nodeInfo = *it;
+		if ( ( nodeInfo->m_homeId == homeId ) && ( nodeInfo->m_nodeId == nodeId ) ){
+			g_nodes.erase( it );
 			break;
 		}
 	}
-	if(!deleted){
-		Log::Write(LogLevel_Info, "valueId %d does not exist in the values list..."
-				"Value: Home 0x%08x Node %d Genre %s Class %s Instance %d Index %d Type %s", valueId,
-					valueId.GetHomeId(), valueId.GetNodeId(), valueGenreStr(valueId.GetGenre()),
-					cclassStr(valueId.GetCommandClassId()), valueId.GetInstance(),
-					valueId.GetIndex(), valueTypeStr(valueId.GetType()));
+	DomoZWave_RPC_NodeRemoved( (int)_data->GetHomeId(), (int)_data->GetNodeId() );
+}
+
+void ZNode::removeValue(Notification const* _data){
+	NodeInfo* nodeInfo = ZNode::getNodeInfo(_data);
+	if (nodeInfo != NULL){
+		// Remove the value from out list
+		for (list<ValueID>::iterator it = nodeInfo->m_values.begin(); it != nodeInfo->m_values.end(); ++it) {
+			if ((*it) == _data->GetValueID())
+			{
+				nodeInfo->m_values.erase( it );
+				break;
+			}
+		}
+	}
+	DomoZWave_RPC_ValueRemoved((int)_data->GetHomeId(), (int)_data->GetNodeId(), _data->GetValueID());
+}
+
+void ZNode::changeValue(Notification const* _data){
+	DomoZWave_RPC_ValueChanged((int)_data->GetHomeId(), (int)_data->GetNodeId(), _data->GetValueID(), false);
+
+	NodeInfo* nodeInfo = ZNode::getNodeInfo(_data);
+	// Update LastSeen and DeviceState
+	if (nodeInfo != NULL){
+		nodeInfo->m_LastSeen = time(NULL);
+		nodeInfo->m_DeviceState = DZType_Alive;
+	}
+
+	// Check if zwcfg*xml has been written 3600+ sec, then flush to disk
+	m_structCtrl* ctrl = DomoZWave_GetControllerInfo((int)_data->GetHomeId());
+	if ( ctrl->m_lastWriteXML > 0 ){
+		double seconds;
+		seconds = difftime( time( NULL ), ctrl->m_lastWriteXML );
+
+		if ( seconds > 3600 ){
+			Manager::Get()->WriteConfig((int)_data->GetHomeId());
+			DomoZWave_WriteLog(LogLevel_Debug, true, "DomoZWave_WriteConfig: HomeId=%d (%.f seconds)", (int)_data->GetHomeId(), seconds);
+			ctrl->m_lastWriteXML = time(NULL);
+		}
 	}
 }
 
-ZValue* ZNode::getValueAt(uint8 n){
-	uint8 size = values.size();
-	if(size > n){
-		Log::Write(LogLevel_Info, "cannot get value at %d, current size is %d ignoring...", n, size);
-		return NULL;
-	}
-	return values[n];
+void ZNode::controllerReady(Notification const* _data){
+	DomoZWave_RPC_DriverReady(_data->GetHomeId(), _data->GetNodeId());
 }
 
-int32 ZNode::getNodeId(){
-	return node_id;
+m_structCtrl* ZNode::getControllerInfo(uint32 const homeId){
+	return DomoZWave_GetControllerInfo(homeId);
 }
 
-vector<ZValue*> ZNode::getValueValues(){
-	return values;
-}
-
-//TinyController
-
-TinyController* TinyController::Init(string port){
-	TinyController::port = port;
+//-----------------------------------------------------------------------------
+//	<TinyController::Init>
+//	Static method to init the singleton.
+//-----------------------------------------------------------------------------
+TinyController* TinyController::Init(){
 	if(s_instance == NULL){
-		Log::Write(LogLevel_Info, "initializing TinyController");
+		Log::Write(LogLevel_Info, "TinyController::Init() : initializing TinyController");
 		cout << "initializing TinyController" << endl;
 		s_instance = new TinyController();
 	}
 	return s_instance;
+}
+
+//-----------------------------------------------------------------------------
+//	<TinyController::AddController>
+//	Static method to add controller and complete initialization
+//-----------------------------------------------------------------------------
+void TinyController::AddController(char const* port){
+	DomoZWave_AddSerialPort(port);
+}
+
+
+//-----------------------------------------------------------------------------
+//	<TinyController::setCurrentController>
+//	Static method to set current controller
+//-----------------------------------------------------------------------------
+void TinyController::setCurrentController(char const* port){
+	list<m_structCtrl*>& g_allControllers = DomoZWave_GetGControllers();
+	for(list<m_structCtrl*>::iterator it = g_allControllers.begin(); it != g_allControllers.end(); ++it){
+		uint32 homeId = (*it)->m_homeId;
+		string controllerPath = Manager::Get()->GetControllerPath(homeId);
+		string portName = port;
+		if(portName == controllerPath){
+			currentControllerHomeId = homeId;
+			currentControllerNodeId = (*it)->m_nodeId;
+			Log::Write(LogLevel_Info, "TinyController::setCurrentController : %s controller with homeId %08x is set as default", port, currentControllerHomeId);
+			break;
+		}
+	}
+	if(currentControllerHomeId == 0){
+		Log::Write(LogLevel_Info, "TinyController::setCurrentController : %s controller is not found", port);
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -401,7 +415,6 @@ TinyController* TinyController::Init(string port){
 //-----------------------------------------------------------------------------
 void TinyController::Destroy()
 {
-	ZNode::Destroy();
 	delete s_instance;
 	s_instance = NULL;
 }
@@ -411,26 +424,17 @@ void TinyController::Destroy()
 // Constructor
 //-----------------------------------------------------------------------------
 TinyController::TinyController() {
+	DomoZWave_Init("./DomoZWave_Log", true);
 
 	Options::Create("./config/", "", "--SaveConfiguration=true --DumpTriggerLevel=0");
-    Options::Get()->AddOptionInt("PollInterval", 5000);
     Options::Get()->AddOptionBool("IntervalBetweenPolls", true);
     Options::Get()->AddOptionBool( "SuppressValueRefresh", false );
     Options::Get()->AddOptionBool( "PerformReturnRoutes", false );
-
-
 	Options::Get()->Lock();
 
 	Manager::Create();
-	Log::Write(LogLevel_Info, "initializing TinyController");
+	Log::Write(LogLevel_Info, "TinyController::TinyController() : initializing TinyController");
 	Manager::Get()->AddWatcher(OnNotification, NULL);
-
-	if(strcasecmp(port.c_str(), "usb") == 0) {
-		Manager::Get()->AddDriver("HID TinyController", Driver::ControllerInterface_Hid);
-	}else{
-		Manager::Get()->AddDriver(port);
-	}
-
 	s_instance = this;
 }
 
@@ -440,42 +444,31 @@ TinyController::TinyController() {
 //-----------------------------------------------------------------------------
 TinyController::~TinyController() {
 	Log::Write(LogLevel_Info, "destroying TinyController object");
-	if(strcasecmp(port.c_str(), "usb") == 0){
-		Manager::Get()->RemoveDriver("HID TinyController");
-	}else{
-		Manager::Get()->RemoveDriver(port);
-	}
 	Manager::Get()->RemoveWatcher(OnNotification, NULL);
 	Manager::Destroy();
 	Options::Destroy();
+	DomoZWave_Destroy();
 }
 
 //BinarySwitch
 
 Device* Device::Init(TinyController* const controller, uint8 const _nodeId, uint8 const _instance, uint8 const _index) {
+	this->node = NULL;
 	this->value = NULL;
 	this->controller = controller;
 	this->nodeId = _nodeId;
 	this->instance = _instance;
 	this->index = _index;
-	this->node = nodes[this->nodeId];
-	vector<ZValue*>::iterator it;
-	if(this->node != NULL){
-		vector<ZValue*> values = this->node->getValueValues();
-		for(it = values.begin(); it != values.end(); it++){
-			ValueID id = (*it)->getId();
-			if(id.GetCommandClassId() == getComandClass() &&
-					id.GetInstance() == this->instance &&
-					id.GetIndex() == this->index){
-				this->value = (*it);
-				break;
-			}
+	list<NodeInfo*>& g_nodes = DomoZWave_GetGNodes();
+	for(list<NodeInfo*>::iterator it=g_nodes.begin(); it!=g_nodes.end(); ++it){
+		uint8 nodeId = (*it)->m_nodeId;
+		uint32 homeId = (*it)->m_homeId;
+		if(nodeId == _nodeId && homeId == currentControllerHomeId){
+			this->node = *it;
+			break;
 		}
-		if(this->value == NULL){
-			Log::Write(LogLevel_Info, "DEVICE INIT: node with id %d does not implement command %s with instance %d and index %d",
-					this->nodeId, cclassStr(getComandClass()), this->instance, this->index);
-		}
-	}else{
+	}
+	if(this->node == NULL){
 		Log::Write(LogLevel_Info, "DEVICE INIT: can not find node with id %d", this->nodeId);
 	}
 	return this;
@@ -483,14 +476,10 @@ Device* Device::Init(TinyController* const controller, uint8 const _nodeId, uint
 
 void TinyController::testOnOff(){
 	Log::Write(LogLevel_Info, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! testOnOff TEST");
-	s = new BinarySwitch();
-	s = s->BinarySwitch::Init(TinyController::Get(),4,1,0);
-
-	//s->turnOn();
 }
 
 uint8 Device::getComandClass(){
-	return cclassNum(COMMAND_CLASS);
+	return COMMAND_CLASS;
 }
 
 Device::~Device() {
@@ -520,47 +509,76 @@ BinarySwitch::~BinarySwitch() {
 }
 
 uint8 BinarySwitch::getComandClass(){
-	return cclassNum(COMMAND_CLASS);
+	return COMMAND_CLASS;
 }
 
 void BinarySwitch::turnOn(){
 	Log::Write(LogLevel_Info, "BinarySwitch::turnOn(): turning on...");
-	if(this->node != NULL && this->value != NULL){
-		ValueID valueId = this->value->getId();
-		if (ValueID::ValueType_Bool == valueId.GetType()){
-			bool bool_value = true;
-			Manager::Get()->SetValue(valueId, bool_value);
-		}else{
-			Log::Write(LogLevel_Info, "BinarySwitch::turnOn(): command value is not of the bool type, ignoring..."
-					"Value: Home 0x%08x Node %d Genre %s Class %s Instance %d Index %d Type %s", valueId,
-										valueId.GetHomeId(), valueId.GetNodeId(), valueGenreStr(valueId.GetGenre()),
-										cclassStr(valueId.GetCommandClassId()), valueId.GetInstance(),
-										valueId.GetIndex(), valueTypeStr(valueId.GetType()));
+	//DomoZWave_SetValue(currentControllerHomeId, this->nodeId, this->instance, 0);
+	if(this->node != NULL){
+		list<ValueID> values = this->node->m_values;
+		for(list<ValueID>::iterator it=values.begin(); it!=values.end(); ++it){
+			if((*it).GetCommandClassId() == getComandClass() &&
+					(*it).GetInstance() == this->instance &&
+					(*it).GetIndex() == this->index &&
+					(*it).GetHomeId() == currentControllerHomeId){
+				this->value = &(*it);
+				ValueID valueId = *this->value;
+				if (ValueID::ValueType_Bool == valueId.GetType()){
+					Log::Write(LogLevel_Info, "Value: Home 0x%08x Node %d Genre %s Class %s Instance %d Index %d Type %s",
+															valueId.GetHomeId(), valueId.GetNodeId(), valueGenreStr(valueId.GetGenre()),
+															cclassStr(valueId.GetCommandClassId()), valueId.GetInstance(),
+															valueId.GetIndex(), valueTypeStr(valueId.GetType()));
+					bool bool_value = true;
+					Manager::Get()->SetValue(valueId, bool_value);
+				}else{
+					Log::Write(LogLevel_Info, "BinarySwitch::turnOn(): command value is not of the bool type, ignoring..."
+							"Value: Home 0x%08x Node %d Genre %s Class %s Instance %d Index %d Type %s", valueId,
+												valueId.GetHomeId(), valueId.GetNodeId(), valueGenreStr(valueId.GetGenre()),
+												cclassStr(valueId.GetCommandClassId()), valueId.GetInstance(),
+												valueId.GetIndex(), valueTypeStr(valueId.GetType()));
+				}
+				break;
+			}
+		}
+		if(this->value == NULL){
+			Log::Write(LogLevel_Info, "BinarySwitch::turnOn(): node with id %d does not implement command %s with instance %d and index %d",
+					this->nodeId, cclassStr(getComandClass()), this->instance, this->index);
 		}
 	}else{
-		Log::Write(LogLevel_Info, "BinarySwitch::turnOn(): node or valueid for turn on/off command is NULL, ignoring...");
+		Log::Write(LogLevel_Info, "BinarySwitch::turnOn(): node is NULL, ignoring...");
 	};
 }
 
 void BinarySwitch::turnOff(){
 	Log::Write(LogLevel_Info, "BinarySwitch::turnOff(): turning off...");
-	if(this->node != NULL && this->value != NULL){
-		ValueID valueId = this->value->getId();
-		if (ValueID::ValueType_Bool == valueId.GetType()){
-			bool bool_value = false;
-			Manager::Get()->SetValue(valueId, bool_value);
-		}else{
-			Log::Write(LogLevel_Info, "BinarySwitch::turnOff(): command value is not of the bool type, ignoring..."
-					"Value: Home 0x%08x Node %d Genre %s Class %s Instance %d Index %d Type %s", valueId,
-										valueId.GetHomeId(), valueId.GetNodeId(), valueGenreStr(valueId.GetGenre()),
-										cclassStr(valueId.GetCommandClassId()), valueId.GetInstance(),
-										valueId.GetIndex(), valueTypeStr(valueId.GetType()));
+	if(this->node != NULL){
+		list<ValueID> values = this->node->m_values;
+		for(list<ValueID>::iterator it=values.begin(); it!=values.end(); ++it){
+			if((*it).GetCommandClassId() == getComandClass() &&
+					(*it).GetInstance() == this->instance &&
+					(*it).GetIndex() == this->index &&
+					(*it).GetHomeId() == currentControllerHomeId){
+				this->value = &(*it);
+				ValueID valueId = *this->value;
+				if (ValueID::ValueType_Bool == valueId.GetType()){
+					bool bool_value = false;
+					Manager::Get()->SetValue(valueId, bool_value);
+				}else{
+					Log::Write(LogLevel_Info, "BinarySwitch::turnOff(): command value is not of the bool type, ignoring..."
+							"Value: Home 0x%08x Node %d Genre %s Class %s Instance %d Index %d Type %s", valueId,
+												valueId.GetHomeId(), valueId.GetNodeId(), valueGenreStr(valueId.GetGenre()),
+												cclassStr(valueId.GetCommandClassId()), valueId.GetInstance(),
+												valueId.GetIndex(), valueTypeStr(valueId.GetType()));
+				}
+				break;
+			}
+		}
+		if(this->value == NULL){
+			Log::Write(LogLevel_Info, "BinarySwitch::turnOff(): node with id %d does not implement command %s with instance %d and index %d",
+					this->nodeId, cclassStr(getComandClass()), this->instance, this->index);
 		}
 	}else{
-		Log::Write(LogLevel_Info, "BinarySwitch::turnOff(): node or valueid for turn on/off command is NULL, ignoring...");
+		Log::Write(LogLevel_Info, "BinarySwitch::turnOff(): node is NULL, ignoring...");
 	};
-}
-
-ZValue* BinarySwitch::getValueToPull(){
-	return this->value;
 }

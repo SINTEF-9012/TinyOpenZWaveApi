@@ -42,16 +42,20 @@ all : api
 %.o : %.c
 	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $<
 
-Api.o : Api.h ./libs/types.h $(OPENZWAVE)/cpp/src/Options.h $(OPENZWAVE)/cpp/src/Manager.h \
+Api.o : Api.h ./libs/types.h ./libs/DomoZWave.h $(OPENZWAVE)/cpp/src/Options.h $(OPENZWAVE)/cpp/src/Manager.h \
 	$(OPENZWAVE)/cpp/src/Node.h $(OPENZWAVE)/cpp/src/Group.h \
 	$(OPENZWAVE)/cpp/src/Notification.h $(OPENZWAVE)/cpp/src/platform/Log.h \
 
 ./libs/zwavelib.o : $(OPENZWAVE)/cpp/src/Options.h $(OPENZWAVE)/cpp/src/Manager.h \
 	$(OPENZWAVE)/cpp/src/Node.h $(OPENZWAVE)/cpp/src/Group.h \
 	$(OPENZWAVE)/cpp/src/Notification.h $(OPENZWAVE)/cpp/src/platform/Log.h \
+	
+./libs/DomoZWave.o : ./libs/DomoZWave.h ./libs/types.h $(OPENZWAVE)/cpp/src/Options.h $(OPENZWAVE)/cpp/src/Manager.h \
+	$(OPENZWAVE)/cpp/src/Node.h $(OPENZWAVE)/cpp/src/Group.h \
+	$(OPENZWAVE)/cpp/src/Notification.h $(OPENZWAVE)/cpp/src/platform/Log.h \
 
-api : Api.o ./libs/zwavelib.o
-	$(LD) -o $@ $(LDFLAGS) Api.o  ./libs/zwavelib.o $(LIBS)
+api : Api.o ./libs/zwavelib.o ./libs/DomoZWave.o
+	$(LD) -o $@ $(LDFLAGS) Api.o  ./libs/zwavelib.o ./libs/DomoZWave.o $(LIBS)
 	
 clean:
-	rm -rf api *.o ./libs/*.o *.xml *.txt
+	rm -rf api *.o ./libs/*.o *.xml *.txt *.log

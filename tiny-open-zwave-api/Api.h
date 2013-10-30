@@ -43,11 +43,13 @@ namespace TinyOpenZWaveApi{
 			TinyController();
 			virtual ~TinyController();
 			static TinyController* s_instance;
-			static string port;
+			//static string port;
 
 		public:
-			static TinyController* Init(string port);
+			static TinyController* Init();
 			static TinyController* Get() {return s_instance;};
+			static void AddController(char const* port);
+			static void setCurrentController(char const* port);
 			static void Destroy();
 			
 			//this should be deleted: just for initial testing
@@ -62,12 +64,13 @@ namespace TinyOpenZWaveApi{
 			uint8 instance;
 			uint8 index;
 			TinyController* controller;
-			ZNode* node;
-			ZValue* value;
+			NodeInfo* node;
+			ValueID* value;
 			virtual uint8 getComandClass();
 
 		public:
-			static const char *COMMAND_CLASS;
+			virtual ValueID* getValueId() {return value;};
+			static uint8 COMMAND_CLASS;
 			Device* Init(TinyController* const controller, uint8 const _nodeId, uint8 const _instance, uint8 const _index);
 
 			virtual ~Device();
@@ -79,7 +82,8 @@ namespace TinyOpenZWaveApi{
 			virtual uint8 getComandClass();
 
 		public:
-			static const char *COMMAND_CLASS;
+			virtual ValueID* getValueId() {return value;};
+			static uint8 COMMAND_CLASS;
 
 			BinarySwitch* Init(TinyController* const controller, uint8 const _nodeId, uint8 const _instance, uint8 const _index) {return (BinarySwitch*)Device::Init(controller, _nodeId, _instance, _index);};
 			BinarySwitch();
@@ -90,7 +94,7 @@ namespace TinyOpenZWaveApi{
 			void turnOn();
 			void turnOff();
 			
-			ZValue* getValueToPull();
+			//ZValue* getValueToPull();
 
 	};
 };
