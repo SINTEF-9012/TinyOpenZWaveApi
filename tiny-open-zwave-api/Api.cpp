@@ -16,6 +16,7 @@
 #include "Api.h"
 #include "libs/types.h"
 #include "libs/DomoZWave.h"
+#include "devices/TinyController.h"
 
 #include "Options.h"
 #include "Manager.h"
@@ -26,8 +27,6 @@
 
 using namespace TinyOpenZWaveApi;
 
-uint32 currentControllerHomeId = 0;
-uint8 currentControllerNodeId = 0;
 pthread_mutex_t nlock = PTHREAD_MUTEX_INITIALIZER;
 
 uint8 Device::COMMAND_CLASS = COMMAND_CLASS_NO_OPERATION;
@@ -237,6 +236,7 @@ void exit_main_handler(int s){
 BinarySwitch* s;
 int main(int argc, char* argv[]){
 	const char* port = "/dev/ttyUSB0";
+	TinyController::notification = OnNotification;
 	TinyController::Init();
 	TinyController::AddController(port);
 
@@ -365,92 +365,6 @@ m_structCtrl* ZNode::getControllerInfo(uint32 const homeId){
 	return DomoZWave_GetControllerInfo(homeId);
 }
 
-//-----------------------------------------------------------------------------
-//	<TinyController::Init>
-//	Static method to init the singleton.
-//-----------------------------------------------------------------------------
-TinyController* TinyController::Init(){
-	if(s_instance == NULL){
-		Log::Write(LogLevel_Info, "TinyController::Init() : initializing TinyController");
-		cout << "initializing TinyController" << endl;
-		s_instance = new TinyController();
-	}
-	return s_instance;
-}
-
-//-----------------------------------------------------------------------------
-//	<TinyController::AddController>
-//	Static method to add controller and complete initialization
-//-----------------------------------------------------------------------------
-void TinyController::AddController(char const* port){
-	DomoZWave_AddSerialPort(port);
-}
-
-
-//-----------------------------------------------------------------------------
-//	<TinyController::setCurrentController>
-//	Static method to set current controller
-//-----------------------------------------------------------------------------
-void TinyController::setCurrentController(char const* port){
-	list<m_structCtrl*>& g_allControllers = DomoZWave_GetGControllers();
-	for(list<m_structCtrl*>::iterator it = g_allControllers.begin(); it != g_allControllers.end(); ++it){
-		uint32 homeId = (*it)->m_homeId;
-		string controllerPath = Manager::Get()->GetControllerPath(homeId);
-		string portName = port;
-		if(portName == controllerPath){
-			currentControllerHomeId = homeId;
-			currentControllerNodeId = (*it)->m_nodeId;
-			Log::Write(LogLevel_Info, "TinyController::setCurrentController : %s controller with homeId %08x is set as default", port, currentControllerHomeId);
-			break;
-		}
-	}
-	if(currentControllerHomeId == 0){
-		Log::Write(LogLevel_Info, "TinyController::setCurrentController : %s controller is not found", port);
-	}
-}
-
-//-----------------------------------------------------------------------------
-//	<TinyController::Destroy>
-//	Static method to destroy the singleton.
-//-----------------------------------------------------------------------------
-void TinyController::Destroy()
-{
-	delete s_instance;
-	s_instance = NULL;
-}
-
-//-----------------------------------------------------------------------------
-// <TinyController::TinyController>
-// Constructor
-//-----------------------------------------------------------------------------
-TinyController::TinyController() {
-	DomoZWave_Init("./DomoZWave_Log", true);
-
-	Options::Create("./config/", "", "--SaveConfiguration=true --DumpTriggerLevel=0");
-    Options::Get()->AddOptionBool("IntervalBetweenPolls", true);
-    Options::Get()->AddOptionBool( "SuppressValueRefresh", false );
-    Options::Get()->AddOptionBool( "PerformReturnRoutes", false );
-	Options::Get()->Lock();
-
-	Manager::Create();
-	Log::Write(LogLevel_Info, "TinyController::TinyController() : initializing TinyController");
-	Manager::Get()->AddWatcher(OnNotification, NULL);
-	s_instance = this;
-}
-
-//-----------------------------------------------------------------------------
-// <TinyController::TinyController>
-// Destructor
-//-----------------------------------------------------------------------------
-TinyController::~TinyController() {
-	Log::Write(LogLevel_Info, "destroying TinyController object");
-	Manager::Get()->RemoveWatcher(OnNotification, NULL);
-	Manager::Destroy();
-	Options::Destroy();
-	DomoZWave_Destroy();
-}
-
-//BinarySwitch
 
 Device* Device::Init(TinyController* const controller, uint8 const _nodeId, uint8 const _instance, uint8 const _index) {
 	this->node = NULL;
@@ -463,7 +377,7 @@ Device* Device::Init(TinyController* const controller, uint8 const _nodeId, uint
 	for(list<NodeInfo*>::iterator it=g_nodes.begin(); it!=g_nodes.end(); ++it){
 		uint8 nodeId = (*it)->m_nodeId;
 		uint32 homeId = (*it)->m_homeId;
-		if(nodeId == _nodeId && homeId == currentControllerHomeId){
+		if(nodeId == _nodeId && homeId == controller->currentControllerHomeId){
 			this->node = *it;
 			break;
 		}
@@ -472,10 +386,6 @@ Device* Device::Init(TinyController* const controller, uint8 const _nodeId, uint
 		Log::Write(LogLevel_Info, "DEVICE INIT: can not find node with id %d", this->nodeId);
 	}
 	return this;
-}
-
-void TinyController::testOnOff(){
-	Log::Write(LogLevel_Info, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! testOnOff TEST");
 }
 
 uint8 Device::getComandClass(){
@@ -521,7 +431,7 @@ void BinarySwitch::turnOn(){
 			if((*it).GetCommandClassId() == getComandClass() &&
 					(*it).GetInstance() == this->instance &&
 					(*it).GetIndex() == this->index &&
-					(*it).GetHomeId() == currentControllerHomeId){
+					(*it).GetHomeId() == controller->currentControllerHomeId){
 				this->value = &(*it);
 				ValueID valueId = *this->value;
 				if (ValueID::ValueType_Bool == valueId.GetType()){
@@ -558,7 +468,7 @@ void BinarySwitch::turnOff(){
 			if((*it).GetCommandClassId() == getComandClass() &&
 					(*it).GetInstance() == this->instance &&
 					(*it).GetIndex() == this->index &&
-					(*it).GetHomeId() == currentControllerHomeId){
+					(*it).GetHomeId() == controller->currentControllerHomeId){
 				this->value = &(*it);
 				ValueID valueId = *this->value;
 				if (ValueID::ValueType_Bool == valueId.GetType()){

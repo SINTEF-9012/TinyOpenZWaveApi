@@ -21,7 +21,18 @@
 //
 //-----------------------------------------------------------------------------
 
+// open-zwave
+#include "Options.h"
+#include "Manager.h"
+#include "Node.h"
+#include "Group.h"
+#include "Notification.h"
 #include "Log.h"
+
+#include "types.h"
+
+using namespace OpenZWave;
+
 
 #define COMMAND_CLASS_NO_OPERATION 0x00
 #define COMMAND_CLASS_BASIC 0x20

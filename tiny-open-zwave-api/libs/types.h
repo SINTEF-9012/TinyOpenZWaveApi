@@ -80,18 +80,4 @@ using namespace OpenZWave;
 		list<ValueID>	m_values;
 	} NodeInfo;
 
-	class ZNode {
-		public:
-			static int32 getNodeCount();
-			static ZNode* getNode(int32 const _node_id);
-			static NodeInfo* getNodeInfo(Notification const* _data);
-			static void addNode(Notification const* _data);
-			static void addValue(Notification const* _data);
-			static void removeNode(Notification const* _data);
-			static void removeValue(Notification const* _data);
-			static void changeValue(Notification const* _data);
-			static void controllerReady(Notification const* _data);
-			static m_structCtrl* getControllerInfo(uint32 const homeId);
-	};
-
 #endif /* TYPES_H_ */

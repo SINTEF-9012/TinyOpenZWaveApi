@@ -14,3 +14,5 @@
 
 ./tiny-open-zwave-api/*.txt
 ./tiny-open-zwave-api/*.xml
+./tiny-open-zwave-api/*.log
+

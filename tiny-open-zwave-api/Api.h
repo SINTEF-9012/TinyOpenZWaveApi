@@ -21,6 +21,8 @@
 #include "ValueString.h"
 
 #include "libs/types.h"
+#include "devices/TinyController.h"
+
 
 using namespace OpenZWave;
 
@@ -36,25 +38,18 @@ extern const char *controllerErrorStr(Driver::ControllerError err);
 namespace TinyOpenZWaveApi{
 	using namespace std;
 
-
-	class TinyController
-	{
-		private:
-			TinyController();
-			virtual ~TinyController();
-			static TinyController* s_instance;
-			//static string port;
-
+	class ZNode {
 		public:
-			static TinyController* Init();
-			static TinyController* Get() {return s_instance;};
-			static void AddController(char const* port);
-			static void setCurrentController(char const* port);
-			static void Destroy();
-			
-			//this should be deleted: just for initial testing
-			static void testOnOff();
-
+			static int32 getNodeCount();
+			static ZNode* getNode(int32 const _node_id);
+			static NodeInfo* getNodeInfo(Notification const* _data);
+			static void addNode(Notification const* _data);
+			static void addValue(Notification const* _data);
+			static void removeNode(Notification const* _data);
+			static void removeValue(Notification const* _data);
+			static void changeValue(Notification const* _data);
+			static void controllerReady(Notification const* _data);
+			static m_structCtrl* getControllerInfo(uint32 const homeId);
 	};
 
 	class Device

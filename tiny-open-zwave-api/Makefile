@@ -53,9 +53,14 @@ Api.o : Api.h ./libs/types.h ./libs/DomoZWave.h $(OPENZWAVE)/cpp/src/Options.h $
 ./libs/DomoZWave.o : ./libs/DomoZWave.h ./libs/types.h $(OPENZWAVE)/cpp/src/Options.h $(OPENZWAVE)/cpp/src/Manager.h \
 	$(OPENZWAVE)/cpp/src/Node.h $(OPENZWAVE)/cpp/src/Group.h \
 	$(OPENZWAVE)/cpp/src/Notification.h $(OPENZWAVE)/cpp/src/platform/Log.h \
+	
+./devices/TinyController.o : ./devices/TinyController.h ./libs/types.h ./libs/DomoZWave.h \
+	$(OPENZWAVE)/cpp/src/Options.h $(OPENZWAVE)/cpp/src/Manager.h \
+	$(OPENZWAVE)/cpp/src/Node.h $(OPENZWAVE)/cpp/src/Group.h \
+	$(OPENZWAVE)/cpp/src/Notification.h $(OPENZWAVE)/cpp/src/platform/Log.h \
 
-api : Api.o ./libs/zwavelib.o ./libs/DomoZWave.o
-	$(LD) -o $@ $(LDFLAGS) Api.o  ./libs/zwavelib.o ./libs/DomoZWave.o $(LIBS)
+api : Api.o ./libs/zwavelib.o ./libs/DomoZWave.o ./devices/TinyController.o
+	$(LD) -o $@ $(LDFLAGS) Api.o  ./libs/zwavelib.o ./libs/DomoZWave.o ./devices/TinyController.o $(LIBS)
 	
 clean:
-	rm -rf api *.o ./libs/*.o *.xml *.txt *.log
+	rm -rf api *.o ./libs/*.o ./devices/*.o *.xml *.txt *.log
