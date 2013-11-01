@@ -24,16 +24,18 @@ using namespace OpenZWave;
 TinyController* TinyController::s_instance = NULL;
 uint32 TinyController::currentControllerHomeId = 0;
 uint8 TinyController::currentControllerNodeId = 0;
-pfnOnNotification_t TinyController::callback = NULL;
+Manager::pfnOnNotification_t TinyController::callback = NULL;
 
 //-----------------------------------------------------------------------------
 //	<TinyController::Init>
 //	Static method to init the singleton.
 //-----------------------------------------------------------------------------
-TinyController* TinyController::Init(char const* config_name, char const* zw_dir,
+TinyController* TinyController::Init(Manager::pfnOnNotification_t _callback,
+		char const* config_name, char const* zw_dir,
 		char const* domo_log, bool const enableLog,
 		bool const enableOZdebug, int polltime){
 	if(s_instance == NULL){
+		TinyController::callback = _callback;
 		Log::Write(LogLevel_Info, "TinyController::Init() : initializing TinyController");
 		s_instance = new TinyController(config_name, zw_dir, domo_log, enableLog, enableOZdebug, polltime);
 	}
@@ -86,8 +88,8 @@ void TinyController::Destroy()
 // Constructor
 //-----------------------------------------------------------------------------
 TinyController::TinyController(char const* config_name, char const* zw_dir,
-					char const* domo_log, bool const enableLog,
-					bool const enableOZdebug, int polltime) {
+		char const* domo_log, bool const enableLog,
+		bool const enableOZdebug, int polltime) {
 	DomoZWave_Init(domo_log, enableLog);
 	Options::Create(config_name, zw_dir, "");
 
@@ -121,10 +123,6 @@ TinyController::~TinyController() {
 	Manager::Get()->RemoveWatcher(TinyController::callback, NULL);
 	Manager::Get()->Destroy();
 	Options::Get()->Destroy();
-}
-
-void TinyController::testOnOff(){
-	Log::Write(LogLevel_Info, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! testOnOff TEST");
 }
 
 

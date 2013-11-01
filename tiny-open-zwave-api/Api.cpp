@@ -191,7 +191,7 @@ void OnNotification (Notification const* _notification, void* _context)
 	  case Notification::Type_AllNodesQueried:
 		Log::Write(LogLevel_Info, "Notification: All Nodes Queried");
 
-		TinyController::testOnOff();
+		OpenZWaveFacade::ready();
 
 		break;
 	  case Notification::Type_Notification:
@@ -246,9 +246,9 @@ void exit_main_handler(int s){
 }
 
 int main(int argc, char* argv[]){
-	TinyController::callback = OnNotification;
-	TinyController::Init(config, zwdir, domo_log, enableLog, enableZWLog, polltime);
-	TinyController::AddController(port);
+
+	OpenZWaveFacade::Init(config, zwdir, domo_log, enableLog, enableZWLog, polltime);
+	OpenZWaveFacade::Get()->AddController(port);
 
 	struct sigaction sigIntHandler;
 	sigIntHandler.sa_handler = exit_main_handler;
@@ -267,7 +267,7 @@ int main(int argc, char* argv[]){
 		}
 		if(ch == 'i'){
 			Log::Write(LogLevel_Info, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! init");
-			TinyController::Get()->setCurrentController(port);
+			OpenZWaveFacade::Get()->setCurrentController(port);
 			s = new BinarySwitch();
 			s = s->BinarySwitch::Init(TinyController::Get(),4,1,0);
 		}
@@ -286,90 +286,20 @@ int main(int argc, char* argv[]){
 	return 0;
 }
 
-void ZNode::addNode(Notification const* _notification){
-	NodeInfo* nodeInfo = new NodeInfo();
-	nodeInfo->m_nodeId = _notification->GetNodeId();
-	nodeInfo->m_homeId = _notification->GetHomeId();
-	nodeInfo->m_DeviceState = DZType_Unknown;
-	nodeInfo->m_LastSeen = 0;
-	DomoZWave_GetGNodes().push_back(nodeInfo);
-	Log::Write(LogLevel_Info, "ZNode(): adding node value %d", nodeInfo->m_nodeId);
+void OpenZWaveFacade::ready(){
+	cout << "READY!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
 }
 
-int32 ZNode::getNodeCount(){
-	return DomoZWave_GetGNodes().size();
+TinyController* OpenZWaveFacade::Init(char const* config_name, char const* zw_dir,
+		char const* domo_log, bool const enableLog,
+		bool const enableOZdebug, int polltime){
+	return TinyController::Init(OnNotification, config_name, zw_dir, domo_log, enableLog, enableOZdebug, polltime);
 }
 
-NodeInfo *ZNode::getNodeInfo(Notification const* _data){
-	return DomoZWave_GetNodeInfo(_data);
-}
-
-void ZNode::addValue(Notification const* _data){
-	NodeInfo *nodeInfo = getNodeInfo(_data);
-	if(nodeInfo != NULL){
-		nodeInfo->m_values.push_back(_data->GetValueID());
+TinyController* OpenZWaveFacade::Get(){
+	TinyController *controller = TinyController::Get();
+	if(controller == NULL){
+		Log::Write(LogLevel_Info, "OpenZWaveFacade::Get(): controller is not initialized, call OpenZWaveFacade::Init first");
 	}
-	DomoZWave_RPC_ValueChanged( (int)_data->GetHomeId(), (int)_data->GetNodeId(), _data->GetValueID(), true );
-}
-
-void ZNode::removeNode(Notification const* _data){
-	uint32 const homeId = _data->GetHomeId();
-	uint8 const nodeId = _data->GetNodeId();
-	list<NodeInfo*>& g_nodes = DomoZWave_GetGNodes();
-
-	for ( list<NodeInfo*>::iterator it = g_nodes.begin(); it != g_nodes.end(); ++it ) {
-		NodeInfo* nodeInfo = *it;
-		if ( ( nodeInfo->m_homeId == homeId ) && ( nodeInfo->m_nodeId == nodeId ) ){
-			g_nodes.erase( it );
-			break;
-		}
-	}
-	DomoZWave_RPC_NodeRemoved( (int)_data->GetHomeId(), (int)_data->GetNodeId() );
-}
-
-void ZNode::removeValue(Notification const* _data){
-	NodeInfo* nodeInfo = ZNode::getNodeInfo(_data);
-	if (nodeInfo != NULL){
-		// Remove the value from out list
-		for (list<ValueID>::iterator it = nodeInfo->m_values.begin(); it != nodeInfo->m_values.end(); ++it) {
-			if ((*it) == _data->GetValueID())
-			{
-				nodeInfo->m_values.erase( it );
-				break;
-			}
-		}
-	}
-	DomoZWave_RPC_ValueRemoved((int)_data->GetHomeId(), (int)_data->GetNodeId(), _data->GetValueID());
-}
-
-void ZNode::changeValue(Notification const* _data){
-	DomoZWave_RPC_ValueChanged((int)_data->GetHomeId(), (int)_data->GetNodeId(), _data->GetValueID(), false);
-
-	NodeInfo* nodeInfo = ZNode::getNodeInfo(_data);
-	// Update LastSeen and DeviceState
-	if (nodeInfo != NULL){
-		nodeInfo->m_LastSeen = time(NULL);
-		nodeInfo->m_DeviceState = DZType_Alive;
-	}
-
-	// Check if zwcfg*xml has been written 3600+ sec, then flush to disk
-	m_structCtrl* ctrl = DomoZWave_GetControllerInfo((int)_data->GetHomeId());
-	if ( ctrl->m_lastWriteXML > 0 ){
-		double seconds;
-		seconds = difftime( time( NULL ), ctrl->m_lastWriteXML );
-
-		if ( seconds > 3600 ){
-			Manager::Get()->WriteConfig((int)_data->GetHomeId());
-			DomoZWave_WriteLog(LogLevel_Debug, true, "DomoZWave_WriteConfig: HomeId=%d (%.f seconds)", (int)_data->GetHomeId(), seconds);
-			ctrl->m_lastWriteXML = time(NULL);
-		}
-	}
-}
-
-void ZNode::controllerReady(Notification const* _data){
-	DomoZWave_RPC_DriverReady(_data->GetHomeId(), _data->GetNodeId());
-}
-
-m_structCtrl* ZNode::getControllerInfo(uint32 const homeId){
-	return DomoZWave_GetControllerInfo(homeId);
+	return controller;
 }

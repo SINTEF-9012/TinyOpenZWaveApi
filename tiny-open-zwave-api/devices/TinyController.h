@@ -16,8 +16,6 @@
 
 using namespace OpenZWave;
 
-typedef void (*pfnOnNotification_t)( Notification const* _pNotification, void* _context );
-
 	class TinyController
 	{
 		private:
@@ -31,20 +29,17 @@ typedef void (*pfnOnNotification_t)( Notification const* _pNotification, void* _
 		public:
 			static uint32 currentControllerHomeId;
 			static uint8 currentControllerNodeId;
-			static pfnOnNotification_t callback;
+			static Manager::pfnOnNotification_t callback;
 
 		public:
-			static TinyController* Init(char const* config_name, char const* zw_dir,
+			static TinyController* Init(Manager::pfnOnNotification_t callback,
+					char const* config_name, char const* zw_dir,
 					char const* domo_log, bool const enableLog,
 					bool const enableOZdebug, int polltime);
 			static TinyController* Get() {return s_instance;};
 			static void AddController(char const* port);
 			static void setCurrentController(char const* port);
 			static void Destroy();
-
-			//this should be deleted: just for initial testing
-			static void testOnOff();
-
 	};
 
 

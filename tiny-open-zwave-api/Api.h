@@ -21,6 +21,7 @@
 #include "ValueString.h"
 
 #include "libs/Utility.h"
+#include "devices/TinyController.h"
 
 
 using namespace OpenZWave;
@@ -28,19 +29,17 @@ using namespace OpenZWave;
 namespace TinyOpenZWaveApi{
 	using namespace std;
 
-	class ZNode {
+	class OpenZWaveFacade {
 		public:
-			static int32 getNodeCount();
-			static ZNode* getNode(int32 const _node_id);
-			static NodeInfo* getNodeInfo(Notification const* _data);
-			static void addNode(Notification const* _data);
-			static void addValue(Notification const* _data);
-			static void removeNode(Notification const* _data);
-			static void removeValue(Notification const* _data);
-			static void changeValue(Notification const* _data);
-			static void controllerReady(Notification const* _data);
-			static m_structCtrl* getControllerInfo(uint32 const homeId);
+			static TinyController* Init(char const* config_name, char const* zw_dir,
+					char const* domo_log, bool const enableLog,
+					bool const enableOZdebug, int polltime);
+			static TinyController* Get();
+
+			//remove this stab
+			static void ready();
 	};
+
 };
 
 
