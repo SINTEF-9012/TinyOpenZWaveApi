@@ -33,6 +33,17 @@ uint8 Device::COMMAND_CLASS = COMMAND_CLASS_NO_OPERATION;
 uint8 BinarySwitch::COMMAND_CLASS = COMMAND_CLASS_SWITCH_BINARY;
 TinyController* TinyController::s_instance = NULL;
 
+//START: this should be removed in final version just for testing
+BinarySwitch* s;
+const char* port = "/dev/ttyUSB0";
+char const* config = "./config/";
+char const* zwdir = "";
+char const* domo_log = "./DomoZWave_Log";
+bool const enableLog = true;
+bool const enableZWLog = false;
+int const polltime = 0;
+//END: this should be removed in final version just for testing
+
 void OnNotification (Notification const* _notification, void* _context)
 {
 
@@ -228,16 +239,16 @@ void OnNotification (Notification const* _notification, void* _context)
 void exit_main_handler(int s){
 	Log::Write(LogLevel_Info, "Caught signal %d",s);
 	Log::Write(LogLevel_Info, "We have registered %d nodes", ZNode::getNodeCount());
+
+
 	TinyController* api = TinyController::Get();
 	api->Destroy();
     exit(1);
 }
 
-BinarySwitch* s;
 int main(int argc, char* argv[]){
-	const char* port = "/dev/ttyUSB0";
-	TinyController::notification = OnNotification;
-	TinyController::Init();
+	TinyController::callback = OnNotification;
+	TinyController::Init(config, zwdir, domo_log, enableLog, enableZWLog, polltime);
 	TinyController::AddController(port);
 
 	struct sigaction sigIntHandler;
@@ -256,9 +267,8 @@ int main(int argc, char* argv[]){
 			s->turnOff();
 		}
 		if(ch == 'i'){
-			//Log::Write(LogLevel_Info, "BinarySwitch: is value polled %d ...", Manager::Get()->isPolled(s->getValueToPull()->getId()));
 			Log::Write(LogLevel_Info, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! init");
-			TinyController::Get()->setCurrentController("/dev/ttyUSB0");
+			TinyController::Get()->setCurrentController(port);
 			s = new BinarySwitch();
 			s = s->BinarySwitch::Init(TinyController::Get(),4,1,0);
 		}

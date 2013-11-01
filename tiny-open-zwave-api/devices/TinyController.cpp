@@ -24,16 +24,18 @@ using namespace OpenZWave;
 
 uint32 TinyController::currentControllerHomeId = 0;
 uint8 TinyController::currentControllerNodeId = 0;
-pfnOnNotification_t TinyController::notification = NULL;
+pfnOnNotification_t TinyController::callback = NULL;
 
 //-----------------------------------------------------------------------------
 //	<TinyController::Init>
 //	Static method to init the singleton.
 //-----------------------------------------------------------------------------
-TinyController* TinyController::Init(){
+TinyController* TinyController::Init(char const* config_name, char const* zw_dir,
+		char const* domo_log, bool const enableLog,
+		bool const enableOZdebug, int polltime){
 	if(s_instance == NULL){
 		Log::Write(LogLevel_Info, "TinyController::Init() : initializing TinyController");
-		s_instance = new TinyController();
+		s_instance = new TinyController(config_name, zw_dir, domo_log, enableLog, enableOZdebug, polltime);
 	}
 	return s_instance;
 }
@@ -83,17 +85,29 @@ void TinyController::Destroy()
 // <TinyController::TinyController>
 // Constructor
 //-----------------------------------------------------------------------------
-TinyController::TinyController() {
-	DomoZWave_Init("./DomoZWave_Log", true);
+TinyController::TinyController(char const* config_name, char const* zw_dir,
+					char const* domo_log, bool const enableLog,
+					bool const enableOZdebug, int polltime) {
+	DomoZWave_Init(domo_log, enableLog);
+	Options::Create(config_name, zw_dir, "");
 
-	Options::Create("./config/", "", "--SaveConfiguration=true --DumpTriggerLevel=0");
-    Options::Get()->AddOptionBool("IntervalBetweenPolls", true);
-    Options::Get()->AddOptionBool( "SuppressValueRefresh", false );
-    Options::Get()->AddOptionBool( "PerformReturnRoutes", false );
+	if (enableOZdebug)
+	{
+		Options::Get()->AddOptionInt("SaveLogLevel", LogLevel_Detail);
+	  	Options::Get()->AddOptionInt("QueueLogLevel", LogLevel_Debug);
+	   	Options::Get()->AddOptionInt("DumpTriggerLevel", LogLevel_Error);
+	}
+
+	if(polltime != 0){
+		Options::Get()->AddOptionInt("PollInterval", polltime);
+		Options::Get()->AddOptionBool("IntervalBetweenPolls", true);
+		Options::Get()->AddOptionBool("SuppressValueRefresh", false);
+		Options::Get()->AddOptionBool("PerformReturnRoutes", false);
+	}
 	Options::Get()->Lock();
 
 	Manager::Create();
-	Manager::Get()->AddWatcher(TinyController::notification, NULL);
+	Manager::Get()->AddWatcher(TinyController::callback, NULL);
 	s_instance = this;
 }
 
@@ -103,10 +117,10 @@ TinyController::TinyController() {
 //-----------------------------------------------------------------------------
 TinyController::~TinyController() {
 	Log::Write(LogLevel_Info, "destroying TinyController object");
-	Manager::Get()->RemoveWatcher(TinyController::notification, NULL);
-	Manager::Destroy();
-	Options::Destroy();
 	DomoZWave_Destroy();
+	Manager::Get()->RemoveWatcher(TinyController::callback, NULL);
+	Manager::Get()->Destroy();
+	Options::Get()->Destroy();
 }
 
 void TinyController::testOnOff(){
