@@ -22,6 +22,7 @@
 
 #include "libs/types.h"
 #include "devices/TinyController.h"
+#include "devices/Device.h"
 
 
 using namespace OpenZWave;
@@ -52,24 +53,6 @@ namespace TinyOpenZWaveApi{
 			static m_structCtrl* getControllerInfo(uint32 const homeId);
 	};
 
-	class Device
-	{
-		protected:
-			uint8 nodeId;
-			uint8 instance;
-			uint8 index;
-			TinyController* controller;
-			NodeInfo* node;
-			ValueID* value;
-			virtual uint8 getComandClass();
-
-		public:
-			virtual ValueID* getValueId() {return value;};
-			static uint8 COMMAND_CLASS;
-			Device* Init(TinyController* const controller, uint8 const _nodeId, uint8 const _instance, uint8 const _index);
-
-			virtual ~Device();
-	};
 
 	class BinarySwitch: public Device
 	{

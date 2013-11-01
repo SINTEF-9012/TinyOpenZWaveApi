@@ -17,6 +17,7 @@
 #include "libs/types.h"
 #include "libs/DomoZWave.h"
 #include "devices/TinyController.h"
+#include "devices/Device.h"
 
 #include "Options.h"
 #include "Manager.h"
@@ -375,36 +376,6 @@ m_structCtrl* ZNode::getControllerInfo(uint32 const homeId){
 	return DomoZWave_GetControllerInfo(homeId);
 }
 
-
-Device* Device::Init(TinyController* const controller, uint8 const _nodeId, uint8 const _instance, uint8 const _index) {
-	this->node = NULL;
-	this->value = NULL;
-	this->controller = controller;
-	this->nodeId = _nodeId;
-	this->instance = _instance;
-	this->index = _index;
-	list<NodeInfo*>& g_nodes = DomoZWave_GetGNodes();
-	for(list<NodeInfo*>::iterator it=g_nodes.begin(); it!=g_nodes.end(); ++it){
-		uint8 nodeId = (*it)->m_nodeId;
-		uint32 homeId = (*it)->m_homeId;
-		if(nodeId == _nodeId && homeId == controller->currentControllerHomeId){
-			this->node = *it;
-			break;
-		}
-	}
-	if(this->node == NULL){
-		Log::Write(LogLevel_Info, "DEVICE INIT: can not find node with id %d", this->nodeId);
-	}
-	return this;
-}
-
-uint8 Device::getComandClass(){
-	return COMMAND_CLASS;
-}
-
-Device::~Device() {
-	delete this;
-}
 
 //-----------------------------------------------------------------------------
 //	<BinarySwitch::Destroy>
