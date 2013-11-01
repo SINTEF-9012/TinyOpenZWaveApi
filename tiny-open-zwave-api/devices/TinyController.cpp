@@ -17,11 +17,11 @@
 
 #include "TinyController.h"
 #include "../libs/DomoZWave.h"
-#include "../libs/types.h"
+#include "../libs/Utility.h"
 
 using namespace OpenZWave;
 
-
+TinyController* TinyController::s_instance = NULL;
 uint32 TinyController::currentControllerHomeId = 0;
 uint8 TinyController::currentControllerNodeId = 0;
 pfnOnNotification_t TinyController::callback = NULL;

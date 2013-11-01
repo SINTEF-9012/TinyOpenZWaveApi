@@ -14,10 +14,11 @@
 
 
 #include "Api.h"
-#include "libs/types.h"
+#include "libs/Utility.h"
 #include "libs/DomoZWave.h"
 #include "devices/TinyController.h"
 #include "devices/Device.h"
+#include "devices/BinarySwitch.h"
 
 #include "Options.h"
 #include "Manager.h"
@@ -30,9 +31,6 @@ using namespace TinyOpenZWaveApi;
 
 pthread_mutex_t nlock = PTHREAD_MUTEX_INITIALIZER;
 
-uint8 Device::COMMAND_CLASS = COMMAND_CLASS_NO_OPERATION;
-uint8 BinarySwitch::COMMAND_CLASS = COMMAND_CLASS_SWITCH_BINARY;
-TinyController* TinyController::s_instance = NULL;
 
 //START: this should be removed in final version just for testing
 BinarySwitch* s;
@@ -53,8 +51,8 @@ void OnNotification (Notification const* _notification, void* _context)
 	  case Notification::Type_ValueAdded:
 		Log::Write(LogLevel_Info, "Notification: Value Added Home 0x%08x Node %d Genre %s Class %s Instance %d Index %d Type %s",
 			   _notification->GetHomeId(), _notification->GetNodeId(),
-			   valueGenreStr(id.GetGenre()), cclassStr(id.GetCommandClassId()), id.GetInstance(),
-			   id.GetIndex(), valueTypeStr(id.GetType()));
+			   genreToStr(id.GetGenre()), cclassToStr(id.GetCommandClassId()), id.GetInstance(),
+			   id.GetIndex(), typeToStr(id.GetType()));
 		pthread_mutex_lock(&nlock);;
 		ZNode::addValue(_notification);
 		pthread_mutex_unlock(&nlock);
@@ -62,8 +60,8 @@ void OnNotification (Notification const* _notification, void* _context)
 	  case Notification::Type_ValueRemoved:
 		Log::Write(LogLevel_Info, "Notification: Value Removed Home 0x%08x Node %d Genre %s Class %s Instance %d Index %d Type %s",
 			   _notification->GetHomeId(), _notification->GetNodeId(),
-			   valueGenreStr(id.GetGenre()), cclassStr(id.GetCommandClassId()), id.GetInstance(),
-			   id.GetIndex(), valueTypeStr(id.GetType()));
+			   genreToStr(id.GetGenre()), cclassToStr(id.GetCommandClassId()), id.GetInstance(),
+			   id.GetIndex(), typeToStr(id.GetType()));
 		pthread_mutex_lock(&nlock);
 		ZNode::removeValue(_notification);
 		pthread_mutex_unlock(&nlock);
@@ -71,8 +69,8 @@ void OnNotification (Notification const* _notification, void* _context)
 	  case Notification::Type_ValueChanged:
 		Log::Write(LogLevel_Info, "Notification: Value Changed Home 0x%08x Node %d Genre %s Class %s Instance %d Index %d Type %s",
 			   _notification->GetHomeId(), _notification->GetNodeId(),
-			   valueGenreStr(id.GetGenre()), cclassStr(id.GetCommandClassId()), id.GetInstance(),
-			   id.GetIndex(), valueTypeStr(id.GetType()));
+			   genreToStr(id.GetGenre()), cclassToStr(id.GetCommandClassId()), id.GetInstance(),
+			   id.GetIndex(), typeToStr(id.GetType()));
 		pthread_mutex_lock(&nlock);
 		ZNode::changeValue(_notification);
 		pthread_mutex_unlock(&nlock);
@@ -80,8 +78,8 @@ void OnNotification (Notification const* _notification, void* _context)
 	  case Notification::Type_ValueRefreshed:
 		Log::Write(LogLevel_Info, "Notification: Value Refreshed Home 0x%08x Node %d Genre %s Class %s Instance %d Index %d Type %s",
 			   _notification->GetHomeId(), _notification->GetNodeId(),
-			   valueGenreStr(id.GetGenre()), cclassStr(id.GetCommandClassId()), id.GetInstance(),
-			   id.GetIndex(), valueTypeStr(id.GetType()));
+			   genreToStr(id.GetGenre()), cclassToStr(id.GetCommandClassId()), id.GetInstance(),
+			   id.GetIndex(), typeToStr(id.GetType()));
 		break;
 	  case Notification::Type_Group:
 		{
@@ -92,14 +90,14 @@ void OnNotification (Notification const* _notification, void* _context)
 	  case Notification::Type_NodeNew:
 		Log::Write(LogLevel_Info, "Notification: Node New Home %08x Node %d Genre %s Class %s Instance %d Index %d Type %s",
 			   _notification->GetHomeId(), _notification->GetNodeId(),
-			   valueGenreStr(id.GetGenre()), cclassStr(id.GetCommandClassId()), id.GetInstance(),
-			   id.GetIndex(), valueTypeStr(id.GetType()));
+			   genreToStr(id.GetGenre()), cclassToStr(id.GetCommandClassId()), id.GetInstance(),
+			   id.GetIndex(), typeToStr(id.GetType()));
 		break;
 	  case Notification::Type_NodeAdded:
 		Log::Write(LogLevel_Info, "Notification: Node Added Home %08x Node %d Genre %s Class %s Instance %d Index %d Type %s",
 			   _notification->GetHomeId(), _notification->GetNodeId(),
-			   valueGenreStr(id.GetGenre()), cclassStr(id.GetCommandClassId()), id.GetInstance(),
-			   id.GetIndex(), valueTypeStr(id.GetType()));
+			   genreToStr(id.GetGenre()), cclassToStr(id.GetCommandClassId()), id.GetInstance(),
+			   id.GetIndex(), typeToStr(id.GetType()));
 	    pthread_mutex_lock(&nlock);
 	    ZNode::addNode(_notification);
 	    pthread_mutex_unlock(&nlock);
@@ -107,8 +105,8 @@ void OnNotification (Notification const* _notification, void* _context)
 	  case Notification::Type_NodeRemoved:
 		Log::Write(LogLevel_Info, "Notification: Node Removed Home %08x Node %d Genre %s Class %s Instance %d Index %d Type %s",
 			   _notification->GetHomeId(), _notification->GetNodeId(),
-			   valueGenreStr(id.GetGenre()), cclassStr(id.GetCommandClassId()), id.GetInstance(),
-			   id.GetIndex(), valueTypeStr(id.GetType()));
+			   genreToStr(id.GetGenre()), cclassToStr(id.GetCommandClassId()), id.GetInstance(),
+			   id.GetIndex(), typeToStr(id.GetType()));
 		pthread_mutex_lock(&nlock);
 		ZNode::removeNode(_notification);
 		pthread_mutex_unlock(&nlock);
@@ -116,38 +114,38 @@ void OnNotification (Notification const* _notification, void* _context)
 	  case Notification::Type_NodeProtocolInfo:
 		Log::Write(LogLevel_Info, "Notification: Node Protocol Info Home %08x Node %d Genre %s Class %s Instance %d Index %d Type %s",
 			   _notification->GetHomeId(), _notification->GetNodeId(),
-			   valueGenreStr(id.GetGenre()), cclassStr(id.GetCommandClassId()), id.GetInstance(),
-			   id.GetIndex(), valueTypeStr(id.GetType()));
+			   genreToStr(id.GetGenre()), cclassToStr(id.GetCommandClassId()), id.GetInstance(),
+			   id.GetIndex(), typeToStr(id.GetType()));
 		break;
 	  case Notification::Type_NodeNaming:
 		Log::Write(LogLevel_Info, "Notification: Node Naming Home %08x Node %d Genre %s Class %s Instance %d Index %d Type %s",
 			   _notification->GetHomeId(), _notification->GetNodeId(),
-			   valueGenreStr(id.GetGenre()), cclassStr(id.GetCommandClassId()), id.GetInstance(),
-			   id.GetIndex(), valueTypeStr(id.GetType()));
+			   genreToStr(id.GetGenre()), cclassToStr(id.GetCommandClassId()), id.GetInstance(),
+			   id.GetIndex(), typeToStr(id.GetType()));
 		break;
 	  case Notification::Type_NodeEvent:
 		Log::Write(LogLevel_Info, "Notification: Node Event Home %08x Node %d Status %d Genre %s Class %s Instance %d Index %d Type %s",
 			   _notification->GetHomeId(), _notification->GetNodeId(), _notification->GetEvent(),
-			   valueGenreStr(id.GetGenre()), cclassStr(id.GetCommandClassId()), id.GetInstance(),
-			   id.GetIndex(), valueTypeStr(id.GetType()));
+			   genreToStr(id.GetGenre()), cclassToStr(id.GetCommandClassId()), id.GetInstance(),
+			   id.GetIndex(), typeToStr(id.GetType()));
 		break;
 	  case Notification::Type_PollingDisabled:
 		Log::Write(LogLevel_Info, "Notification: Polling Disabled Home %08x Node %d Genre %s Class %s Instance %d Index %d Type %s",
 			   _notification->GetHomeId(), _notification->GetNodeId(),
-			   valueGenreStr(id.GetGenre()), cclassStr(id.GetCommandClassId()), id.GetInstance(),
-			   id.GetIndex(), valueTypeStr(id.GetType()));
+			   genreToStr(id.GetGenre()), cclassToStr(id.GetCommandClassId()), id.GetInstance(),
+			   id.GetIndex(), typeToStr(id.GetType()));
 		break;
 	  case Notification::Type_PollingEnabled:
 		Log::Write(LogLevel_Info, "Notification: Polling Enabled Home %08x Node %d Genre %s Class %s Instance %d Index %d Type %s",
 			   _notification->GetHomeId(), _notification->GetNodeId(),
-			   valueGenreStr(id.GetGenre()), cclassStr(id.GetCommandClassId()), id.GetInstance(),
-			   id.GetIndex(), valueTypeStr(id.GetType()));
+			   genreToStr(id.GetGenre()), cclassToStr(id.GetCommandClassId()), id.GetInstance(),
+			   id.GetIndex(), typeToStr(id.GetType()));
 		break;
 	  case Notification::Type_SceneEvent:
 		Log::Write(LogLevel_Info, "Notification: Scene Event Home %08x Node %d Genre %s Class %s Instance %d Index %d Type %s Scene Id %d",
 			   _notification->GetHomeId(), _notification->GetNodeId(),
-			   valueGenreStr(id.GetGenre()), cclassStr(id.GetCommandClassId()), id.GetInstance(),
-			   id.GetIndex(), valueTypeStr(id.GetType()), _notification->GetSceneId());
+			   genreToStr(id.GetGenre()), cclassToStr(id.GetCommandClassId()), id.GetInstance(),
+			   id.GetIndex(), typeToStr(id.GetType()), _notification->GetSceneId());
 		break;
 	  case Notification::Type_CreateButton:
 		Log::Write(LogLevel_Info, "Notification: Create button Home %08x Node %d Button %d",
@@ -374,102 +372,4 @@ void ZNode::controllerReady(Notification const* _data){
 
 m_structCtrl* ZNode::getControllerInfo(uint32 const homeId){
 	return DomoZWave_GetControllerInfo(homeId);
-}
-
-
-//-----------------------------------------------------------------------------
-//	<BinarySwitch::Destroy>
-//	Static method to destroy the singleton.
-//-----------------------------------------------------------------------------
-void BinarySwitch::Destroy() {
-	delete this;
-}
-
-//-----------------------------------------------------------------------------
-// <BinarySwitch::BinarySwitch>
-// Constructor
-//-----------------------------------------------------------------------------
-BinarySwitch::BinarySwitch() {}
-
-//-----------------------------------------------------------------------------
-// <BinarySwitch::BinarySwitch>
-// Destructor
-//-----------------------------------------------------------------------------
-BinarySwitch::~BinarySwitch() {
-	BinarySwitch::Destroy();
-}
-
-uint8 BinarySwitch::getComandClass(){
-	return COMMAND_CLASS;
-}
-
-void BinarySwitch::turnOn(){
-	Log::Write(LogLevel_Info, "BinarySwitch::turnOn(): turning on...");
-	//DomoZWave_SetValue(currentControllerHomeId, this->nodeId, this->instance, 0);
-	if(this->node != NULL){
-		list<ValueID> values = this->node->m_values;
-		for(list<ValueID>::iterator it=values.begin(); it!=values.end(); ++it){
-			if((*it).GetCommandClassId() == getComandClass() &&
-					(*it).GetInstance() == this->instance &&
-					(*it).GetIndex() == this->index &&
-					(*it).GetHomeId() == controller->currentControllerHomeId){
-				this->value = &(*it);
-				ValueID valueId = *this->value;
-				if (ValueID::ValueType_Bool == valueId.GetType()){
-					Log::Write(LogLevel_Info, "Value: Home 0x%08x Node %d Genre %s Class %s Instance %d Index %d Type %s",
-															valueId.GetHomeId(), valueId.GetNodeId(), valueGenreStr(valueId.GetGenre()),
-															cclassStr(valueId.GetCommandClassId()), valueId.GetInstance(),
-															valueId.GetIndex(), valueTypeStr(valueId.GetType()));
-					bool bool_value = true;
-					Manager::Get()->SetValue(valueId, bool_value);
-				}else{
-					Log::Write(LogLevel_Info, "BinarySwitch::turnOn(): command value is not of the bool type, ignoring..."
-							"Value: Home 0x%08x Node %d Genre %s Class %s Instance %d Index %d Type %s", valueId,
-												valueId.GetHomeId(), valueId.GetNodeId(), valueGenreStr(valueId.GetGenre()),
-												cclassStr(valueId.GetCommandClassId()), valueId.GetInstance(),
-												valueId.GetIndex(), valueTypeStr(valueId.GetType()));
-				}
-				break;
-			}
-		}
-		if(this->value == NULL){
-			Log::Write(LogLevel_Info, "BinarySwitch::turnOn(): node with id %d does not implement command %s with instance %d and index %d",
-					this->nodeId, cclassStr(getComandClass()), this->instance, this->index);
-		}
-	}else{
-		Log::Write(LogLevel_Info, "BinarySwitch::turnOn(): node is NULL, ignoring...");
-	};
-}
-
-void BinarySwitch::turnOff(){
-	Log::Write(LogLevel_Info, "BinarySwitch::turnOff(): turning off...");
-	if(this->node != NULL){
-		list<ValueID> values = this->node->m_values;
-		for(list<ValueID>::iterator it=values.begin(); it!=values.end(); ++it){
-			if((*it).GetCommandClassId() == getComandClass() &&
-					(*it).GetInstance() == this->instance &&
-					(*it).GetIndex() == this->index &&
-					(*it).GetHomeId() == controller->currentControllerHomeId){
-				this->value = &(*it);
-				ValueID valueId = *this->value;
-				if (ValueID::ValueType_Bool == valueId.GetType()){
-					bool bool_value = false;
-					Manager::Get()->SetValue(valueId, bool_value);
-				}else{
-					Log::Write(LogLevel_Info, "BinarySwitch::turnOff(): command value is not of the bool type, ignoring..."
-							"Value: Home 0x%08x Node %d Genre %s Class %s Instance %d Index %d Type %s", valueId,
-												valueId.GetHomeId(), valueId.GetNodeId(), valueGenreStr(valueId.GetGenre()),
-												cclassStr(valueId.GetCommandClassId()), valueId.GetInstance(),
-												valueId.GetIndex(), valueTypeStr(valueId.GetType()));
-				}
-				break;
-			}
-		}
-		if(this->value == NULL){
-			Log::Write(LogLevel_Info, "BinarySwitch::turnOff(): node with id %d does not implement command %s with instance %d and index %d",
-					this->nodeId, cclassStr(getComandClass()), this->instance, this->index);
-		}
-	}else{
-		Log::Write(LogLevel_Info, "BinarySwitch::turnOff(): node is NULL, ignoring...");
-	};
 }

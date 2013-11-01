@@ -12,7 +12,7 @@
 #include "Node.h"
 
 #include "TinyController.h"
-#include "../libs/types.h"
+#include "../libs/Utility.h"
 
 using namespace OpenZWave;
 

@@ -50,7 +50,7 @@
 #include "ValueShort.h"
 #include "ValueString.h"
 
-#include "types.h"
+#include "Utility.h"
 
 // wrapper
 #include "DomoZWave.h"
