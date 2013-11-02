@@ -113,6 +113,76 @@ m_structCtrl* ZNode::getControllerInfo(uint32 const homeId){
 	return DomoZWave_GetControllerInfo(homeId);
 }
 
+void ZNode::updateNodeProtocolInfo(uint32 const homeId, uint8 const nodeId){
+	DomoZWave_RPC_NodeProtocolInfo((int)homeId, (int)nodeId);
+}
+
+void ZNode::updateNodeEvent(Notification const* _data){
+	// Event caused by basic set or hail
+	DomoZWave_RPC_NodeEvent((int)_data->GetHomeId(), (int)_data->GetNodeId(), _data->GetValueID(), (int)_data->GetEvent());
+	NodeInfo* nodeInfo = DomoZWave_GetNodeInfo(_data);
+	if(nodeInfo != NULL){
+		nodeInfo->m_LastSeen = time(NULL);
+		nodeInfo->m_DeviceState = DZType_Alive;
+	}
+}
+
+void ZNode::allNodeQueriedSomeDead(Notification const* _data){
+	m_structCtrl* ctrl = DomoZWave_GetControllerInfo((int)_data->GetHomeId());
+
+	if(_data->GetType() == Notification::Type_AllNodesQueried ) DomoZWave_WriteLog( LogLevel_Debug, true, "AllNodesQueried: HomeId=%d", (int)_data->GetHomeId());
+	if(_data->GetType() == Notification::Type_AwakeNodesQueried ) DomoZWave_WriteLog( LogLevel_Debug, true, "AwakeNodesQueried: HomeId=%d", (int)_data->GetHomeId());
+	if(_data->GetType() == Notification::Type_AllNodesQueriedSomeDead ) DomoZWave_WriteLog( LogLevel_Debug, true, "AllNodesQueriedSomeDead: HomeId=%d", (int)_data->GetHomeId());
+
+	if(ctrl->m_controllerAllQueried == 0){
+		// Write zwcfg*xml file
+		Manager::Get()->WriteConfig((int)_data->GetHomeId());
+
+		// The zwcfg*xml is written, save the current time
+		ctrl->m_lastWriteXML = time(NULL);
+
+	}else{
+		// If we got 2 or more a AllQueried, then there is something really wrong somewhere
+		if ( ctrl->m_controllerAllQueried > 1 ) {
+			DomoZWave_WriteLog( LogLevel_Error, true, "ERROR: AllNodesQueried happened %d times (max should be 2)", ctrl->m_controllerAllQueried );
+		}
+	}
+	ctrl->m_controllerAllQueried++;
+}
+
+void ZNode::allNodeQueried(Notification const* _data){
+	list<m_structCtrl*>& g_allControllers = DomoZWave_GetGControllers();
+	for(list<m_structCtrl*>::iterator it = g_allControllers.begin(); it != g_allControllers.end(); ++it){
+		uint32 homeId = (*it)->m_homeId;
+		DomoZWave_WriteConfig(homeId);
+		(*it)->m_lastWriteXML = time(NULL);
+	}
+}
+
+void ZNode::messageComplete(Notification const* _data){
+	NodeInfo* nodeInfo = DomoZWave_GetNodeInfo(_data);
+	if (nodeInfo != NULL){
+		nodeInfo->m_LastSeen = time(NULL);
+		nodeInfo->m_DeviceState = DZType_Alive;
+	}
+}
+
+void ZNode::messageAwake(Notification const* _data){
+	NodeInfo* nodeInfo = DomoZWave_GetNodeInfo(_data);
+	if (nodeInfo != NULL){
+		nodeInfo->m_LastSeen = time(NULL);
+		nodeInfo->m_DeviceState = DZType_Awake;
+	}
+}
+
+void ZNode::messageAlive(Notification const* _data){
+	NodeInfo* nodeInfo = DomoZWave_GetNodeInfo(_data);
+	if (nodeInfo != NULL){
+		nodeInfo->m_LastSeen = time(NULL);
+		nodeInfo->m_DeviceState = DZType_Alive;
+	}
+}
+
 const char *genreToStr (ValueID::ValueGenre vg)
 {
   switch (vg) {

@@ -116,6 +116,9 @@ void OnNotification (Notification const* _notification, void* _context)
 			   _notification->GetHomeId(), _notification->GetNodeId(),
 			   genreToStr(id.GetGenre()), cclassToStr(id.GetCommandClassId()), id.GetInstance(),
 			   id.GetIndex(), typeToStr(id.GetType()));
+		pthread_mutex_lock(&nlock);
+		ZNode::updateNodeProtocolInfo(_notification->GetHomeId(), _notification->GetNodeId());
+		pthread_mutex_unlock(&nlock);
 		break;
 	  case Notification::Type_NodeNaming:
 		Log::Write(LogLevel_Info, "Notification: Node Naming Home %08x Node %d Genre %s Class %s Instance %d Index %d Type %s",
@@ -128,6 +131,9 @@ void OnNotification (Notification const* _notification, void* _context)
 			   _notification->GetHomeId(), _notification->GetNodeId(), _notification->GetEvent(),
 			   genreToStr(id.GetGenre()), cclassToStr(id.GetCommandClassId()), id.GetInstance(),
 			   id.GetIndex(), typeToStr(id.GetType()));
+		pthread_mutex_lock(&nlock);
+		ZNode::updateNodeEvent(_notification);
+		pthread_mutex_unlock(&nlock);
 		break;
 	  case Notification::Type_PollingDisabled:
 		Log::Write(LogLevel_Info, "Notification: Polling Disabled Home %08x Node %d Genre %s Class %s Instance %d Index %d Type %s",
@@ -187,18 +193,25 @@ void OnNotification (Notification const* _notification, void* _context)
 		break;
 	  case Notification::Type_AllNodesQueriedSomeDead:
 		Log::Write(LogLevel_Info, "Notification: Awake Nodes Queried Some Dead");
+		pthread_mutex_lock(&nlock);
+		ZNode::allNodeQueriedSomeDead(_notification);
+		pthread_mutex_unlock(&nlock);
 		break;
 	  case Notification::Type_AllNodesQueried:
 		Log::Write(LogLevel_Info, "Notification: All Nodes Queried");
-
+		pthread_mutex_lock(&nlock);
+		ZNode::allNodeQueried(_notification);
+		pthread_mutex_unlock(&nlock);
 		OpenZWaveFacade::ready();
-
 		break;
 	  case Notification::Type_Notification:
 		switch (_notification->GetNotification()) {
 			case Notification::Code_MsgComplete:
 			  Log::Write(LogLevel_Info, "Notification: Notification home %08x node %d Message Complete",
 				_notification->GetHomeId(), _notification->GetNodeId(), _notification->GetNotification());
+			  pthread_mutex_lock(&nlock);
+			  ZNode::messageComplete(_notification);
+			  pthread_mutex_unlock(&nlock);
 			  break;
 			case Notification::Code_Timeout:
 			  Log::Write(LogLevel_Info, "Notification: Notification home %08x node %d Timeout",
@@ -211,6 +224,9 @@ void OnNotification (Notification const* _notification, void* _context)
 			case Notification::Code_Awake:
 			  Log::Write(LogLevel_Info, "Notification: Notification home %08x node %d Awake",
 				_notification->GetHomeId(), _notification->GetNodeId(), _notification->GetNotification());
+			  pthread_mutex_lock(&nlock);
+			  ZNode::messageAwake(_notification);
+			  pthread_mutex_unlock(&nlock);
 			  break;
 			case Notification::Code_Sleep:
 			  Log::Write(LogLevel_Info, "Notification: Notification home %08x node %d Sleep",
@@ -220,6 +236,13 @@ void OnNotification (Notification const* _notification, void* _context)
 			  Log::Write(LogLevel_Info, "Notification: Notification home %08x node %d Dead",
 				_notification->GetHomeId(), _notification->GetNodeId(), _notification->GetNotification());
 			  break;
+			case Notification::Code_Alive:
+				Log::Write(LogLevel_Info, "Notification: Notification home %08x node %d Alive",
+								_notification->GetHomeId(), _notification->GetNodeId(), _notification->GetNotification());
+				pthread_mutex_lock(&nlock);
+				ZNode::messageAlive(_notification);
+				pthread_mutex_unlock(&nlock);
+				break;
 			default:
 			  Log::Write(LogLevel_Info, "Notification: Notification home %08x node %d Unknown %d",
 				 _notification->GetHomeId(), _notification->GetNodeId(), _notification->GetNotification());
