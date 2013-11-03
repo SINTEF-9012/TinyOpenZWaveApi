@@ -23,8 +23,11 @@ using namespace OpenZWave;
 			virtual uint8 getComandClass();
 
 		public:
-			virtual ValueID* getValueId() {return value;};
 			static uint8 COMMAND_CLASS;
+			list<ValueCallback*> callbacksOnOff;
+
+		public:
+			virtual ValueID* getValueId() {return value;};
 
 			BinarySwitch* Init(TinyController* const controller, uint8 const _nodeId, uint8 const _instance, uint8 const _index) {return (BinarySwitch*)Device::Init(controller, _nodeId, _instance, _index);};
 			BinarySwitch();
@@ -34,6 +37,9 @@ using namespace OpenZWave;
 			//commands
 			void turnOn();
 			void turnOff();
+
+			//commands callback
+			static void callback_turnOnOff(Device* _context, Notification const* _data);
 	};
 
 #endif /* BINARYSWITCH_H_ */

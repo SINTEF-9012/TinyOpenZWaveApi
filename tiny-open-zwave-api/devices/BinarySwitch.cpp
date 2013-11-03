@@ -33,7 +33,9 @@ void BinarySwitch::Destroy() {
 // <BinarySwitch::BinarySwitch>
 // Constructor
 //-----------------------------------------------------------------------------
-BinarySwitch::BinarySwitch() {}
+BinarySwitch::BinarySwitch() {
+	callbacksOnOff.push_back(new ValueCallback(BinarySwitch::callback_turnOnOff, this));
+}
 
 //-----------------------------------------------------------------------------
 // <BinarySwitch::BinarySwitch>
@@ -50,7 +52,7 @@ uint8 BinarySwitch::getComandClass(){
 void BinarySwitch::turnOn(){
 	Log::Write(LogLevel_Info, "BinarySwitch::turnOn(): turning on...");
 	if(this->node != NULL){
-		DomoZWave_SetValue((int) controller->currentControllerHomeId, (int) this->node->m_nodeId, this->instance, 255);
+		DomoZWave_SetValue((int) controller->currentControllerHomeId, (int) this->node->m_nodeId, this->instance, 255, callbacksOnOff);
 	}else{
 		Log::Write(LogLevel_Info, "BinarySwitch::turnOn(): node is NULL, ignoring...");
 	};
@@ -59,10 +61,14 @@ void BinarySwitch::turnOn(){
 void BinarySwitch::turnOff(){
 	Log::Write(LogLevel_Info, "BinarySwitch::turnOff(): turning off...");
 	if(this->node != NULL){
-		DomoZWave_SetValue((int) controller->currentControllerHomeId, (int) this->node->m_nodeId, this->instance, 0);
+		DomoZWave_SetValue((int) controller->currentControllerHomeId, (int) this->node->m_nodeId, this->instance, 0, callbacksOnOff);
 	}else{
 		Log::Write(LogLevel_Info, "BinarySwitch::turnOff(): node is NULL, ignoring...");
 	};
+}
+
+void BinarySwitch::callback_turnOnOff(Device* _context, Notification const* _data){
+	Log::Write(LogLevel_Info, "BinarySwitch::callback_turnOnOff(): ...");
 }
 
 

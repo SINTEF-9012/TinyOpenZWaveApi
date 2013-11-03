@@ -66,6 +66,8 @@ using namespace OpenZWave;
 	// list and the only suggestion I got was to store them off when the values are
 	// added. So we store a list of structs to hold this mapping.
 
+	struct ValueCallback;
+
 	typedef struct
 	{
 		uint32		m_homeId;
@@ -78,6 +80,7 @@ using namespace OpenZWave;
 		std::map<int,string> instancecommandclass;
 		std::map<int,string> instanceLabel;
 		list<ValueID>	m_values;
+		std::map<ValueID, list<ValueCallback*> > m_value_callback;
 	} NodeInfo;
 
 	class ZNode {

@@ -292,7 +292,7 @@ int main(int argc, char* argv[]){
 			Log::Write(LogLevel_Info, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! init");
 			OpenZWaveFacade::Get()->setCurrentController(port);
 			s = new BinarySwitch();
-			s = s->BinarySwitch::Init(TinyController::Get(),4,1,0);
+			s = s->BinarySwitch::Init(OpenZWaveFacade::Get(),4,1,0);
 		}
 		if(ch == 'g'){
 			Log::Write(LogLevel_Info, "BinarySwitch: the poll interval is  %d ...", Manager::Get()->GetPollInterval());

@@ -103,6 +103,8 @@ void ZNode::changeValue(Notification const* _data){
 			ctrl->m_lastWriteXML = time(NULL);
 		}
 	}
+
+	//DomoZWave_callValueCallback(_data);
 }
 
 void ZNode::controllerReady(Notification const* _data){

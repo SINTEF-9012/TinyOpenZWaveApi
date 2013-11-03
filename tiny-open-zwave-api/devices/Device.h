@@ -35,5 +35,19 @@ using namespace OpenZWave;
 			virtual ~Device();
 	};
 
+	//callback type of value change
+
+	typedef void (*pvfCallback)(Device *_device, Notification const* _data);
+
+	struct ValueCallback {
+		pvfCallback fn_callback;
+		Device *fn_device;
+
+		ValueCallback(pvfCallback _callback, Device *_device):
+			fn_callback(_callback),
+			fn_device(_device){
+		};
+	};
+
 
 #endif /* DEVICE_H_ */

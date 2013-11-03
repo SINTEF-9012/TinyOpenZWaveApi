@@ -220,6 +220,31 @@ ostream &OZW_datetime(ostream &stream)
 	return stream;
 }
 
+//------------------------------------------------------------------------------------
+// Check Node Callbacks
+//------------------------------------------------------------------------------------
+void testValueCallbacks(NodeInfo *nodeInfo, ValueID valueID, list<ValueCallback*> callbacks){
+	if(nodeInfo->m_value_callback.find(valueID) != nodeInfo->m_value_callback.end()){
+		for(list<ValueCallback*>::iterator it = callbacks.begin(); it != callbacks.end(); ++it){
+			bool found = false;
+			list<ValueCallback*> c_list = nodeInfo->m_value_callback[valueID];
+			for(list<ValueCallback*>::iterator iti = c_list.begin(); iti != c_list.end(); ++iti){
+				if(*iti == *it){
+					found = true;
+					break;
+				}
+			}
+			if(found == false){
+				nodeInfo->m_value_callback[valueID].push_back((*it));
+				DomoZWave_WriteLog(LogLevel_Debug, true, "testValueCallbacks : Appending callbacks for a value");
+			}
+		}
+	}else{
+		nodeInfo->m_value_callback[valueID] = callbacks;
+		DomoZWave_WriteLog(LogLevel_Debug, true, "testValueCallbacks : Adding callbacks for a value");
+	}
+}
+
 //-----------------------------------------------------------------------------
 // <WriteLog>
 //
@@ -2122,7 +2147,7 @@ bool DomoZWave_RequestNodeMeter( int32 home, int32 node )
 // <other>=Dim & COMMAND_CLASS_SWITCH_MULTILEVEL 
 //-----------------------------------------------------------------------------
 
-bool DomoZWave_SetValue( int32 home, int32 node, int32 instance, int32 value )
+bool DomoZWave_SetValue( int32 home, int32 node, int32 instance, int32 value, list<ValueCallback*> callbacks)
 {
 	bool bool_value;
 	int int_value;
@@ -2181,8 +2206,9 @@ bool DomoZWave_SetValue( int32 home, int32 node, int32 instance, int32 value )
 
 				if ( inst == instance )
 				{
-			        	if ( ValueID::ValueType_Bool == (*it).GetType() )
+			        if ( ValueID::ValueType_Bool == (*it).GetType() )
 					{
+			        	testValueCallbacks(nodeInfo, *it, callbacks);
 						bool_value = (bool)value;
 						response = Manager::Get()->SetValue( *it, bool_value );
 						cmdfound = true;
@@ -4107,4 +4133,19 @@ list<NodeInfo*>& DomoZWave_GetGNodes(){
 
 list<m_structCtrl*>& DomoZWave_GetGControllers(){
 	return g_allControllers;
+}
+
+void DomoZWave_callValueCallback(Notification const* notification){
+	/*NodeInfo* nodeInfo = DomoZWave_GetNodeInfo(notification);
+	if(nodeInfo != NULL){
+		ValueID valueId = notification->GetValueID();
+		if(nodeInfo->m_value_callback.find(valueId) != nodeInfo->m_value_callback.end()){
+			for(list<ValueCallback*>::iterator it = nodeInfo->m_value_callback[valueId].begin(); it != nodeInfo->m_value_callback[valueId].end(); ++it){
+				DomoZWave_WriteLog(LogLevel_Debug, true, "DomoZWave_callValueCallback() : calling callback");
+				(*it)->fn_callback((*it)->fn_device, notification);
+			}
+		}
+	}else{
+		DomoZWave_WriteLog(LogLevel_Debug, true, "DomoZWave_callValueCallback() : can not find node");
+	}*/
 }
