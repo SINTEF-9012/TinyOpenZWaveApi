@@ -190,7 +190,8 @@ bool DomoZWave_RequestNodeNeighborUpdate( int32 home, int32 node, bool addqueue 
 bool DomoZWave_RefreshNodeInfo(int32 home, int32 node );
 bool DomoZWave_RequestNodeVersion( int32 home, int32 node );
 bool DomoZWave_RequestNodeMeter( int32 home, int32 node );
-bool DomoZWave_SetValue( int32 home, int32 node, int32 instance, int32 value, list<ValueCallback*> callbacks );
+bool DomoZWave_SetValue( int32 home, int32 node, int32 instance, int32 value, list<ValueCallback*> callbacks);
+bool DomoZWave_SetValue( int32 home, int32 node, int32 instance, int32 value);
 
 // Request or update node configuration
 bool DomoZWave_SetConfigParam( int32 home, int32 node, int32 param, int32 value, int32 size );
@@ -284,4 +285,6 @@ void DomoZWave_RPC_DriverReady( int homeID, int nodeID );
 void DomoZWave_WriteLog(LogLevel _log, bool	_newline, char const* _format, ...);
 
 void DomoZWave_callValueCallback(Notification const* notification);
+
+ValueID DomoZWave_GetValueID(uint32 home, uint8 command_class, uint8 node, uint8 instance, uint8 index);
 

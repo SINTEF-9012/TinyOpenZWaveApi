@@ -47,11 +47,12 @@ Api.o : Api.h ./libs/Utility.h ./libs/DomoZWave.h ./devices/TinyController.h ./d
 	$(OPENZWAVE)/cpp/src/Node.h $(OPENZWAVE)/cpp/src/Group.h \
 	$(OPENZWAVE)/cpp/src/Notification.h $(OPENZWAVE)/cpp/src/platform/Log.h \
 
-./libs/Utility.o : ./libs/Utility.h ./devices/Device.h ./devices/TinyController.h $(OPENZWAVE)/cpp/src/Options.h $(OPENZWAVE)/cpp/src/Manager.h \
+./libs/Utility.o : ./libs/Utility.h $(OPENZWAVE)/cpp/src/Options.h $(OPENZWAVE)/cpp/src/Manager.h \
 	$(OPENZWAVE)/cpp/src/Node.h $(OPENZWAVE)/cpp/src/Group.h \
 	$(OPENZWAVE)/cpp/src/Notification.h $(OPENZWAVE)/cpp/src/platform/Log.h \
 	
-./libs/DomoZWave.o : ./libs/DomoZWave.h ./libs/Utility.h $(OPENZWAVE)/cpp/src/Options.h $(OPENZWAVE)/cpp/src/Manager.h \
+./libs/DomoZWave.o : ./libs/DomoZWave.h ./libs/Utility.h ./devices/Device.h \
+	$(OPENZWAVE)/cpp/src/Options.h $(OPENZWAVE)/cpp/src/Manager.h \
 	$(OPENZWAVE)/cpp/src/Node.h $(OPENZWAVE)/cpp/src/Group.h \
 	$(OPENZWAVE)/cpp/src/Notification.h $(OPENZWAVE)/cpp/src/platform/Log.h \
 	
@@ -65,10 +66,12 @@ Api.o : Api.h ./libs/Utility.h ./libs/DomoZWave.h ./devices/TinyController.h ./d
 
 ./devices/BinarySwitch.o : ./devices/BinarySwitch.h ./devices/TinyController.h ./libs/Utility.h ./libs/DomoZWave.h \
 	$(OPENZWAVE)/cpp/src/Options.h $(OPENZWAVE)/cpp/src/Manager.h $(OPENZWAVE)/cpp/src/Node.h $(OPENZWAVE)/cpp/src/Group.h \
-	$(OPENZWAVE)/cpp/src/Notification.h $(OPENZWAVE)/cpp/src/platform/Log.h \
+	$(OPENZWAVE)/cpp/src/Notification.h $(OPENZWAVE)/cpp/src/platform/Log.h ./thingMLcallbacks/TMLcallback.h \
+	
+./thingMLcallbacks/TMLcallback.o : ./thingMLcallbacks/TMLcallback.h
 
-api : Api.o ./libs/Utility.o ./libs/DomoZWave.o ./devices/TinyController.o ./devices/Device.o ./devices/BinarySwitch.o
-	$(LD) -o $@ $(LDFLAGS) Api.o  ./libs/Utility.o ./libs/DomoZWave.o ./devices/TinyController.o ./devices/Device.o ./devices/BinarySwitch.o $(LIBS)
+api : Api.o ./libs/Utility.o ./libs/DomoZWave.o ./devices/TinyController.o ./devices/Device.o ./devices/BinarySwitch.o ./thingMLcallbacks/TMLcallback.o
+	$(LD) -o $@ $(LDFLAGS) Api.o  ./libs/Utility.o ./libs/DomoZWave.o ./devices/TinyController.o ./devices/Device.o ./devices/BinarySwitch.o ./thingMLcallbacks/TMLcallback.o $(LIBS)
 	
 clean:
-	rm -rf api *.o ./libs/*.o ./devices/*.o *.xml *.txt *.log
+	rm -rf api *.o ./libs/*.o ./devices/*.o ./thingMLcallbacks/*.o *.xml *.txt *.log

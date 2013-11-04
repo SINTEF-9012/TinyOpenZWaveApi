@@ -51,6 +51,7 @@
 #include "ValueString.h"
 
 #include "Utility.h"
+#include "../devices/Device.h"
 
 // wrapper
 #include "DomoZWave.h"
@@ -223,7 +224,7 @@ ostream &OZW_datetime(ostream &stream)
 //------------------------------------------------------------------------------------
 // Check Node Callbacks
 //------------------------------------------------------------------------------------
-void testValueCallbacks(NodeInfo *nodeInfo, ValueID valueID, list<ValueCallback*> callbacks){
+void TestValueIDCallback(NodeInfo *nodeInfo, ValueID valueID, list<ValueCallback*> callbacks){
 	if(nodeInfo->m_value_callback.find(valueID) != nodeInfo->m_value_callback.end()){
 		for(list<ValueCallback*>::iterator it = callbacks.begin(); it != callbacks.end(); ++it){
 			bool found = false;
@@ -236,12 +237,20 @@ void testValueCallbacks(NodeInfo *nodeInfo, ValueID valueID, list<ValueCallback*
 			}
 			if(found == false){
 				nodeInfo->m_value_callback[valueID].push_back((*it));
-				DomoZWave_WriteLog(LogLevel_Debug, true, "testValueCallbacks : Appending callbacks for a value");
+				DomoZWave_WriteLog(LogLevel_Debug, true, "TestValueIDCallback() : Appending the callback for a value : "
+						"Home 0x%08x Node %d Genre %s Class %s Instance %d Index %d Type %s",
+						valueID.GetHomeId(), valueID.GetNodeId(),
+						genreToStr(valueID.GetGenre()), cclassToStr(valueID.GetCommandClassId()), valueID.GetInstance(),
+						valueID.GetIndex(), typeToStr(valueID.GetType()));
 			}
 		}
 	}else{
 		nodeInfo->m_value_callback[valueID] = callbacks;
-		DomoZWave_WriteLog(LogLevel_Debug, true, "testValueCallbacks : Adding callbacks for a value");
+		DomoZWave_WriteLog(LogLevel_Debug, true, "TestValueIDCallback() : Adding %d callbacks for a value :"
+				"Home 0x%08x Node %d Genre %s Class %s Instance %d Index %d Type %s",
+				callbacks.size(), valueID.GetHomeId(), valueID.GetNodeId(),
+				genreToStr(valueID.GetGenre()), cclassToStr(valueID.GetCommandClassId()), valueID.GetInstance(),
+				valueID.GetIndex(), typeToStr(valueID.GetType()));
 	}
 }
 
@@ -2140,12 +2149,39 @@ bool DomoZWave_RequestNodeMeter( int32 home, int32 node )
 	return response;
 }
 
+//------------------------------------------------------------------------------
+// Get value ID for a node
+//------------------------------------------------------------------------------
+
+ValueID DomoZWave_GetValueID(uint32 home, uint8 command_class, uint8 node, uint8 instance, uint8 index){
+	DummyValueID d_valueID;
+	if(DomoZWave_HomeIdPresent( home, "DomoZWave_GetValueID" ) == false) return *d_valueID.valueId;
+
+	if(NodeInfo* nodeInfo = DomoZWave_GetNodeInfo(home, node)) {
+		for (list<ValueID>::iterator it = nodeInfo->m_values.begin(); it != nodeInfo->m_values.end(); ++it){
+			uint8 id = (*it).GetCommandClassId();
+			uint8 inst = (*it).GetInstance();
+			uint8 ind = (*it).GetIndex();
+			if(command_class == id && inst == instance && index == ind){
+				return (*it);
+			}
+		}
+	}
+	return *d_valueID.valueId;
+}
+
 //-----------------------------------------------------------------------------
 // <DomoZWave_SetValue>
 // Set the On, Off or Dim xyz of a device and instance
 // 0=Off or 255=On - COMMAND_CLASS_SWITCH_BINARY
 // <other>=Dim & COMMAND_CLASS_SWITCH_MULTILEVEL 
+// callbacks - list of callbacks on a value change
 //-----------------------------------------------------------------------------
+
+bool DomoZWave_SetValue(int32 home, int32 node, int32 instance, int32 value){
+	list<ValueCallback*> callbacks;
+	return DomoZWave_SetValue(home, node, instance, value, callbacks);
+}
 
 bool DomoZWave_SetValue( int32 home, int32 node, int32 instance, int32 value, list<ValueCallback*> callbacks)
 {
@@ -2208,31 +2244,35 @@ bool DomoZWave_SetValue( int32 home, int32 node, int32 instance, int32 value, li
 				{
 			        if ( ValueID::ValueType_Bool == (*it).GetType() )
 					{
-			        	testValueCallbacks(nodeInfo, *it, callbacks);
+			        	TestValueIDCallback(nodeInfo, *it, callbacks);
 						bool_value = (bool)value;
 						response = Manager::Get()->SetValue( *it, bool_value );
 						cmdfound = true;
 					}
 					else if ( ValueID::ValueType_Byte == (*it).GetType() )
 					{
+						TestValueIDCallback(nodeInfo, *it, callbacks);
 						uint8_value = (uint8)value;
 						response = Manager::Get()->SetValue( *it, uint8_value );
 						cmdfound = true;
 					}
 					else if ( ValueID::ValueType_Short == (*it).GetType() )
 					{
+						TestValueIDCallback(nodeInfo, *it, callbacks);
 						uint16_value = (uint16)value;
 						response = Manager::Get()->SetValue( *it, uint16_value );
 						cmdfound = true;
 					}
 					else if ( ValueID::ValueType_Int == (*it).GetType() )
 					{
+						TestValueIDCallback(nodeInfo, *it, callbacks);
 						int_value = value;
 						response = Manager::Get()->SetValue( *it, int_value );
 						cmdfound = true;
 					}
 					else if ( ValueID::ValueType_List == (*it).GetType() )
 					{
+						TestValueIDCallback(nodeInfo, *it, callbacks);
 						response = Manager::Get()->SetValue( *it, value );
 						cmdfound = true;
 	       				}
@@ -4136,16 +4176,25 @@ list<m_structCtrl*>& DomoZWave_GetGControllers(){
 }
 
 void DomoZWave_callValueCallback(Notification const* notification){
-	/*NodeInfo* nodeInfo = DomoZWave_GetNodeInfo(notification);
-	if(nodeInfo != NULL){
+	NodeInfo* nodeInfo = DomoZWave_GetNodeInfo(notification);
+	if(nodeInfo != NULL && notification->GetNodeId() == nodeInfo->m_nodeId){
 		ValueID valueId = notification->GetValueID();
 		if(nodeInfo->m_value_callback.find(valueId) != nodeInfo->m_value_callback.end()){
 			for(list<ValueCallback*>::iterator it = nodeInfo->m_value_callback[valueId].begin(); it != nodeInfo->m_value_callback[valueId].end(); ++it){
-				DomoZWave_WriteLog(LogLevel_Debug, true, "DomoZWave_callValueCallback() : calling callback");
+				DomoZWave_WriteLog(LogLevel_Debug, true, "DomoZWave_callValueCallback() : calling callback for a value : "
+						"Home 0x%08x Node %d Genre %s Class %s Instance %d Index %d Type %s",
+						notification->GetHomeId(), nodeInfo->m_nodeId,
+						genreToStr(valueId.GetGenre()), cclassToStr(valueId.GetCommandClassId()), valueId.GetInstance(),
+						valueId.GetIndex(), typeToStr(valueId.GetType()));
 				(*it)->fn_callback((*it)->fn_device, notification);
 			}
 		}
 	}else{
-		DomoZWave_WriteLog(LogLevel_Debug, true, "DomoZWave_callValueCallback() : can not find node");
-	}*/
+		ValueID valueId = notification->GetValueID();
+		DomoZWave_WriteLog(LogLevel_Error, true, "DomoZWave_callValueCallback() : can not find a node for a value : "
+				"Home 0x%08x Node %d Genre %s Class %s Instance %d Index %d Type %s",
+				notification->GetHomeId(), nodeInfo->m_nodeId,
+				genreToStr(valueId.GetGenre()), cclassToStr(valueId.GetCommandClassId()), valueId.GetInstance(),
+				valueId.GetIndex(), typeToStr(valueId.GetType()));
+	}
 }

@@ -35,7 +35,9 @@ using namespace OpenZWave;
 			virtual ~Device();
 	};
 
-	//callback type of value change
+	//-------------------------------------------------------------------------
+	//Structures for a valueID callback
+	//-------------------------------------------------------------------------
 
 	typedef void (*pvfCallback)(Device *_device, Notification const* _data);
 

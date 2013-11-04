@@ -62,11 +62,15 @@ using namespace OpenZWave;
 		time_t		m_lastWriteXML;
 	} m_structCtrl;
 
+	//-------------------------------------------------------------------------
+	//the actual definition of ValueCallback is in Device.h
+	//-------------------------------------------------------------------------
+
+	struct ValueCallback;
+
 	// To enable polling we need a nodeId->ValueID mapping. I asked on the mailing
 	// list and the only suggestion I got was to store them off when the values are
 	// added. So we store a list of structs to hold this mapping.
-
-	struct ValueCallback;
 
 	typedef struct
 	{
@@ -103,6 +107,19 @@ using namespace OpenZWave;
 			static void messageComplete(Notification const* _data);
 			static void messageAwake(Notification const* _data);
 			static void messageAlive(Notification const* _data);
+	};
+
+	struct DummyValueID {
+		ValueID* valueId;
+		uint32 home_id;
+		uint8 node_id;
+		uint8 command_class;
+		uint8 instance;
+		uint8 index;
+
+		DummyValueID() : home_id(0), node_id(0), command_class(0), instance(0), index(0) {
+			valueId = new ValueID(home_id , node_id, ValueID::ValueGenre_Basic, command_class, instance, index ,ValueID::ValueType_Bool);
+		}
 	};
 
 	const char *genreToStr(ValueID::ValueGenre value);
