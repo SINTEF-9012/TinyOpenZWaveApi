@@ -35,9 +35,6 @@ namespace TinyOpenZWaveApi{
 					char const* domo_log, bool const enableLog,
 					bool const enableOZdebug, int polltime);
 			static TinyController* Get();
-
-			//remove this stab
-			static void ready();
 	};
 
 };

@@ -12,4 +12,6 @@ void ThingML_binary_switch_turned_on();
 void ThingML_binary_switch_turned_off();
 void ThingML_binary_switch_nochange();
 
+void ThingML_network_ready();
+
 #endif /* TMLCALLBACK_H_ */

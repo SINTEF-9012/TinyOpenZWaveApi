@@ -202,7 +202,6 @@ void OnNotification (Notification const* _notification, void* _context)
 		pthread_mutex_lock(&nlock);
 		ZNode::allNodeQueried(_notification);
 		pthread_mutex_unlock(&nlock);
-		OpenZWaveFacade::ready();
 		break;
 	  case Notification::Type_Notification:
 		switch (_notification->GetNotification()) {
@@ -326,10 +325,6 @@ int main(int argc, char* argv[]){
 		}
 	}
 	return 0;
-}
-
-void OpenZWaveFacade::ready(){
-	cout << "READY!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
 }
 
 TinyController* OpenZWaveFacade::Init(char const* config_name, char const* zw_dir,

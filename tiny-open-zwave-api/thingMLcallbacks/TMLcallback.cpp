@@ -20,5 +20,9 @@ void ThingML_binary_switch_nochange(){
 	//the the value is not actually changed, but reported as changed...
 }
 
+void ThingML_network_ready(){
+	//network ready callback, to let thingML now that we are ready to work
+}
+
 
 

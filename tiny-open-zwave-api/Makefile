@@ -47,7 +47,8 @@ Api.o : Api.h ./libs/Utility.h ./libs/DomoZWave.h ./devices/TinyController.h ./d
 	$(OPENZWAVE)/cpp/src/Node.h $(OPENZWAVE)/cpp/src/Group.h \
 	$(OPENZWAVE)/cpp/src/Notification.h $(OPENZWAVE)/cpp/src/platform/Log.h \
 
-./libs/Utility.o : ./libs/Utility.h $(OPENZWAVE)/cpp/src/Options.h $(OPENZWAVE)/cpp/src/Manager.h \
+./libs/Utility.o : ./libs/Utility.h ./thingMLcallbacks/TMLcallback.h \
+	$(OPENZWAVE)/cpp/src/Options.h $(OPENZWAVE)/cpp/src/Manager.h \
 	$(OPENZWAVE)/cpp/src/Node.h $(OPENZWAVE)/cpp/src/Group.h \
 	$(OPENZWAVE)/cpp/src/Notification.h $(OPENZWAVE)/cpp/src/platform/Log.h \
 	
