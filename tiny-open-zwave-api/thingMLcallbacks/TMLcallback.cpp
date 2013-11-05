@@ -15,5 +15,10 @@ void ThingML_binary_switch_turned_off(){
 	//thingML turnOff message here
 }
 
+void ThingML_binary_switch_nochange(){
+	//thingML nochange callback. For example, we set polling for a value,
+	//the the value is not actually changed, but reported as changed...
+}
+
 
 

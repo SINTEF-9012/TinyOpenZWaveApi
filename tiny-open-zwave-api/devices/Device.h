@@ -18,7 +18,7 @@ using namespace OpenZWave;
 
 	class Device
 	{
-		protected:
+		public:
 			uint8 nodeId;
 			uint8 instance;
 			uint8 index;

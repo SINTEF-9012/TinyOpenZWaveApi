@@ -299,11 +299,30 @@ int main(int argc, char* argv[]){
 		}
 		if(ch == 'e'){
 			Log::Write(LogLevel_Info, "BinarySwitch: enabling  poll");
-			//Manager::Get()->EnablePoll(s->getValueToPull()->getId(), 1);
+			ValueID valueId = DomoZWave_GetValueID(s->controller->currentControllerHomeId, s->getComandClass(), s->node->m_nodeId, s->instance, s->index);
+			Manager::Get()->EnablePoll(valueId, 1);
 		}
 		if(ch == 's'){
 			Log::Write(LogLevel_Info, "BinarySwitch: setting poll interval");
 			Manager::Get()->SetPollInterval(5000, false);
+		}
+		if(ch == 'q'){
+			ValueID valueId = DomoZWave_GetValueID(s->controller->currentControllerHomeId, s->getComandClass(), s->node->m_nodeId, s->instance, s->index);
+			DummyValueID dummy;
+			if(valueId != *dummy.valueId){
+				bool isTurnedOn;
+				bool result = Manager::Get()->GetValueAsBool(valueId, &isTurnedOn);
+				if(!result){
+					Log::Write(LogLevel_Error, "default value is not requested...");
+				}else{
+					Log::Write(LogLevel_Error, "the value is %i...", isTurnedOn);
+				}
+			}else{
+				Log::Write(LogLevel_Error, "can not find ValueID for"
+						"Home 0x%08x Node %d Class %s Instance %d Index %d",
+						s->controller->currentControllerHomeId, s->node->m_nodeId,
+						s->getComandClass(), s->instance, s->index);
+			}
 		}
 	}
 	return 0;

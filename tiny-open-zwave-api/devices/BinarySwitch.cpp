@@ -99,14 +99,19 @@ void BinarySwitch::callback_turnOnOff(Device* _context, Notification const* _dat
 				valueID.GetHomeId(), valueID.GetNodeId(), genreToStr(valueID.GetGenre()),
 				cclassToStr(valueID.GetCommandClassId()), valueID.GetInstance(),
 				valueID.GetIndex(), typeToStr(valueID.GetType()), result);
-		if(result){
-			Log::Write(LogLevel_Info, "BinarySwitch::callback_turnOnOff(): calling ThingML_binary_switch_turned_on()");
-			ThingML_binary_switch_turned_on();
+		if(bs->isTurnedOn != result){
+			if(result){
+				Log::Write(LogLevel_Info, "BinarySwitch::callback_turnOnOff(): calling ThingML_binary_switch_turned_on()");
+				ThingML_binary_switch_turned_on();
+			}else{
+				Log::Write(LogLevel_Info, "BinarySwitch::callback_turnOnOff(): calling ThingML_binary_switch_turned_off()");
+				ThingML_binary_switch_turned_off();
+			}
+			bs->isTurnedOn = result;
 		}else{
-			Log::Write(LogLevel_Info, "BinarySwitch::callback_turnOnOff(): calling ThingML_binary_switch_turned_off()");
-			ThingML_binary_switch_turned_off();
+			Log::Write(LogLevel_Info, "BinarySwitch::callback_turnOnOff(): calling ThingML_binary_switch_nochange()");
+			ThingML_binary_switch_nochange();
 		}
-		bs->isTurnedOn = result;
 	}else{
 		Log::Write(LogLevel_Error, "BinarySwitch::callback_turnOnOff(): there must be a error, value should be of the bool type..."
 				"Home 0x%08x Node %d Genre %s Class %s Instance %d Index %d Type %s",

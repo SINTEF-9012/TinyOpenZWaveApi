@@ -19,7 +19,7 @@ using namespace OpenZWave;
 
 	class BinarySwitch: public Device
 	{
-		protected:
+		public:
 			virtual uint8 getComandClass();
 
 		public:
