@@ -18,6 +18,7 @@
 #include "TinyController.h"
 #include "../libs/DomoZWave.h"
 #include "../libs/Utility.h"
+#include "../devices/Device.h"
 
 using namespace OpenZWave;
 
@@ -119,6 +120,9 @@ TinyController::TinyController(char const* config_name, char const* zw_dir,
 //-----------------------------------------------------------------------------
 TinyController::~TinyController() {
 	Log::Write(LogLevel_Info, "destroying TinyController object");
+	for(list<Device*>::iterator it = devices.begin(); it != devices.end(); ++it){
+		(*it)->Destroy();
+	}
 	DomoZWave_Destroy();
 	Manager::Get()->RemoveWatcher(TinyController::callback, NULL);
 	Manager::Get()->Destroy();

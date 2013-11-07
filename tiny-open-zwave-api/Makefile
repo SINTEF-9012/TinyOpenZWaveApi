@@ -58,7 +58,7 @@ Api.o : Api.h ./libs/Utility.h ./libs/DomoZWave.h ./devices/TinyController.h ./d
 	$(OPENZWAVE)/cpp/src/Notification.h $(OPENZWAVE)/cpp/src/platform/Log.h \
 	
 ./devices/TinyController.o : ./devices/TinyController.h ./libs/Utility.h ./libs/DomoZWave.h \
-	$(OPENZWAVE)/cpp/src/Options.h $(OPENZWAVE)/cpp/src/Manager.h \
+	./devices/Device.h $(OPENZWAVE)/cpp/src/Options.h $(OPENZWAVE)/cpp/src/Manager.h \
 	$(OPENZWAVE)/cpp/src/Node.h $(OPENZWAVE)/cpp/src/Group.h \
 	$(OPENZWAVE)/cpp/src/Notification.h $(OPENZWAVE)/cpp/src/platform/Log.h \
 	

@@ -32,6 +32,7 @@ using namespace OpenZWave;
 			static uint8 COMMAND_CLASS;
 			Device* Init(TinyController* const controller, uint8 const _nodeId, uint8 const _instance, uint8 const _index);
 
+			virtual void Destroy();
 			virtual ~Device();
 	};
 

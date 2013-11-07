@@ -261,7 +261,6 @@ void exit_main_handler(int s){
 	Log::Write(LogLevel_Info, "Caught signal %d",s);
 	Log::Write(LogLevel_Info, "We have registered %d nodes", ZNode::getNodeCount());
 
-
 	TinyController* api = TinyController::Get();
 	api->Destroy();
     exit(1);

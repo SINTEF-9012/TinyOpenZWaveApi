@@ -20,19 +20,18 @@ using namespace OpenZWave;
 	class BinarySwitch: public Device
 	{
 		public:
-			virtual uint8 getComandClass();
-
-		public:
 			static uint8 COMMAND_CLASS;
 			list<ValueCallback*> callbacksOnOff;
 			bool isTurnedOn;
 
 		public:
+			virtual uint8 getComandClass();
 			virtual ValueID* getValueId() {return value;};
 
 			BinarySwitch* Init(TinyController* const controller, uint8 const _nodeId, uint8 const _instance, uint8 const _index);
+
 			BinarySwitch();
-			void Destroy();
+			virtual void Destroy();
 			virtual ~BinarySwitch();
 
 			//commands

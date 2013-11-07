@@ -14,7 +14,10 @@
 #include "Driver.h"
 #include "ValueID.h"
 
+
 using namespace OpenZWave;
+
+	class Device;
 
 	class TinyController
 	{
@@ -30,6 +33,7 @@ using namespace OpenZWave;
 			static uint32 currentControllerHomeId;
 			static uint8 currentControllerNodeId;
 			static Manager::pfnOnNotification_t callback;
+			list<Device*> devices;
 
 		public:
 			static TinyController* Init(Manager::pfnOnNotification_t callback,

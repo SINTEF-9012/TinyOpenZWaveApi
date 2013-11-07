@@ -24,7 +24,7 @@ using namespace OpenZWave;
 uint8 BinarySwitch::COMMAND_CLASS = COMMAND_CLASS_SWITCH_BINARY;
 //-----------------------------------------------------------------------------
 //	<BinarySwitch::Destroy>
-//	Static method to destroy the singleton.
+//	method to destroy
 //-----------------------------------------------------------------------------
 void BinarySwitch::Destroy() {
 	delete this;
@@ -62,7 +62,7 @@ BinarySwitch* BinarySwitch::Init(TinyController* const controller, uint8 const _
 // Destructor
 //-----------------------------------------------------------------------------
 BinarySwitch::~BinarySwitch() {
-	BinarySwitch::Destroy();
+	Log::Write(LogLevel_Info, "BinarySwitch::~BinarySwitch(): 0x%08x", this);
 }
 
 uint8 BinarySwitch::getComandClass(){

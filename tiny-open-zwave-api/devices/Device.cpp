@@ -36,6 +36,7 @@ Device* Device::Init(TinyController* const controller, uint8 const _nodeId, uint
 	if(this->node == NULL){
 		Log::Write(LogLevel_Info, "Device::Init(): can not find node with id %d", this->nodeId);
 	}
+	controller->devices.push_back(this);
 	return this;
 }
 
@@ -43,6 +44,10 @@ uint8 Device::getComandClass(){
 	return COMMAND_CLASS;
 }
 
-Device::~Device() {
+void Device::Destroy(){
 	delete this;
+}
+
+Device::~Device(){
+	Log::Write(LogLevel_Info, "Device::~Device(): 0x%08x", this);
 }
