@@ -22,6 +22,7 @@ CFLAGS	:= -c $(DEBUG_CFLAGS)
 LDFLAGS	:= $(DEBUG_LDFLAGS)
 
 OPENZWAVE := ../open-zwave
+TINYOPENZWAVE := .
 
 INCLUDES := -I $(OPENZWAVE)/cpp/src -I $(OPENZWAVE)/cpp/src/command_classes/ \
 	-I $(OPENZWAVE)/cpp/src/value_classes/ -I $(OPENZWAVE)/cpp/src/platform/ \
@@ -42,37 +43,46 @@ all : api
 %.o : %.c
 	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $<
 
-Api.o : Api.h ./libs/Utility.h ./libs/DomoZWave.h ./devices/TinyController.h ./devices/Device.h \
-	./devices/BinarySwitch.h $(OPENZWAVE)/cpp/src/Options.h $(OPENZWAVE)/cpp/src/Manager.h \
+Api.o : $(TINYOPENZWAVE)/Api.h $(TINYOPENZWAVE)/libs/Utility.h $(TINYOPENZWAVE)/libs/DomoZWave.h \
+	$(TINYOPENZWAVE)/devices/TinyController.h $(TINYOPENZWAVE)/devices/Device.h \
+	$(TINYOPENZWAVE)/devices/BinarySwitch.h $(OPENZWAVE)/cpp/src/Options.h $(OPENZWAVE)/cpp/src/Manager.h \
 	$(OPENZWAVE)/cpp/src/Node.h $(OPENZWAVE)/cpp/src/Group.h \
 	$(OPENZWAVE)/cpp/src/Notification.h $(OPENZWAVE)/cpp/src/platform/Log.h \
 
-./libs/Utility.o : ./libs/Utility.h ./thingMLcallbacks/TMLcallback.h \
+$(TINYOPENZWAVE)/libs/Utility.o : $(TINYOPENZWAVE)/libs/Utility.h \
+	$(TINYOPENZWAVE)/thingMLcallbacks/TMLcallback.h \
 	$(OPENZWAVE)/cpp/src/Options.h $(OPENZWAVE)/cpp/src/Manager.h \
 	$(OPENZWAVE)/cpp/src/Node.h $(OPENZWAVE)/cpp/src/Group.h \
 	$(OPENZWAVE)/cpp/src/Notification.h $(OPENZWAVE)/cpp/src/platform/Log.h \
 	
-./libs/DomoZWave.o : ./libs/DomoZWave.h ./libs/Utility.h ./devices/Device.h \
+$(TINYOPENZWAVE)/libs/DomoZWave.o : $(TINYOPENZWAVE)/libs/DomoZWave.h \
+	$(TINYOPENZWAVE)/libs/Utility.h $(TINYOPENZWAVE)/devices/Device.h \
 	$(OPENZWAVE)/cpp/src/Options.h $(OPENZWAVE)/cpp/src/Manager.h \
 	$(OPENZWAVE)/cpp/src/Node.h $(OPENZWAVE)/cpp/src/Group.h \
 	$(OPENZWAVE)/cpp/src/Notification.h $(OPENZWAVE)/cpp/src/platform/Log.h \
 	
-./devices/TinyController.o : ./devices/TinyController.h ./libs/Utility.h ./libs/DomoZWave.h \
-	./devices/Device.h $(OPENZWAVE)/cpp/src/Options.h $(OPENZWAVE)/cpp/src/Manager.h \
+$(TINYOPENZWAVE)/devices/TinyController.o : $(TINYOPENZWAVE)/devices/TinyController.h \
+	$(TINYOPENZWAVE)/libs/Utility.h $(TINYOPENZWAVE)/libs/DomoZWave.h \
+	$(TINYOPENZWAVE)/devices/Device.h $(OPENZWAVE)/cpp/src/Options.h $(OPENZWAVE)/cpp/src/Manager.h \
 	$(OPENZWAVE)/cpp/src/Node.h $(OPENZWAVE)/cpp/src/Group.h \
 	$(OPENZWAVE)/cpp/src/Notification.h $(OPENZWAVE)/cpp/src/platform/Log.h \
 	
-./devices/Device.o : ./devices/Device.h ./devices/TinyController.h ./libs/Utility.h ./libs/DomoZWave.h \
+$(TINYOPENZWAVE)/devices/Device.o : $(TINYOPENZWAVE)/devices/Device.h \
+	$(TINYOPENZWAVE)/devices/TinyController.h $(TINYOPENZWAVE)/libs/Utility.h $(TINYOPENZWAVE)/libs/DomoZWave.h \
 	$(OPENZWAVE)/cpp/src/value_classes/ValueID.h $(OPENZWAVE)/cpp/src/Node.h $(OPENZWAVE)/cpp/src/platform/Log.h \
 
-./devices/BinarySwitch.o : ./devices/BinarySwitch.h ./devices/TinyController.h ./libs/Utility.h ./libs/DomoZWave.h \
-	$(OPENZWAVE)/cpp/src/Options.h $(OPENZWAVE)/cpp/src/Manager.h $(OPENZWAVE)/cpp/src/Node.h $(OPENZWAVE)/cpp/src/Group.h \
-	$(OPENZWAVE)/cpp/src/Notification.h $(OPENZWAVE)/cpp/src/platform/Log.h ./thingMLcallbacks/TMLcallback.h \
+$(TINYOPENZWAVE)/devices/BinarySwitch.o : $(TINYOPENZWAVE)/devices/BinarySwitch.h $(TINYOPENZWAVE)/devices/TinyController.h \
+	$(TINYOPENZWAVE)/libs/Utility.h $(TINYOPENZWAVE)/libs/DomoZWave.h $(OPENZWAVE)/cpp/src/Options.h $(OPENZWAVE)/cpp/src/Manager.h \
+	$(OPENZWAVE)/cpp/src/Node.h $(OPENZWAVE)/cpp/src/Group.h $(OPENZWAVE)/cpp/src/Notification.h $(OPENZWAVE)/cpp/src/platform/Log.h \
+	$(TINYOPENZWAVE)/thingMLcallbacks/TMLcallback.h \
 	
-./thingMLcallbacks/TMLcallback.o : ./thingMLcallbacks/TMLcallback.h
+$(TINYOPENZWAVE)/thingMLcallbacks/TMLcallback.o : $(TINYOPENZWAVE)/thingMLcallbacks/TMLcallback.h
 
-api : Api.o ./libs/Utility.o ./libs/DomoZWave.o ./devices/TinyController.o ./devices/Device.o ./devices/BinarySwitch.o ./thingMLcallbacks/TMLcallback.o
-	$(LD) -o $@ $(LDFLAGS) Api.o  ./libs/Utility.o ./libs/DomoZWave.o ./devices/TinyController.o ./devices/Device.o ./devices/BinarySwitch.o ./thingMLcallbacks/TMLcallback.o $(LIBS)
+api : Api.o $(TINYOPENZWAVE)/libs/Utility.o $(TINYOPENZWAVE)/libs/DomoZWave.o $(TINYOPENZWAVE)/devices/TinyController.o \
+	$(TINYOPENZWAVE)/devices/Device.o $(TINYOPENZWAVE)/devices/BinarySwitch.o $(TINYOPENZWAVE)/thingMLcallbacks/TMLcallback.o
+		$(LD) -o $@ $(LDFLAGS) $(TINYOPENZWAVE)/Api.o  $(TINYOPENZWAVE)/libs/Utility.o $(TINYOPENZWAVE)/libs/DomoZWave.o \
+			$(TINYOPENZWAVE)/devices/TinyController.o $(TINYOPENZWAVE)/devices/Device.o $(TINYOPENZWAVE)/devices/BinarySwitch.o \
+			$(TINYOPENZWAVE)/thingMLcallbacks/TMLcallback.o $(LIBS)
 	
 clean:
-	rm -rf api *.o ./libs/*.o ./devices/*.o ./thingMLcallbacks/*.o *.xml *.txt *.log
+	rm -rf api *.o $(TINYOPENZWAVE)/libs/*.o $(TINYOPENZWAVE)/devices/*.o $(TINYOPENZWAVE)/thingMLcallbacks/*.o *.xml *.txt *.log

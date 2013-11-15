@@ -267,10 +267,6 @@ void exit_main_handler(int s){
 }
 
 int main(int argc, char* argv[]){
-
-	OpenZWaveFacade::Init(config, zwdir, domo_log, enableLog, enableZWLog, polltime);
-	OpenZWaveFacade::Get()->AddController(port);
-
 	struct sigaction sigIntHandler;
 	sigIntHandler.sa_handler = exit_main_handler;
 	sigemptyset(&sigIntHandler.sa_mask);
@@ -286,11 +282,15 @@ int main(int argc, char* argv[]){
 		if(ch == 'f'){
 			s->turnOff();
 		}
+		if(ch == 'k'){
+			OpenZWaveFacade::Init(config, zwdir, domo_log, enableLog, enableZWLog, polltime);
+			OpenZWaveFacade::Get()->AddController(port);
+		}
 		if(ch == 'i'){
 			Log::Write(LogLevel_Info, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! init");
 			OpenZWaveFacade::Get()->setCurrentController(port);
 			s = new BinarySwitch();
-			s = s->BinarySwitch::Init(OpenZWaveFacade::Get(),4,1,0);
+			s = s->BinarySwitch::Init(OpenZWaveFacade::Get(),5,1,0);
 		}
 		if(ch == 'g'){
 			Log::Write(LogLevel_Info, "BinarySwitch: the poll interval is  %d ...", Manager::Get()->GetPollInterval());
