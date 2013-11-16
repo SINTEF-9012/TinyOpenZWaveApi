@@ -14,18 +14,9 @@
 #include <netinet/in.h>
 
 #include "tiny-open-zwave-api/Api.h"
-#include "tiny-open-zwave-api/libs/Utility.h"
-#include "tiny-open-zwave-api/libs/DomoZWave.h"
-#include "tiny-open-zwave-api/devices/TinyController.h"
-#include "tiny-open-zwave-api/devices/Device.h"
-#include "tiny-open-zwave-api/devices/BinarySwitch.h"
 
-#include "Options.h"
-#include "Manager.h"
-#include "Node.h"
-#include "Group.h"
-#include "Notification.h"
-#include "Log.h"
+#include "tiny-open-zwave-api/devices/BinarySwitch.h"
+#include "tiny-open-zwave-api/libs/DomoZWave.h"
 
 
 using namespace TinyOpenZWaveApi;

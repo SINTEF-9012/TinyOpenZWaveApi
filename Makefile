@@ -43,9 +43,9 @@ all : run
 %.o : %.c
 	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $<
 
-$(TINYOPENZWAVE)/Api.o : $(TINYOPENZWAVE)/Api.h $(TINYOPENZWAVE)/libs/Utility.h \
-	$(TINYOPENZWAVE)/devices/TinyController.h \
-	$(OPENZWAVE)/cpp/src/Options.h $(OPENZWAVE)/cpp/src/Manager.h \
+$(TINYOPENZWAVE)/Api.o : $(TINYOPENZWAVE)/Api.h $(TINYOPENZWAVE)/libs/Utility.h $(TINYOPENZWAVE)/libs/DomoZWave.h \
+	$(TINYOPENZWAVE)/devices/TinyController.h $(TINYOPENZWAVE)/devices/Device.h \
+	$(TINYOPENZWAVE)/devices/BinarySwitch.h $(OPENZWAVE)/cpp/src/Options.h $(OPENZWAVE)/cpp/src/Manager.h \
 	$(OPENZWAVE)/cpp/src/Node.h $(OPENZWAVE)/cpp/src/Group.h \
 	$(OPENZWAVE)/cpp/src/Notification.h $(OPENZWAVE)/cpp/src/platform/Log.h \
 
