@@ -23,12 +23,12 @@ using namespace TinyOpenZWaveApi;
 
 BinarySwitch* s;
 const char* port = "/dev/ttyUSB0";
-char const* config = "./tiny-open-zwave-api/config/";
-char const* zwdir = "";
-char const* domo_log = "./DomoZWave_Log";
-bool const enableLog = true;
-bool const enableZWLog = false;
-int const polltime = 0;
+const char* config = "./tiny-open-zwave-api/config/";
+const char* zwdir = "";
+const char* domo_log = "./DomoZWave_Log";
+const bool enableLog = true;
+const bool enableZWLog = false;
+const int polltime = 0;
 
 
 void exit_main_handler(int s){

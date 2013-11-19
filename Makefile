@@ -38,10 +38,10 @@ LIBS := $(LIBZWAVE) $(GNUTLS) $(LIBMICROHTTPD) -pthread $(LIBUSB)
 all : run
 
 %.o : %.cpp
-	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $<
+	$(CXX) $(CFLAGS) $(INCLUDES) -o $@ $<
 
 %.o : %.c
-	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $<
+	$(CXX) $(CFLAGS) $(INCLUDES) -o $@ $<
 
 $(TINYOPENZWAVE)/Api.o : $(TINYOPENZWAVE)/Api.h $(TINYOPENZWAVE)/libs/Utility.h $(TINYOPENZWAVE)/libs/DomoZWave.h \
 	$(TINYOPENZWAVE)/devices/TinyController.h $(TINYOPENZWAVE)/devices/Device.h \
