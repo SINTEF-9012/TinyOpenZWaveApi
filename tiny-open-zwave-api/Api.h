@@ -30,7 +30,7 @@ namespace TinyOpenZWaveApi{
 		public:
 			static TinyController* Init(char const* config_name, char const* zw_dir,
 					char const* domo_log, bool const enableLog,
-					bool const enableOZdebug, int polltime);
+					bool const enableOZdebug, int polltime, ThingMLCallback* callback);
 			static TinyController* Get();
 	};
 

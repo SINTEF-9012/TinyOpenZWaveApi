@@ -16,7 +16,6 @@
 #include "../libs/Utility.h"
 #include "../libs/DomoZWave.h"
 #include "BinarySwitch.h"
-#include "../thingMLcallbacks/TMLcallback.h"
 
 using namespace OpenZWave;
 
@@ -34,9 +33,20 @@ void BinarySwitch::Destroy() {
 // <BinarySwitch::BinarySwitch>
 // Constructor
 //-----------------------------------------------------------------------------
-BinarySwitch::BinarySwitch() {
-	callbacksOnOff.push_back(new ValueCallback(BinarySwitch::callback_turnOnOff, this));
+BinarySwitch::BinarySwitch(ThingMLCallback* turnedOnCallback, ThingMLCallback* turnedOffCallback, ThingMLCallback* noChangeCallback) {
 	isTurnedOn = false;
+	callbacksOnOff.push_back(new ValueCallback(BinarySwitch::callback_turnOnOff, this));
+	this->turnedOnCallback = turnedOnCallback;
+	this->turnedOffCallback = turnedOffCallback;
+	this->noChangeCallback = noChangeCallback;
+}
+
+BinarySwitch::BinarySwitch(){
+	isTurnedOn = false;
+	callbacksOnOff.push_back(new ValueCallback(BinarySwitch::callback_turnOnOff, this));
+	this->turnedOnCallback = NULL;
+	this->turnedOffCallback = NULL;
+	this->noChangeCallback = NULL;
 }
 
 BinarySwitch* BinarySwitch::Init(TinyController* const controller, uint8 const _nodeId, uint8 const _instance, uint8 const _index){
@@ -101,16 +111,22 @@ void BinarySwitch::callback_turnOnOff(Device* _context, Notification const* _dat
 				valueID.GetIndex(), typeToStr(valueID.GetType()), result);
 		if(bs->isTurnedOn != result){
 			if(result){
-				Log::Write(LogLevel_Info, "BinarySwitch::callback_turnOnOff(): calling ThingML_binary_switch_turned_on()");
-				ThingML_binary_switch_turned_on();
+				if(bs->turnedOnCallback != NULL){
+					Log::Write(LogLevel_Info, "BinarySwitch::callback_turnOnOff(): calling ThingML_binary_switch_turned_on()");
+					bs->turnedOnCallback->fn_callback(bs->turnedOnCallback->instance);
+				}
 			}else{
-				Log::Write(LogLevel_Info, "BinarySwitch::callback_turnOnOff(): calling ThingML_binary_switch_turned_off()");
-				ThingML_binary_switch_turned_off();
+				if(bs->turnedOffCallback != NULL){
+					Log::Write(LogLevel_Info, "BinarySwitch::callback_turnOnOff(): calling ThingML_binary_switch_turned_off()");
+					bs->turnedOffCallback->fn_callback(bs->turnedOffCallback->instance);
+				}
 			}
 			bs->isTurnedOn = result;
 		}else{
-			Log::Write(LogLevel_Info, "BinarySwitch::callback_turnOnOff(): calling ThingML_binary_switch_nochange()");
-			ThingML_binary_switch_nochange();
+			if(bs->noChangeCallback != NULL){
+				Log::Write(LogLevel_Info, "BinarySwitch::callback_turnOnOff(): calling ThingML_binary_switch_nochange()");
+				bs->noChangeCallback->fn_callback(bs->noChangeCallback->instance);
+			}
 		}
 	}else{
 		Log::Write(LogLevel_Error, "BinarySwitch::callback_turnOnOff(): there must be a error, value should be of the bool type..."

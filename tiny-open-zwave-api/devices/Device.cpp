@@ -5,6 +5,8 @@
  *      Author: vassik
  */
 
+#include <iostream>
+
 #include "Log.h"
 #include "Node.h"
 

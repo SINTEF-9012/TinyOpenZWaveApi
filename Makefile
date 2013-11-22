@@ -12,8 +12,8 @@ LD     := $(CROSS_COMPILE)g++
 AR     := $(CROSS_COMPILE)ar rc
 RANLIB := $(CROSS_COMPILE)ranlib
 
-DEBUG_CFLAGS    := -Wall -Wno-unknown-pragmas -Wno-inline -Werror -Wno-format -g -DDEBUG
-RELEASE_CFLAGS  := -Wall -Wno-unknown-pragmas -Werror -Wno-format -O3 -DNDEBUG
+DEBUG_CFLAGS    := -Wall -Wno-unknown-pragmas -Wno-inline -Wno-format -fpermissive -g -DDEBUG
+RELEASE_CFLAGS  := -Wall -Wno-unknown-pragmas -Wno-format -fpermissive -O3 -DNDEBUG
 
 DEBUG_LDFLAGS	:= -g
 
@@ -50,7 +50,6 @@ $(TINYOPENZWAVE)/Api.o : $(TINYOPENZWAVE)/Api.h $(TINYOPENZWAVE)/libs/Utility.h 
 	$(OPENZWAVE)/cpp/src/Notification.h $(OPENZWAVE)/cpp/src/platform/Log.h \
 
 $(TINYOPENZWAVE)/libs/Utility.o : $(TINYOPENZWAVE)/libs/Utility.h \
-	$(TINYOPENZWAVE)/thingMLcallbacks/TMLcallback.h \
 	$(OPENZWAVE)/cpp/src/Options.h $(OPENZWAVE)/cpp/src/Manager.h \
 	$(OPENZWAVE)/cpp/src/Node.h $(OPENZWAVE)/cpp/src/Group.h \
 	$(OPENZWAVE)/cpp/src/Notification.h $(OPENZWAVE)/cpp/src/platform/Log.h \
@@ -74,17 +73,13 @@ $(TINYOPENZWAVE)/devices/Device.o : $(TINYOPENZWAVE)/devices/Device.h \
 $(TINYOPENZWAVE)/devices/BinarySwitch.o : $(TINYOPENZWAVE)/devices/BinarySwitch.h $(TINYOPENZWAVE)/devices/TinyController.h \
 	$(TINYOPENZWAVE)/libs/Utility.h $(TINYOPENZWAVE)/libs/DomoZWave.h $(OPENZWAVE)/cpp/src/Options.h $(OPENZWAVE)/cpp/src/Manager.h \
 	$(OPENZWAVE)/cpp/src/Node.h $(OPENZWAVE)/cpp/src/Group.h $(OPENZWAVE)/cpp/src/Notification.h $(OPENZWAVE)/cpp/src/platform/Log.h \
-	$(TINYOPENZWAVE)/thingMLcallbacks/TMLcallback.h \
-	
-$(TINYOPENZWAVE)/thingMLcallbacks/TMLcallback.o : $(TINYOPENZWAVE)/thingMLcallbacks/TMLcallback.h
+
 
 run : run.o $(TINYOPENZWAVE)/Api.o $(TINYOPENZWAVE)/libs/Utility.o $(TINYOPENZWAVE)/libs/DomoZWave.o $(TINYOPENZWAVE)/devices/TinyController.o \
-	$(TINYOPENZWAVE)/devices/Device.o $(TINYOPENZWAVE)/devices/BinarySwitch.o $(TINYOPENZWAVE)/thingMLcallbacks/TMLcallback.o
+	$(TINYOPENZWAVE)/devices/Device.o $(TINYOPENZWAVE)/devices/BinarySwitch.o
 		$(LD) -o $@ $(LDFLAGS) run.o $(TINYOPENZWAVE)/Api.o  $(TINYOPENZWAVE)/libs/Utility.o $(TINYOPENZWAVE)/libs/DomoZWave.o \
-			$(TINYOPENZWAVE)/devices/TinyController.o $(TINYOPENZWAVE)/devices/Device.o $(TINYOPENZWAVE)/devices/BinarySwitch.o \
-			$(TINYOPENZWAVE)/thingMLcallbacks/TMLcallback.o $(LIBS)
+			$(TINYOPENZWAVE)/devices/TinyController.o $(TINYOPENZWAVE)/devices/Device.o $(TINYOPENZWAVE)/devices/BinarySwitch.o $(LIBS) \
 	
 clean:
 	rm -rf run *.o $(TINYOPENZWAVE)/*.o $(TINYOPENZWAVE)/libs/*.o $(TINYOPENZWAVE)/devices/*.o \
-		$(TINYOPENZWAVE)/thingMLcallbacks/*.o  $(TINYOPENZWAVE)/*.xml  $(TINYOPENZWAVE)/*.txt \
-		$(TINYOPENZWAVE)/*.log *.xml *.txt *.log
+		$(TINYOPENZWAVE)/*.xml  $(TINYOPENZWAVE)/*.txt $(TINYOPENZWAVE)/*.log *.xml *.txt *.log \

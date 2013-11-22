@@ -34,11 +34,11 @@ Manager::pfnOnNotification_t TinyController::callback = NULL;
 TinyController* TinyController::Init(Manager::pfnOnNotification_t _callback,
 		char const* config_name, char const* zw_dir,
 		char const* domo_log, bool const enableLog,
-		bool const enableOZdebug, int polltime){
+		bool const enableOZdebug, int polltime, ThingMLCallback* networkReadycallback){
 	if(s_instance == NULL){
 		TinyController::callback = _callback;
 		Log::Write(LogLevel_Info, "TinyController::Init() : initializing TinyController");
-		s_instance = new TinyController(config_name, zw_dir, domo_log, enableLog, enableOZdebug, polltime);
+		s_instance = new TinyController(config_name, zw_dir, domo_log, enableLog, enableOZdebug, polltime, networkReadycallback);
 	}
 	return s_instance;
 }
@@ -90,7 +90,7 @@ void TinyController::Destroy()
 //-----------------------------------------------------------------------------
 TinyController::TinyController(char const* config_name, char const* zw_dir,
 		char const* domo_log, bool const enableLog,
-		bool const enableOZdebug, int polltime) {
+		bool const enableOZdebug, int polltime, ThingMLCallback* callback) {
 	DomoZWave_Init(domo_log, enableLog);
 	Options::Create(config_name, zw_dir, "");
 
@@ -112,6 +112,7 @@ TinyController::TinyController(char const* config_name, char const* zw_dir,
 	Manager::Create();
 	Manager::Get()->AddWatcher(TinyController::callback, NULL);
 	s_instance = this;
+	networkReadyCallback = callback;
 }
 
 //-----------------------------------------------------------------------------

@@ -122,6 +122,19 @@ using namespace OpenZWave;
 		}
 	};
 
+	//TODO: using of this structure requires the -fpermissive flag while compiling since it is not type safe
+	//probably we need to look into this
+	typedef void (*pthingMLCallback)(void* _instance, ...);
+	struct ThingMLCallback {
+		pthingMLCallback fn_callback;
+		void* instance;
+
+		ThingMLCallback(pthingMLCallback _callback, void* _instance):
+			fn_callback(_callback),
+			instance(_instance){
+		};
+	};
+
 	const char *genreToStr(ValueID::ValueGenre value);
 	ValueID::ValueGenre genreToNum(char const* value);
 	const char *typeToStr(ValueID::ValueType value);

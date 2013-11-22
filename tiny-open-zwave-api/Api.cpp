@@ -172,6 +172,7 @@ void OnNotification (Notification const* _notification, void* _context)
 		Log::Write(LogLevel_Info, "Notification: All Nodes Queried");
 		pthread_mutex_lock(&nlock);
 		ZNode::allNodeQueried(_notification);
+		OpenZWaveFacade::Get()->networkReadyCallback->fn_callback(OpenZWaveFacade::Get()->networkReadyCallback->instance);
 		pthread_mutex_unlock(&nlock);
 		break;
 	  case Notification::Type_Notification:
@@ -230,8 +231,8 @@ void OnNotification (Notification const* _notification, void* _context)
 
 TinyController* OpenZWaveFacade::Init(char const* config_name, char const* zw_dir,
 		char const* domo_log, bool const enableLog,
-		bool const enableOZdebug, int polltime){
-	return TinyController::Init(OnNotification, config_name, zw_dir, domo_log, enableLog, enableOZdebug, polltime);
+		bool const enableOZdebug, int polltime, ThingMLCallback* callback){
+	return TinyController::Init(OnNotification, config_name, zw_dir, domo_log, enableLog, enableOZdebug, polltime, callback);
 }
 
 TinyController* OpenZWaveFacade::Get(){

@@ -18,6 +18,8 @@
 #include "tiny-open-zwave-api/devices/BinarySwitch.h"
 #include "tiny-open-zwave-api/libs/DomoZWave.h"
 
+#include "tiny-open-zwave-api/libs/Utility.h"
+
 
 using namespace TinyOpenZWaveApi;
 
@@ -41,6 +43,10 @@ void exit_main_handler(int s){
     exit(1);
 }
 
+void f_function(void *param){
+	cout<< "f_function network ready" << endl;
+}
+
 int main(int argc, char* argv[]){
 	struct sigaction sigIntHandler;
 	sigIntHandler.sa_handler = exit_main_handler;
@@ -58,14 +64,15 @@ int main(int argc, char* argv[]){
 			s->turnOff();
 		}
 		if(ch == 'k'){
-			OpenZWaveFacade::Init(config, zwdir, domo_log, enableLog, enableZWLog, polltime);
+			ThingMLCallback *callback = new ThingMLCallback(f_function, NULL);
+			OpenZWaveFacade::Init(config, zwdir, domo_log, enableLog, enableZWLog, polltime, callback);
 			OpenZWaveFacade::Get()->AddController(port);
 		}
 		if(ch == 'i'){
 			cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! init" <<endl;
 			OpenZWaveFacade::Get()->setCurrentController(port);
 			s = new BinarySwitch();
-			s = s->BinarySwitch::Init(OpenZWaveFacade::Get(),5,1,0);
+			s = s->Init(OpenZWaveFacade::Get(),5,1,0);
 		}
 		if(ch == 'g'){
 			cout << "BinarySwitch: the poll interval is " << Manager::Get()->GetPollInterval() <<endl;

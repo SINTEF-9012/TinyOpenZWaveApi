@@ -21,7 +21,6 @@
 
 #include "Utility.h"
 #include "DomoZWave.h"
-#include "../thingMLcallbacks/TMLcallback.h"
 
 
 using namespace OpenZWave;
@@ -160,8 +159,7 @@ void ZNode::allNodeQueried(Notification const* _data){
 		DomoZWave_WriteConfig(homeId);
 		(*it)->m_lastWriteXML = time(NULL);
 	}
-	Log::Write(LogLevel_Info, "ZNode::allNodeQueried(): calling ThingML_network_ready()");
-	ThingML_network_ready();
+	Log::Write(LogLevel_Info, "ZNode::allNodeQueried(): calling");
 }
 
 void ZNode::messageComplete(Notification const* _data){

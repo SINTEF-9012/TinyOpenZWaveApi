@@ -19,6 +19,11 @@ using namespace OpenZWave;
 
 	class BinarySwitch: public Device
 	{
+		private:
+			ThingMLCallback* turnedOnCallback;
+			ThingMLCallback* turnedOffCallback;
+			ThingMLCallback* noChangeCallback;
+
 		public:
 			static uint8 COMMAND_CLASS;
 			list<ValueCallback*> callbacksOnOff;
@@ -31,6 +36,7 @@ using namespace OpenZWave;
 			BinarySwitch* Init(TinyController* const controller, uint8 const _nodeId, uint8 const _instance, uint8 const _index);
 
 			BinarySwitch();
+			BinarySwitch(ThingMLCallback* turnedOnCallback, ThingMLCallback* turnedOffCallback, ThingMLCallback* noChangeCallback);
 			virtual void Destroy();
 			virtual ~BinarySwitch();
 

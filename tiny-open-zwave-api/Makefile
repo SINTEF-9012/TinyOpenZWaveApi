@@ -50,7 +50,6 @@ $(TINYOPENZWAVE)/Api.o : $(TINYOPENZWAVE)/Api.h $(TINYOPENZWAVE)/libs/Utility.h 
 	$(OPENZWAVE)/cpp/src/Notification.h $(OPENZWAVE)/cpp/src/platform/Log.h \
 
 $(TINYOPENZWAVE)/libs/Utility.o : $(TINYOPENZWAVE)/libs/Utility.h \
-	$(TINYOPENZWAVE)/thingMLcallbacks/TMLcallback.h \
 	$(OPENZWAVE)/cpp/src/Options.h $(OPENZWAVE)/cpp/src/Manager.h \
 	$(OPENZWAVE)/cpp/src/Node.h $(OPENZWAVE)/cpp/src/Group.h \
 	$(OPENZWAVE)/cpp/src/Notification.h $(OPENZWAVE)/cpp/src/platform/Log.h \
@@ -74,15 +73,12 @@ $(TINYOPENZWAVE)/devices/Device.o : $(TINYOPENZWAVE)/devices/Device.h \
 $(TINYOPENZWAVE)/devices/BinarySwitch.o : $(TINYOPENZWAVE)/devices/BinarySwitch.h $(TINYOPENZWAVE)/devices/TinyController.h \
 	$(TINYOPENZWAVE)/libs/Utility.h $(TINYOPENZWAVE)/libs/DomoZWave.h $(OPENZWAVE)/cpp/src/Options.h $(OPENZWAVE)/cpp/src/Manager.h \
 	$(OPENZWAVE)/cpp/src/Node.h $(OPENZWAVE)/cpp/src/Group.h $(OPENZWAVE)/cpp/src/Notification.h $(OPENZWAVE)/cpp/src/platform/Log.h \
-	$(TINYOPENZWAVE)/thingMLcallbacks/TMLcallback.h \
 	
-$(TINYOPENZWAVE)/thingMLcallbacks/TMLcallback.o : $(TINYOPENZWAVE)/thingMLcallbacks/TMLcallback.h
 
 api : $(TINYOPENZWAVE)/Api.o $(TINYOPENZWAVE)/libs/Utility.o $(TINYOPENZWAVE)/libs/DomoZWave.o $(TINYOPENZWAVE)/devices/TinyController.o \
-	$(TINYOPENZWAVE)/devices/Device.o $(TINYOPENZWAVE)/devices/BinarySwitch.o $(TINYOPENZWAVE)/thingMLcallbacks/TMLcallback.o
+	$(TINYOPENZWAVE)/devices/Device.o $(TINYOPENZWAVE)/devices/BinarySwitch.o
 		$(LD) -o $@ $(LDFLAGS) $(TINYOPENZWAVE)/Api.o  $(TINYOPENZWAVE)/libs/Utility.o $(TINYOPENZWAVE)/libs/DomoZWave.o \
-			$(TINYOPENZWAVE)/devices/TinyController.o $(TINYOPENZWAVE)/devices/Device.o $(TINYOPENZWAVE)/devices/BinarySwitch.o \
-			$(TINYOPENZWAVE)/thingMLcallbacks/TMLcallback.o $(LIBS)
+			$(TINYOPENZWAVE)/devices/TinyController.o $(TINYOPENZWAVE)/devices/Device.o $(TINYOPENZWAVE)/devices/BinarySwitch.o $(LIBS) \
 	
 clean:
-	rm -rf api *.o $(TINYOPENZWAVE)/libs/*.o $(TINYOPENZWAVE)/devices/*.o $(TINYOPENZWAVE)/thingMLcallbacks/*.o *.xml *.txt *.log
+	rm -rf api *.o $(TINYOPENZWAVE)/libs/*.o $(TINYOPENZWAVE)/devices/*.o *.xml *.txt *.log
