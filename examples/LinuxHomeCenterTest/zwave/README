@@ -1,0 +1,15 @@
+1) the "zwave" folder should be coppied to the thingML directory containing the core thingML components. So it should like as follows:
+./core/
+./hardware/
+./samples/
+./studies/
+./tests/
+./zwave/
+
+2) Generate C++ code for ./zwave/network.thingml
+3) Go to a folder with generated code
+4) Copy LinuxHomeCenterTest/open-zwave, LinuxHomeCenterTest/tiny-open-zwave-api to the folder with the generated code
+4) Replace the contenets of the generated Makefile to the contents in LinuxHomeCenterTest/Makefile_VALID
+5) Run make clean
+6) make
+7) sudo ./LinuxHomeCenterTest
