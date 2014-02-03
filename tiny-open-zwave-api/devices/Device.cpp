@@ -7,8 +7,8 @@
 
 #include <iostream>
 
-#include "Log.h"
-#include "Node.h"
+#include "openzwave/Log.h"
+#include "openzwave/Node.h"
 
 #include "TinyController.h"
 #include "Device.h"

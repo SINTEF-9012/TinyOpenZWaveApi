@@ -8,11 +8,11 @@
 #ifndef TINYCONTROLLER_H_
 #define TINYCONTROLLER_H_
 
-#include "Notification.h"
-#include "Manager.h"
-#include "Defs.h"
-#include "Driver.h"
-#include "ValueID.h"
+#include "openzwave/Notification.h"
+#include "openzwave/Manager.h"
+#include "openzwave/Defs.h"
+#include "openzwave/Driver.h"
+#include "openzwave/ValueID.h"
 #include "../libs/Utility.h"
 
 

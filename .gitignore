@@ -4,13 +4,11 @@
 *.o
 
 # Compiled Dynamic libraries
-*.so
 *.dylib
 
 # Compiled Static libraries
 *.lai
 *.la
-*.a
 
 ./tiny-open-zwave-api/*.txt
 ./tiny-open-zwave-api/*.xml

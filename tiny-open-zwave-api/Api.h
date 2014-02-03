@@ -8,17 +8,17 @@
 #ifndef API_H_
 #define API_H_
 
-#include "Driver.h"
-#include "Notification.h"
-#include "ValueStore.h"
-#include "Value.h"
-#include "ValueBool.h"
-#include "ValueByte.h"
-#include "ValueDecimal.h"
-#include "ValueInt.h"
-#include "ValueList.h"
-#include "ValueShort.h"
-#include "ValueString.h"
+#include "openzwave/Driver.h"
+#include "openzwave/Notification.h"
+#include "openzwave/ValueStore.h"
+#include "openzwave/Value.h"
+#include "openzwave/ValueBool.h"
+#include "openzwave/ValueByte.h"
+#include "openzwave/ValueDecimal.h"
+#include "openzwave/ValueInt.h"
+#include "openzwave/ValueList.h"
+#include "openzwave/ValueShort.h"
+#include "openzwave/ValueString.h"
 
 #include "libs/Utility.h"
 #include "devices/TinyController.h"

@@ -8,8 +8,8 @@
 #ifndef DEVICE_H_
 #define DEVICE_H_
 
-#include "ValueID.h"
-#include "Node.h"
+#include "openzwave/ValueID.h"
+#include "openzwave/Node.h"
 
 #include "TinyController.h"
 #include "../libs/Utility.h"

@@ -43,7 +43,7 @@ void exit_main_handler(int s){
     exit(1);
 }
 
-void f_function(void *param){
+void f_function(void *param, ...){
 	cout<< "f_function network ready" << endl;
 }
 

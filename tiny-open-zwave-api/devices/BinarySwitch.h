@@ -8,8 +8,8 @@
 #ifndef BINARYSWITCH_H_
 #define BINARYSWITCH_H_
 
-#include "ValueID.h"
-#include "Node.h"
+#include "openzwave/ValueID.h"
+#include "openzwave/Node.h"
 
 #include "TinyController.h"
 #include "../libs/Utility.h"

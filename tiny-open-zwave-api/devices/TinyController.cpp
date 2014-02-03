@@ -8,12 +8,12 @@
 #include <string>
 #include <iostream>
 
-#include "Options.h"
-#include "Manager.h"
-#include "Node.h"
-#include "Group.h"
-#include "Notification.h"
-#include "Log.h"
+#include "openzwave/Options.h"
+#include "openzwave/Manager.h"
+#include "openzwave/Node.h"
+#include "openzwave/Group.h"
+#include "openzwave/Notification.h"
+#include "openzwave/Log.h"
 
 #include "TinyController.h"
 #include "../libs/DomoZWave.h"
