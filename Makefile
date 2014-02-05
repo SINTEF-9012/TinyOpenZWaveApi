@@ -45,15 +45,17 @@ staticlib : $(OBJS)
 dynamiclib : $(OBJS)
 	$(CXX) -shared -o $(DYNAMIC_LIB_LOCATION) $(OBJ)
 
-install:
-	install -d /usr/lib
-	install -d /usr/include/tinyozw
-	install -d /usr/include/tinyozw/devices
-	install -d /usr/include/tinyozw/libs
-	install $(DYNAMIC_LIB_LOCATION) /usr/lib
-	install $(STATIC_LIB_LOCATION) /usr/lib
-	cp -r $(TINYOPENZWAVE)/devices/*.h /usr/include/tinyozw/devices
-	cp -r $(TINYOPENZWAVE)/libs/*.h /usr/include/tinyozw/libs
+install: staticlib dynamiclib
+	install -d /usr/local
+	install -d /usr/local/lib
+	install -d /usr/local/include/tinyozw
+	install -d /usr/local/include/tinyozw/devices
+	install -d /usr/local/include/tinyozw/libs
+	install $(DYNAMIC_LIB_LOCATION) /usr/local/lib
+	install $(STATIC_LIB_LOCATION) /usr/local/lib
+	cp -r $(TINYOPENZWAVE)/*.h /usr/local/include/tinyozw
+	cp -r $(TINYOPENZWAVE)/devices/*.h /usr/local/include/tinyozw/devices
+	cp -r $(TINYOPENZWAVE)/libs/*.h /usr/local/include/tinyozw/libs
 
 clean :
 	rm -rf run *.o $(TINYOPENZWAVE)/*.o $(TINYOPENZWAVE)/libs/*.o $(TINYOPENZWAVE)/devices/*.o \
