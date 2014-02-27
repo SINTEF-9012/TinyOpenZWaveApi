@@ -20,7 +20,26 @@
 #include "openzwave/ValueShort.h"
 #include "openzwave/ValueString.h"
 
+
 using namespace OpenZWave;
+
+	//-------------------------------------------------------------------------
+	//Structures for a valueID callback
+	//-------------------------------------------------------------------------
+
+	class Device;
+
+	typedef void (*pvfCallback)(Device *_device, Notification const* _data);
+
+	struct ValueCallback {
+		pvfCallback fn_callback;
+		Device *fn_device;
+
+		ValueCallback(pvfCallback _callback, Device *_device):
+			fn_callback(_callback),
+			fn_device(_device){
+		};
+	};
 
 	//-----------------------------------------------------------------------------
 	// Internal enum types
@@ -86,28 +105,6 @@ using namespace OpenZWave;
 		list<ValueID>	m_values;
 		std::map<ValueID, list<ValueCallback*> > m_value_callback;
 	} NodeInfo;
-
-	class ZNode {
-		public:
-			static int32 getNodeCount();
-			static ZNode* getNode(int32 const _node_id);
-			static NodeInfo* getNodeInfo(Notification const* _data);
-			static void addNode(Notification const* _data);
-			static void addValue(Notification const* _data);
-			static void removeNode(Notification const* _data);
-			static void removeValue(Notification const* _data);
-			static void changeValue(Notification const* _data);
-			static void controllerReady(Notification const* _data);
-			static m_structCtrl* getControllerInfo(uint32 const homeId);
-			static void updateNodeProtocolInfo(uint32 const homeId, uint8 const nodeId);
-			static void updateNodeEvent(Notification const* _data);
-			static void allNodeQueriedSomeDead(Notification const* _data);
-			static void allNodeQueried(Notification const* _data);
-
-			static void messageComplete(Notification const* _data);
-			static void messageAwake(Notification const* _data);
-			static void messageAlive(Notification const* _data);
-	};
 
 	struct DummyValueID {
 		ValueID* valueId;

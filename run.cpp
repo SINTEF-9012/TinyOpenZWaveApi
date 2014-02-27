@@ -13,7 +13,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-#include "tiny-open-zwave-api/Api.h"
+#include "tiny-open-zwave-api/TinyZWaveFacade.h"
 
 #include "tiny-open-zwave-api/devices/BinarySwitch.h"
 #include "tiny-open-zwave-api/libs/DomoZWave.h"
@@ -32,6 +32,20 @@ const bool enableLog = true;
 const bool enableZWLog = false;
 const int polltime = 0;
 
+void turned_on_callback(void *_instance, ...) {
+	printf("THINGML: -> FibaroPlug_send_switch_turned_on\n");
+}
+
+// Definition of function turned_off_callback
+void turned_off_callback(void *_instance, ...) {
+	printf("THINGML: -> FibaroPlug_send_switch_turned_off\n");
+}
+
+// Definition of function no_change_callback
+void no_change_callback(void *_instance, ...) {
+	printf("THINGML: -> FibaroPlug_send_switch_no_change\n");
+}
+
 
 void exit_main_handler(int s){
 	cout << "Caught signal on exit" <<endl;
@@ -44,7 +58,7 @@ void exit_main_handler(int s){
 }
 
 void f_function(void *param, ...){
-	cout<< "f_function network ready" << endl;
+	cout<< "f_function network is ready" << endl;
 }
 
 int main(int argc, char* argv[]){
@@ -71,8 +85,11 @@ int main(int argc, char* argv[]){
 		if(ch == 'i'){
 			cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! init" <<endl;
 			OpenZWaveFacade::Get()->setCurrentController(port);
-			s = new BinarySwitch();
-			s = s->Init(OpenZWaveFacade::Get(),5,1,0);
+			ThingMLCallback* turned_on = new ThingMLCallback(turned_on_callback, NULL);
+			ThingMLCallback* turned_off = new ThingMLCallback(turned_off_callback, NULL);
+			ThingMLCallback* no_change = new ThingMLCallback(no_change_callback, NULL);
+			s = new BinarySwitch(turned_on, turned_off, no_change);
+			s = s->Init(OpenZWaveFacade::Get(),2,1,0);
 		}
 		if(ch == 'g'){
 			cout << "BinarySwitch: the poll interval is " << Manager::Get()->GetPollInterval() <<endl;

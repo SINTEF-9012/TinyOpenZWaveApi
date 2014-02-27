@@ -1,4 +1,4 @@
-#include "Api.h"
+#include "TinyZWaveFacade.h"
 #include "libs/Utility.h"
 #include "devices/TinyController.h"
 
@@ -8,6 +8,8 @@
 #include "openzwave/Group.h"
 #include "openzwave/Notification.h"
 #include "openzwave/Log.h"
+
+#include "ZNode.h"
 
 using namespace TinyOpenZWaveApi;
 
@@ -51,18 +53,27 @@ void OnNotification (Notification const* _notification, void* _context)
 			   _notification->GetHomeId(), _notification->GetNodeId(),
 			   genreToStr(id.GetGenre()), cclassToStr(id.GetCommandClassId()), id.GetInstance(),
 			   id.GetIndex(), typeToStr(id.GetType()));
+		pthread_mutex_lock(&nlock);
+		ZNode::refreshedValue(_notification);
+		pthread_mutex_unlock(&nlock);
 		break;
 	  case Notification::Type_Group:
 		{
 		  Log::Write(LogLevel_Info, "Notification: Group Home 0x%08x Node %d Group %d",
 			 _notification->GetHomeId(), _notification->GetNodeId(), _notification->GetGroupIdx());
 		}
+		pthread_mutex_lock(&nlock);
+		ZNode::typeGroup(_notification);
+		pthread_mutex_unlock(&nlock);
 		break;
 	  case Notification::Type_NodeNew:
 		Log::Write(LogLevel_Info, "Notification: Node New Home %08x Node %d Genre %s Class %s Instance %d Index %d Type %s",
 			   _notification->GetHomeId(), _notification->GetNodeId(),
 			   genreToStr(id.GetGenre()), cclassToStr(id.GetCommandClassId()), id.GetInstance(),
 			   id.GetIndex(), typeToStr(id.GetType()));
+		pthread_mutex_lock(&nlock);
+		ZNode::newNode(_notification);
+		pthread_mutex_unlock(&nlock);
 		break;
 	  case Notification::Type_NodeAdded:
 		Log::Write(LogLevel_Info, "Notification: Node Added Home %08x Node %d Genre %s Class %s Instance %d Index %d Type %s",
@@ -221,7 +232,7 @@ void OnNotification (Notification const* _notification, void* _context)
 		}
 		break;
 	  default:
-		Log::Write(LogLevel_Info, "Notification: type %d home %08x node %d genre %d class %d instance %d index %d type %d",
+		Log::Write(LogLevel_Info, "Notification: Unhandled Notification (type %d home %08x node %d) ValueID (genre %d class %d instance %d index %d type %d)",
 			   _notification->GetType(), _notification->GetHomeId(),
 			   _notification->GetNodeId(), id.GetGenre(), id.GetCommandClassId(),
 			   id.GetInstance(), id.GetIndex(), id.GetType());
