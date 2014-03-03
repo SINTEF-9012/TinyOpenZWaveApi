@@ -1395,7 +1395,7 @@ bool DomoZWave_HomeIdPresent( int32 home, const char* _param )
 // NOTE: You need to call DomoZWave_AddSerialPort to complete the initialization
 //-----------------------------------------------------------------------------
 
-void DomoZWave_Init(const char* logname, bool enableLog)
+void ZWave_Init(const char* logname, bool enableLog)
 {
 	// Get a timestamp for Year and Month
 	struct timeval tv;
@@ -1439,7 +1439,7 @@ void DomoZWave_Init(const char* logname, bool enableLog)
 // <DomoZWave_AddSerialPort>
 //-----------------------------------------------------------------------------
 
-void DomoZWave_AddSerialPort( const char* serialPort )
+void ZWave_AddSerialPort( const char* serialPort )
 {
 	string Name;
 
@@ -1455,7 +1455,7 @@ void DomoZWave_AddSerialPort( const char* serialPort )
 // Stops the Open-Zwave wrapper
 //-----------------------------------------------------------------------------
 
-void DomoZWave_Destroy( )
+void ZWave_Destroy( )
 {
 
 	pthread_mutex_lock( &g_criticalSection );
@@ -1489,7 +1489,7 @@ void DomoZWave_Destroy( )
 // the nodes are queried and when wrapper exits
 //-----------------------------------------------------------------------------
 
-void DomoZWave_WriteConfig( int32 home )
+void ZWave_WriteConfig( int32 home )
 {
 	if ( DomoZWave_HomeIdPresent( home, "DomoZWave_WriteConfig" ) == false ) return;
 	DomoZWave_WriteLog( LogLevel_Debug, true, "DomoZWave_WriteConfig: HomeId=%d", home );
@@ -3295,7 +3295,7 @@ bool DomoZWave_SetNodeUserCodeRemove( int32 home, int32 node, int32 usercode )
 // wait/pause for a moment
 //-----------------------------------------------------------------------------
 
-bool DomoZWave_ControllerBusy( int32 home )
+bool ZWave_ControllerBusy( int32 home )
 {
 	bool response;
 

@@ -41,6 +41,7 @@ using namespace OpenZWave;
 		};
 	};
 
+
 	//-----------------------------------------------------------------------------
 	// Internal enum types
 	//-----------------------------------------------------------------------------
@@ -119,8 +120,6 @@ using namespace OpenZWave;
 		}
 	};
 
-	//TODO: using of this structure requires the -fpermissive flag while compiling since it is not type safe
-	//probably we need to look into this
 	typedef void (*pthingMLCallback)(void* _instance, ...);
 	struct ThingMLCallback {
 		pthingMLCallback fn_callback;
@@ -132,6 +131,20 @@ using namespace OpenZWave;
 		};
 	};
 
+	//----------------------------------------------------------------------------
+	//Node subject/observer data structure
+	//-----------------------------------------------------------------------------
+
+	struct NObInfo {
+		Notification const* notification;
+		NodeInfo* nodeInfo;
+		ValueID valueID;
+
+		NObInfo(Notification const* _notification, NodeInfo* _nodeInfo, ValueID _valueID):
+			notification(_notification), nodeInfo(_nodeInfo), valueID(_valueID){
+		};
+	};
+
 	const char *genreToStr(ValueID::ValueGenre value);
 	ValueID::ValueGenre genreToNum(char const* value);
 	const char *typeToStr(ValueID::ValueType value);
@@ -140,5 +153,7 @@ using namespace OpenZWave;
 	const char *cclassToStr(uint8 value);
 	uint8 cclassToNum(char const *value);
 	const char *controllerErrorToStr(Driver::ControllerError error);
+
+	ValueID findValueID(list<ValueID> values, uint8 command_class, uint8 instance, uint8 index);
 
 #endif /* UTILITY_H_ */

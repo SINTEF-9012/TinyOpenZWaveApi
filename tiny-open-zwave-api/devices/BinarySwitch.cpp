@@ -17,7 +17,9 @@
 #include "../libs/DomoZWave.h"
 #include "BinarySwitch.h"
 
-using namespace OpenZWave;
+#include "../TinyZWaveFacade.h"
+
+using namespace TinyOpenZWaveApi;
 
 
 uint8 BinarySwitch::COMMAND_CLASS = COMMAND_CLASS_SWITCH_BINARY;
@@ -51,19 +53,6 @@ BinarySwitch::BinarySwitch(){
 
 BinarySwitch* BinarySwitch::Init(TinyController* const controller, uint8 const _nodeId, uint8 const _instance, uint8 const _index){
 	BinarySwitch* bswitch = (BinarySwitch*)Device::Init(controller, _nodeId, _instance, _index);
-	ValueID valueId = DomoZWave_GetValueID(controller->currentControllerHomeId, getComandClass(), this->node->m_nodeId, this->instance, this->index);
-	DummyValueID dummy;
-	if(valueId != *dummy.valueId){
-		bool result = Manager::Get()->GetValueAsBool(valueId, &isTurnedOn);
-		if(!result){
-			Log::Write(LogLevel_Error, "BinarySwitch::BinarySwitch(): default value is not requested...");
-		}
-	}else{
-		Log::Write(LogLevel_Error, "BinarySwitch::BinarySwitch(): can not find ValueID for"
-				"Home 0x%08x Node %d Class %s Instance %d Index %d",
-				controller->currentControllerHomeId, this->node->m_nodeId,
-				getComandClass(), this->instance, this->index);
-	}
 	return bswitch;
 }
 
@@ -82,7 +71,7 @@ uint8 BinarySwitch::getComandClass(){
 void BinarySwitch::turnOn(){
 	Log::Write(LogLevel_Info, "BinarySwitch::turnOn(): turning on...");
 	if(this->node != NULL){
-		DomoZWave_SetValue((int) controller->currentControllerHomeId, (int) this->node->m_nodeId, this->instance, 255, callbacksOnOff);
+		ZWave_SetValue((int) controller->currentControllerHomeId, (int) this->node->m_nodeId, this->instance, 255);
 	}else{
 		Log::Write(LogLevel_Info, "BinarySwitch::turnOn(): node is NULL, ignoring...");
 	};
@@ -91,7 +80,7 @@ void BinarySwitch::turnOn(){
 void BinarySwitch::turnOff(){
 	Log::Write(LogLevel_Info, "BinarySwitch::turnOff(): turning off...");
 	if(this->node != NULL){
-		DomoZWave_SetValue((int) controller->currentControllerHomeId, (int) this->node->m_nodeId, this->instance, 0, callbacksOnOff);
+		ZWave_SetValue((int) controller->currentControllerHomeId, (int) this->node->m_nodeId, this->instance, 0);
 	}else{
 		Log::Write(LogLevel_Info, "BinarySwitch::turnOff(): node is NULL, ignoring...");
 	};
@@ -104,7 +93,7 @@ void BinarySwitch::callback_turnOnOff(Device* _context, Notification const* _dat
 	if(ValueID::ValueType_Bool == valueID.GetType()){
 		bool result;
 		Manager::Get()->GetValueAsBool(valueID, &result);
-		DomoZWave_WriteLog(LogLevel_Debug, true, "BinarySwitch::callback_turnOnOff(): check value : "
+		ZWave_WriteLog(LogLevel_Debug, true, "BinarySwitch::callback_turnOnOff(): check value : "
 				"Home 0x%08x Node %d Genre %s Class %s Instance %d Index %d Type %s IS %i",
 				valueID.GetHomeId(), valueID.GetNodeId(), genreToStr(valueID.GetGenre()),
 				cclassToStr(valueID.GetCommandClassId()), valueID.GetInstance(),
@@ -134,6 +123,47 @@ void BinarySwitch::callback_turnOnOff(Device* _context, Notification const* _dat
 				valueID.GetHomeId(), valueID.GetNodeId(),
 				genreToStr(valueID.GetGenre()), cclassToStr(valueID.GetCommandClassId()), valueID.GetInstance(),
 				valueID.GetIndex(), typeToStr(valueID.GetType()));
+	}
+}
+
+void BinarySwitch::update(NObInfo* info){
+	Log::Write(LogLevel_Info, "BinarySwitch::update(): is called for the node %d 0x%08x", this->nodeId, this);
+	Device::update(info);
+	Notification const* notification = info->notification;
+	ValueID valueId = notification->GetValueID();
+	if(info == NULL || notification->GetValueID().GetCommandClassId() != getComandClass())
+		return;
+
+	switch (notification->GetType()) {
+		case Notification::Type_ValueAdded:
+			this->setUp(info->nodeInfo);
+			break;
+		case Notification::Type_ValueChanged:
+			Log::Write(LogLevel_Info, "BinarySwitch::update(): value changed, calling callback...");
+			Device::CallValueCallback(this->node, valueId, notification);
+			break;
+		default:
+			Log::Write(LogLevel_Info, "BinarySwitch::update(): not handled case...");
+			break;
+	}
+}
+
+void BinarySwitch::setUp(NodeInfo* nodeInfo){
+	Log::Write(LogLevel_Info, "BinarySwitch::setUp(): is called for the node %d 0x%08x", this->nodeId, this);
+	Device::setUp(nodeInfo);
+	list<ValueID> values = node->m_values;
+	ValueID valueId = findValueID(node->m_values, getComandClass(), this->instance, this->index);
+	DummyValueID dummy;
+	if(valueId != *dummy.valueId){
+		bool result = Manager::Get()->GetValueAsBool(valueId, &isTurnedOn);
+		if(!result) Log::Write(LogLevel_Info, "BinarySwitch::setUp(): default value is not requested yet...");
+		this->value = &valueId;
+		Device::TestValueIDCallback(this->node, valueId, callbacksOnOff);
+	}else{
+		Log::Write(LogLevel_Info, "BinarySwitch::setUp(): ValueID is not known yet for"
+				"Home 0x%08x Node %d Class %s Instance %d Index %d",
+				controller->currentControllerHomeId, this->node->m_nodeId,
+				getComandClass(), this->instance, this->index);
 	}
 }
 

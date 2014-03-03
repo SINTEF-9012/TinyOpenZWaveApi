@@ -23,10 +23,13 @@ TINYOPENZWAVE := ./tiny-open-zwave-api
 STATIC_LIB_LOCATION = $(TINYOPENZWAVE)/libtinyozw.a
 DYNAMIC_LIB_LOCATION = $(TINYOPENZWAVE)/libtinyozw.so
 
-SRC := $(TINYOPENZWAVE)/ZNode.cpp $(TINYOPENZWAVE)/TinyZWaveFacade.cpp $(TINYOPENZWAVE)/libs/Utility.cpp $(TINYOPENZWAVE)/libs/DomoZWave.cpp \
-	$(TINYOPENZWAVE)/devices/TinyController.cpp $(TINYOPENZWAVE)/devices/Device.cpp $(TINYOPENZWAVE)/devices/BinarySwitch.cpp
-OBJ := $(TINYOPENZWAVE)/ZNode.o $(TINYOPENZWAVE)/TinyZWaveFacade.o $(TINYOPENZWAVE)/libs/Utility.o $(TINYOPENZWAVE)/libs/DomoZWave.o \
-	$(TINYOPENZWAVE)/devices/TinyController.o $(TINYOPENZWAVE)/devices/Device.o $(TINYOPENZWAVE)/devices/BinarySwitch.o
+SRC := $(TINYOPENZWAVE)/libs/ZNode.cpp $(TINYOPENZWAVE)/TinyZWaveFacade.cpp $(TINYOPENZWAVE)/libs/Utility.cpp $(TINYOPENZWAVE)/libs/DomoZWave.cpp \
+	$(TINYOPENZWAVE)/devices/TinyController.cpp $(TINYOPENZWAVE)/devices/Device.cpp $(TINYOPENZWAVE)/devices/BinarySwitch.cpp \
+	$(TINYOPENZWAVE)/observer/NodeSubject.cpp
+
+OBJ := $(TINYOPENZWAVE)/libs/ZNode.o $(TINYOPENZWAVE)/TinyZWaveFacade.o $(TINYOPENZWAVE)/libs/Utility.o $(TINYOPENZWAVE)/libs/DomoZWave.o \
+	$(TINYOPENZWAVE)/devices/TinyController.o $(TINYOPENZWAVE)/devices/Device.o $(TINYOPENZWAVE)/devices/BinarySwitch.o \
+	$(TINYOPENZWAVE)/observer/NodeSubject.cpp
 
 LIBUSB := -ludev
 LIBS := $(GNUTLS) $(LIBMICROHTTPD) -pthread -lopenzwave $(LIBUSB)

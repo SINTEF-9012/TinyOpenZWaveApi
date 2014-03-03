@@ -147,15 +147,15 @@ using namespace OpenZWave;
 #define GENERIC_TYPE_NON_INTEROPERABLE 0xFF
 
 // Initialize and destroy the wrapper
-void DomoZWave_AddSerialPort( const char* serialPort );
-void DomoZWave_Init(const char* logname, bool enableLog);
-void DomoZWave_Destroy();
+void ZWave_AddSerialPort( const char* serialPort );
+void ZWave_Init(const char* logname, bool enableLog);
+void ZWave_Destroy();
 
 // Write zwcfg*xml, normally this happens automatically when the open-wave initialized or exits
-void DomoZWave_WriteConfig( int32 home );
+void ZWave_WriteConfig( int32 home );
 
 // Retrieve wrapper and controller information
-bool DomoZWave_ControllerBusy( int32 home );
+bool ZWave_ControllerBusy( int32 home );
 const char* DomoZWave_Version( );
 const char* DomoZWave_OZWVersion( );
 const char* DomoZWave_GetLibraryVersion( int32 home );

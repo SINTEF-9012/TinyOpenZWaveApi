@@ -499,6 +499,19 @@ const char *controllerErrorToStr (Driver::ControllerError err)
   }
 }
 
+ValueID findValueID(list<ValueID> values, uint8 command_class, uint8 instance, uint8 index){
+	DummyValueID d_valueID;
+	for (list<ValueID>::iterator it = values.begin(); it != values.end(); ++it){
+		uint8 id = (*it).GetCommandClassId();
+		uint8 inst = (*it).GetInstance();
+		uint8 ind = (*it).GetIndex();
+		if(command_class == id && inst == instance && index == ind){
+			return (*it);
+		}
+	}
+	return *d_valueID.valueId;
+}
+
 
 
 

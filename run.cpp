@@ -29,7 +29,7 @@ const char* config = "./tiny-open-zwave-api/config/";
 const char* zwdir = "";
 const char* domo_log = "./DomoZWave_Log";
 const bool enableLog = true;
-const bool enableZWLog = false;
+const bool enableZWLog = true;
 const int polltime = 0;
 
 void turned_on_callback(void *_instance, ...) {
@@ -59,6 +59,7 @@ void exit_main_handler(int s){
 
 void f_function(void *param, ...){
 	cout<< "f_function network is ready" << endl;
+	OpenZWaveFacade::Get()->setCurrentController(port);
 }
 
 int main(int argc, char* argv[]){
@@ -78,13 +79,27 @@ int main(int argc, char* argv[]){
 			s->turnOff();
 		}
 		if(ch == 'k'){
-			ThingMLCallback *callback = new ThingMLCallback(f_function, NULL);
-			OpenZWaveFacade::Init(config, zwdir, domo_log, enableLog, enableZWLog, polltime, callback);
+			//ThingMLCallback *callback = new ThingMLCallback(f_function, NULL);
+			//OpenZWaveFacade::Init(config, zwdir, domo_log, enableLog, enableZWLog, polltime, callback);
+			OpenZWaveFacade::Get()->start();
 			OpenZWaveFacade::Get()->AddController(port);
+
 		}
 		if(ch == 'i'){
 			cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! init" <<endl;
-			OpenZWaveFacade::Get()->setCurrentController(port);
+			//OpenZWaveFacade::Get()->setCurrentController(port);
+			ThingMLCallback* turned_on = new ThingMLCallback(turned_on_callback, NULL);
+			ThingMLCallback* turned_off = new ThingMLCallback(turned_off_callback, NULL);
+			ThingMLCallback* no_change = new ThingMLCallback(no_change_callback, NULL);
+			s = new BinarySwitch(turned_on, turned_off, no_change);
+
+			ThingMLCallback *callback = new ThingMLCallback(f_function, NULL);
+			OpenZWaveFacade::Init(config, zwdir, domo_log, enableLog, enableZWLog, polltime, callback);
+
+			//s = s->Init(OpenZWaveFacade::Get(),2,1,0);
+		}
+		if(ch == 'b'){
+			cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! another binary switch" <<endl;
 			ThingMLCallback* turned_on = new ThingMLCallback(turned_on_callback, NULL);
 			ThingMLCallback* turned_off = new ThingMLCallback(turned_off_callback, NULL);
 			ThingMLCallback* no_change = new ThingMLCallback(no_change_callback, NULL);
@@ -98,7 +113,7 @@ int main(int argc, char* argv[]){
 		if(ch == 'e'){
 			cout << "BinarySwitch: enabling  poll" <<endl;
 			//Log::Write(LogLevel_Info, "BinarySwitch: enabling  poll");
-			ValueID valueId = DomoZWave_GetValueID(s->controller->currentControllerHomeId, s->getComandClass(), s->node->m_nodeId, s->instance, s->index);
+			ValueID valueId = ZWave_GetValueID(s->controller->currentControllerHomeId, s->getComandClass(), s->node->m_nodeId, s->instance, s->index);
 			Manager::Get()->EnablePoll(valueId, 1);
 		}
 		if(ch == 's'){
@@ -107,7 +122,7 @@ int main(int argc, char* argv[]){
 			Manager::Get()->SetPollInterval(5000, false);
 		}
 		if(ch == 'q'){
-			ValueID valueId = DomoZWave_GetValueID(s->controller->currentControllerHomeId, s->getComandClass(), s->node->m_nodeId, s->instance, s->index);
+			ValueID valueId = ZWave_GetValueID(s->controller->currentControllerHomeId, s->getComandClass(), s->node->m_nodeId, s->instance, s->index);
 			DummyValueID dummy;
 			if(valueId != *dummy.valueId){
 				bool isTurnedOn;

@@ -48,7 +48,7 @@ TinyController* TinyController::Init(Manager::pfnOnNotification_t _callback,
 //	Static method to add controller and complete initialization
 //-----------------------------------------------------------------------------
 void TinyController::AddController(char const* port){
-	DomoZWave_AddSerialPort(port);
+	ZWave_AddSerialPort(port);
 }
 
 
@@ -91,7 +91,7 @@ void TinyController::Destroy()
 TinyController::TinyController(char const* config_name, char const* zw_dir,
 		char const* domo_log, bool const enableLog,
 		bool const enableOZdebug, int polltime, ThingMLCallback* callback) {
-	DomoZWave_Init(domo_log, enableLog);
+	ZWave_Init(domo_log, enableLog);
 	Options::Create(config_name, zw_dir, "");
 
 	if (enableOZdebug)
@@ -112,7 +112,7 @@ TinyController::TinyController(char const* config_name, char const* zw_dir,
 	Manager::Create();
 	Manager::Get()->AddWatcher(TinyController::callback, NULL);
 	s_instance = this;
-	networkReadyCallback = callback;
+	controllerReadyCallback = callback;
 }
 
 //-----------------------------------------------------------------------------
@@ -124,7 +124,7 @@ TinyController::~TinyController() {
 	for(list<Device*>::iterator it = devices.begin(); it != devices.end(); ++it){
 		(*it)->Destroy();
 	}
-	DomoZWave_Destroy();
+	ZWave_Destroy();
 	Manager::Get()->RemoveWatcher(TinyController::callback, NULL);
 	Manager::Get()->Destroy();
 	Options::Get()->Destroy();

@@ -13,27 +13,41 @@
 
 #include "TinyController.h"
 #include "../libs/Utility.h"
+#include "../observer/NodeObserver.h"
 
 using namespace OpenZWave;
 
-	class Device
+	class Device : public NodeObserver
 	{
+		protected:
+			ThingMLCallback* nodeAddedCallback;
+			ThingMLCallback* nodeQuiriedCallback;
+
 		public:
+			static uint8 COMMAND_CLASS;
 			uint8 nodeId;
 			uint8 instance;
 			uint8 index;
 			TinyController* controller;
 			NodeInfo* node;
 			ValueID* value;
-			virtual uint8 getComandClass();
 
 		public:
 			virtual ValueID* getValueId() {return value;};
-			static uint8 COMMAND_CLASS;
+			virtual uint8 getComandClass();
+			virtual void setUp(NodeInfo* nodeInfo);
 			Device* Init(TinyController* const controller, uint8 const _nodeId, uint8 const _instance, uint8 const _index);
+
+			//callbacks
+			virtual void setNodeQuiriedCallback(ThingMLCallback* _callback) {nodeQuiriedCallback = _callback;};
 
 			virtual void Destroy();
 			virtual ~Device();
+
+			virtual void update(NObInfo* info);
+
+			static void TestValueIDCallback(NodeInfo *nodeInfo, ValueID valueID, list<ValueCallback*> callbacks);
+			static void CallValueCallback(NodeInfo *nodeInfo, ValueID valueId, Notification const* notification);
 	};
 
 

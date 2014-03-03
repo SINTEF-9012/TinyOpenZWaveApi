@@ -11,7 +11,7 @@
 
 #include "openzwave/Notification.h"
 
-#include "libs/Utility.h"
+#include "Utility.h"
 
 using namespace OpenZWave;
 
@@ -41,6 +41,8 @@ class ZNode {
 		static void messageAlive(Notification const* _data);
 
 		static void typeGroup(Notification const* _data);
+
+		static void deviceAdded(Device* device);
 	};
 
 

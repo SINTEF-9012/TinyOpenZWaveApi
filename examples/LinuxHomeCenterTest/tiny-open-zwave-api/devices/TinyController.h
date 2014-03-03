@@ -35,7 +35,7 @@ using namespace OpenZWave;
 			static uint8 currentControllerNodeId;
 			static Manager::pfnOnNotification_t callback;
 			list<Device*> devices;
-			ThingMLCallback* networkReadyCallback;
+			ThingMLCallback* controllerReadyCallback;
 
 		public:
 			static TinyController* Init(Manager::pfnOnNotification_t callback,

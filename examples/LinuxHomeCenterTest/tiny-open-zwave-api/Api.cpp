@@ -172,7 +172,7 @@ void OnNotification (Notification const* _notification, void* _context)
 		Log::Write(LogLevel_Info, "Notification: All Nodes Queried");
 		pthread_mutex_lock(&nlock);
 		ZNode::allNodeQueried(_notification);
-		OpenZWaveFacade::Get()->networkReadyCallback->fn_callback(OpenZWaveFacade::Get()->networkReadyCallback->instance);
+		OpenZWaveFacade::Get()->controllerReadyCallback->fn_callback(OpenZWaveFacade::Get()->controllerReadyCallback->instance);
 		pthread_mutex_unlock(&nlock);
 		break;
 	  case Notification::Type_Notification:

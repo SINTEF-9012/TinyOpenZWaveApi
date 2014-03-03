@@ -156,7 +156,7 @@ void ZNode::allNodeQueried(Notification const* _data){
 	list<m_structCtrl*>& g_allControllers = DomoZWave_GetGControllers();
 	for(list<m_structCtrl*>::iterator it = g_allControllers.begin(); it != g_allControllers.end(); ++it){
 		uint32 homeId = (*it)->m_homeId;
-		DomoZWave_WriteConfig(homeId);
+		ZWave_WriteConfig(homeId);
 		(*it)->m_lastWriteXML = time(NULL);
 	}
 	Log::Write(LogLevel_Info, "ZNode::allNodeQueried(): calling");
