@@ -14,6 +14,7 @@
 #include "TinyController.h"
 #include "../libs/Utility.h"
 #include "../observer/NodeObserver.h"
+#include "../observer/NodeSubject.h"
 
 using namespace OpenZWave;
 
@@ -44,7 +45,7 @@ using namespace OpenZWave;
 			virtual void Destroy();
 			virtual ~Device();
 
-			virtual void update(NObInfo* info);
+			virtual void update(NodeSubject* subject);
 
 			static void TestValueIDCallback(NodeInfo *nodeInfo, ValueID valueID, list<ValueCallback*> callbacks);
 			static void CallValueCallback(NodeInfo *nodeInfo, ValueID valueId, Notification const* notification);

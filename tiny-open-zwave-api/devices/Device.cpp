@@ -42,7 +42,7 @@ Device::~Device(){
 	Log::Write(LogLevel_Info, "Device::~Device(): 0x%08x", this);
 }
 
-void Device::update(NObInfo* nobInfo){
+void Device::update(NodeSubject* subject){
 
 }
 

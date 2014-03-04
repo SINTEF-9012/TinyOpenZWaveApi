@@ -16,10 +16,10 @@
 #include "../libs/Utility.h"
 #include "../libs/DomoZWave.h"
 #include "BinarySwitch.h"
+#include "../observer/NodeSubject.h"
 
-#include "../TinyZWaveFacade.h"
 
-using namespace TinyOpenZWaveApi;
+using namespace OpenZWave;
 
 
 uint8 BinarySwitch::COMMAND_CLASS = COMMAND_CLASS_SWITCH_BINARY;
@@ -126,17 +126,17 @@ void BinarySwitch::callback_turnOnOff(Device* _context, Notification const* _dat
 	}
 }
 
-void BinarySwitch::update(NObInfo* info){
+void BinarySwitch::update(NodeSubject* subject){
 	Log::Write(LogLevel_Info, "BinarySwitch::update(): is called for the node %d 0x%08x", this->nodeId, this);
-	Device::update(info);
-	Notification const* notification = info->notification;
-	ValueID valueId = notification->GetValueID();
-	if(info == NULL || notification->GetValueID().GetCommandClassId() != getComandClass())
+	Device::update(subject);
+	Notification const* notification = subject->getNotification();
+	if(notification->GetValueID().GetCommandClassId() != getComandClass())
 		return;
 
+	ValueID valueId = notification->GetValueID();
 	switch (notification->GetType()) {
 		case Notification::Type_ValueAdded:
-			this->setUp(info->nodeInfo);
+			this->setUp(subject->getNodeInfo());
 			break;
 		case Notification::Type_ValueChanged:
 			Log::Write(LogLevel_Info, "BinarySwitch::update(): value changed, calling callback...");

@@ -36,10 +36,6 @@ void ZNode::deviceAdded(Device* device){
 	NodeInfo *node = NULL;
 	for(list<NodeInfo*>::iterator it = g_nodes.begin(); it != g_nodes.end(); ++it){
 
-		Log::Write(LogLevel_Info, "ZNode::deviceAdded : device->controller->currentControllerHomeId 0x%08x (*it)->m_homeId 0x%08x",
-				device->controller->currentControllerHomeId, (*it)->m_homeId);
-		Log::Write(LogLevel_Info, true, "ZNode::deviceAdded : device->nodeId %d ((*it)->m_nodeId %d", device->nodeId, (*it)->m_nodeId);
-
 		if(device->nodeId == (*it)->m_nodeId && device->controller->currentControllerHomeId == (*it)->m_homeId){
 			node = (*it);
 			break;
@@ -62,7 +58,7 @@ void ZNode::addNode(Notification const* _notification){
 	nodeInfo->m_LastSeen = 0;
 	ZWave_GetGNodes().push_back(nodeInfo);
 	Log::Write(LogLevel_Info, "ZNode(): adding node value %d", nodeInfo->m_nodeId);
-	NodeSubject* nodeSubject = new NodeSubject(nodeInfo);
+	NodeSubject* nodeSubject = new NodeSubject(nodeInfo, _notification);
 
 	list<Device*> devices = TinyController::Get()->getDevices();
 	for(list<Device*>::iterator it = devices.begin(); it != devices.end(); ++it){
@@ -71,8 +67,7 @@ void ZNode::addNode(Notification const* _notification){
 		}
 	}
 	m_nodeSub[nodeInfo->m_nodeId] = nodeSubject;
-	NObInfo* info = new NObInfo(_notification, nodeInfo, _notification->GetValueID());
-	nodeSubject->notify(info);
+	nodeSubject->notify();
 }
 
 int32 ZNode::getNodeCount(){
@@ -144,14 +139,20 @@ void ZNode::changeValue(Notification const* _data){
 
 		if ( seconds > 3600 ){
 			Manager::Get()->WriteConfig((int)_data->GetHomeId());
-			ZWave_WriteLog(LogLevel_Debug, true, "ZWave_WriteConfig: HomeId=%d (%.f seconds)", (int)_data->GetHomeId(), seconds);
+			Log::Write(LogLevel_Debug, "ZNode::changeValue: HomeId=%d (%.f seconds)", (int)_data->GetHomeId(), seconds);
 			ctrl->m_lastWriteXML = time(NULL);
 		}
 	}
 
-	NObInfo* info = new NObInfo(_data, nodeInfo, _data->GetValueID());
-	NodeSubject* nodeSubject = m_nodeSub[(int)_data->GetNodeId()];
-	nodeSubject->notify(info);
+	if(m_nodeSub.find((int)_data->GetNodeId()) != m_nodeSub.end()){
+		NodeSubject* nodeSubject = m_nodeSub[(int)_data->GetNodeId()];
+		nodeSubject->setNodeInfo(nodeInfo);
+		nodeSubject->setNotification(_data);
+		nodeSubject->notify();
+	}else{
+		Log::Write(LogLevel_Error, "ZNode::changeValue: value changes, can not find subject for the given node"
+				"(nidoId %d, homeID 0x%08x) in the list", (int)_data->GetNodeId(), (int)_data->GetHomeId());
+	}
 }
 
 void ZNode::refreshedValue(Notification const* _data){

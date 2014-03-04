@@ -15,10 +15,12 @@
 
 using namespace OpenZWave;
 
+class NodeSubject;
+
 class NodeObserver {
 
 	public:
-		virtual void update(NObInfo* info){};
+		virtual void update(NodeSubject* subject){};
 
 		virtual ~NodeObserver(){};
 };

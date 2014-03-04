@@ -131,20 +131,6 @@ using namespace OpenZWave;
 		};
 	};
 
-	//----------------------------------------------------------------------------
-	//Node subject/observer data structure
-	//-----------------------------------------------------------------------------
-
-	struct NObInfo {
-		Notification const* notification;
-		NodeInfo* nodeInfo;
-		ValueID valueID;
-
-		NObInfo(Notification const* _notification, NodeInfo* _nodeInfo, ValueID _valueID):
-			notification(_notification), nodeInfo(_nodeInfo), valueID(_valueID){
-		};
-	};
-
 	const char *genreToStr(ValueID::ValueGenre value);
 	ValueID::ValueGenre genreToNum(char const* value);
 	const char *typeToStr(ValueID::ValueType value);

@@ -23,7 +23,8 @@
 #include "libs/Utility.h"
 #include "devices/TinyController.h"
 
-namespace TinyOpenZWaveApi{
+namespace TinyOpenZWaveApi {
+
 	using namespace OpenZWave;
 
 	class OpenZWaveFacade {

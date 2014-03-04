@@ -14,6 +14,7 @@
 #include "TinyController.h"
 #include "../libs/Utility.h"
 #include "Device.h"
+#include "../observer/NodeSubject.h"
 
 using namespace OpenZWave;
 
@@ -48,7 +49,7 @@ using namespace OpenZWave;
 			//commands callback
 			static void callback_turnOnOff(Device* _context, Notification const* _data);
 
-			virtual void update(NObInfo* info);
+			virtual void update(NodeSubject* subject);
 	};
 
 #endif /* BINARYSWITCH_H_ */

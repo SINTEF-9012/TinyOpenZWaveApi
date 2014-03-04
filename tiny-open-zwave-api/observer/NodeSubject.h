@@ -8,7 +8,7 @@
 #ifndef NODESUBJECT_H_
 #define NODESUBJECT_H_
 
-
+#include "openzwave/Notification.h"
 #include "openzwave/Defs.h"
 
 #include "NodeObserver.h"
@@ -21,16 +21,20 @@ class NodeSubject {
 	private:
 		NodeInfo* nodeInfo;
 		list<NodeObserver*> observers;
+		Notification const* notification;
 
 	public:
-		NodeSubject(NodeInfo* nodeInfo);
+		NodeSubject(NodeInfo* _nodeInfo, Notification const* _notification);
 		~NodeSubject(){};
 
 		void attach(NodeObserver* observer);
 		void detach(NodeObserver* observer);
-		void notify(NObInfo* info);
+		void notify();
 
+		void setNodeInfo(NodeInfo* _nodeInfo);
 		NodeInfo* getNodeInfo();
+		void setNotification(Notification const* _notification);
+		Notification const* getNotification();
 };
 
 
