@@ -51,7 +51,7 @@ BinarySwitch::BinarySwitch(){
 
 BinarySwitch* BinarySwitch::Init(TinyController* const controller, uint8 const _nodeId, uint8 const _instance, uint8 const _index){
 	BinarySwitch* bswitch = (BinarySwitch*)Device::Init(controller, _nodeId, _instance, _index);
-	ValueID valueId = DomoZWave_GetValueID(controller->currentControllerHomeId, getComandClass(), this->node->m_nodeId, this->instance, this->index);
+	ValueID valueId = DomoZWave_GetValueID(controller->controllerHomeId, getComandClass(), this->node->m_nodeId, this->instance, this->index);
 	DummyValueID dummy;
 	if(valueId != *dummy.valueId){
 		bool result = Manager::Get()->GetValueAsBool(valueId, &isTurnedOn);
@@ -61,7 +61,7 @@ BinarySwitch* BinarySwitch::Init(TinyController* const controller, uint8 const _
 	}else{
 		Log::Write(LogLevel_Error, "BinarySwitch::BinarySwitch(): can not find ValueID for"
 				"Home 0x%08x Node %d Class %s Instance %d Index %d",
-				controller->currentControllerHomeId, this->node->m_nodeId,
+				controller->controllerHomeId, this->node->m_nodeId,
 				getComandClass(), this->instance, this->index);
 	}
 	return bswitch;
@@ -82,7 +82,7 @@ uint8 BinarySwitch::getComandClass(){
 void BinarySwitch::turnOn(){
 	Log::Write(LogLevel_Info, "BinarySwitch::turnOn(): turning on...");
 	if(this->node != NULL){
-		DomoZWave_SetValue((int) controller->currentControllerHomeId, (int) this->node->m_nodeId, this->instance, 255, callbacksOnOff);
+		DomoZWave_SetValue((int) controller->controllerHomeId, (int) this->node->m_nodeId, this->instance, 255, callbacksOnOff);
 	}else{
 		Log::Write(LogLevel_Info, "BinarySwitch::turnOn(): node is NULL, ignoring...");
 	};
@@ -91,7 +91,7 @@ void BinarySwitch::turnOn(){
 void BinarySwitch::turnOff(){
 	Log::Write(LogLevel_Info, "BinarySwitch::turnOff(): turning off...");
 	if(this->node != NULL){
-		DomoZWave_SetValue((int) controller->currentControllerHomeId, (int) this->node->m_nodeId, this->instance, 0, callbacksOnOff);
+		DomoZWave_SetValue((int) controller->controllerHomeId, (int) this->node->m_nodeId, this->instance, 0, callbacksOnOff);
 	}else{
 		Log::Write(LogLevel_Info, "BinarySwitch::turnOff(): node is NULL, ignoring...");
 	};

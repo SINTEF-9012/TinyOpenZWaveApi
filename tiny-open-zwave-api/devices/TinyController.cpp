@@ -19,15 +19,13 @@
 #include "../libs/DomoZWave.h"
 #include "../libs/Utility.h"
 #include "../devices/Device.h"
-
 #include "../libs/ZNode.h"
+#include "../observer/ControllerSubject.h"
+#include "../observer/ControllerObserver.h"
 
 
 using namespace OpenZWave;
 
-TinyController* TinyController::s_instance = NULL;
-uint32 TinyController::currentControllerHomeId = 0;
-uint8 TinyController::currentControllerNodeId = 0;
 
 pthread_mutex_t nlock = PTHREAD_MUTEX_INITIALIZER;
 
@@ -171,7 +169,7 @@ void OnNotification (Notification const* _notification, void* _context)
 			   _notification->GetNodeId());
 		pthread_mutex_lock(&nlock);
 		ZNode::controllerReady(_notification);
-		TinyController::Get()->controllerReadyCallback->fn_callback(TinyController::Get()->controllerReadyCallback->instance);
+		//TinyController::Get()->controllerReadyCallback->fn_callback(TinyController::Get()->controllerReadyCallback->instance);
 		pthread_mutex_unlock(&nlock);
 		break;
 	  case Notification::Type_DriverFailed:
@@ -256,95 +254,35 @@ void OnNotification (Notification const* _notification, void* _context)
   }
 }
 
-
-//-----------------------------------------------------------------------------
-//	<TinyController::SetConfiguration>
-//	Static method to init the singleton.
-//-----------------------------------------------------------------------------
-TinyController* TinyController::SetConfiguration(
-		char const* config_name, char const* zw_dir,
-		char const* domo_log, bool const enableLog,
-		bool const enableOZdebug, int polltime){
-	if(s_instance == NULL){
-		Log::Write(LogLevel_Info, "TinyController::Init() : initializing TinyController");
-		s_instance = new TinyController(config_name, zw_dir, domo_log, enableLog, enableOZdebug, polltime);
-	}
-	return s_instance;
-}
-
-//-----------------------------------------------------------------------------
-//	<TinyController::AddController>
-//	Static method to add controller and complete initialization
-//-----------------------------------------------------------------------------
-void TinyController::AddController(char const* port){
-	ZWave_AddSerialPort(port);
-}
-
-
-//-----------------------------------------------------------------------------
-//	<TinyController::setCurrentController>
-//	Static method to set current controller
-//-----------------------------------------------------------------------------
-void TinyController::setCurrentController(char const* port){
-	list<m_structCtrl*>& g_allControllers = ZWave_GetGControllers();
-	for(list<m_structCtrl*>::iterator it = g_allControllers.begin(); it != g_allControllers.end(); ++it){
-		uint32 homeId = (*it)->m_homeId;
-		string controllerPath = Manager::Get()->GetControllerPath(homeId);
-		string portName = port;
-		if(portName == controllerPath){
-			TinyController::currentControllerHomeId = homeId;
-			TinyController::currentControllerNodeId = (*it)->m_nodeId;
-			Log::Write(LogLevel_Info, "TinyController::setCurrentController : %s controller with homeId %08x is set as default", port, currentControllerHomeId);
-			break;
-		}
-	}
-	if(currentControllerHomeId == 0){
-		Log::Write(LogLevel_Info, "TinyController::setCurrentController : %s controller is not found", port);
-	}
-}
+Manager::pfnOnNotification_t TinyController::OnNotificationCallback = OnNotification;
 
 //-----------------------------------------------------------------------------
 //	<TinyController::Destroy>
 //	Static method to destroy the singleton.
 //-----------------------------------------------------------------------------
-void TinyController::Destroy()
-{
-	delete s_instance;
-	s_instance = NULL;
+void TinyController::Destroy() {
+	delete this;
 }
 
 //-----------------------------------------------------------------------------
 // <TinyController::TinyController>
 // Constructor
 //-----------------------------------------------------------------------------
-TinyController::TinyController(char const* config_name, char const* zw_dir,
-		char const* domo_log, bool const enableLog,
-		bool const enableOZdebug, int polltime) {
-	ZWave_Init(domo_log, enableLog);
-	Options::Create(config_name, zw_dir, "");
+TinyController::TinyController(char const* _port) {
+	Log::Write(LogLevel_Info, "TinyController::TinyController() : initializing...");
 
-	if (enableOZdebug)
-	{
-		Options::Get()->AddOptionInt("SaveLogLevel", LogLevel_Detail);
-	  	Options::Get()->AddOptionInt("QueueLogLevel", LogLevel_Debug);
-	   	Options::Get()->AddOptionInt("DumpTriggerLevel", LogLevel_Error);
-	}
+	port = _port;
+	controllerHomeId = 0;
+	controllerNodeId = 0;
+	isLaunched = false;
 
-	if(polltime != 0){
-		Options::Get()->AddOptionInt("PollInterval", polltime);
-		Options::Get()->AddOptionBool("IntervalBetweenPolls", true);
-		Options::Get()->AddOptionBool("SuppressValueRefresh", false);
-		Options::Get()->AddOptionBool("PerformReturnRoutes", false);
-	}
-	Options::Get()->Lock();
-
+	controllerInfo = NULL;
 	controllerReadyCallback = NULL;
 	controllerFailedCallback = NULL;
 	controllerResetCallback = NULL;
 	allNodeQueriedCallback = NULL;
 	awakedNodesQueriedCallback = NULL;
 	allNodesQueriedSomeDeadCallback = NULL;
-	s_instance = this;
 }
 
 //-----------------------------------------------------------------------------
@@ -353,8 +291,13 @@ TinyController::TinyController(char const* config_name, char const* zw_dir,
 //-----------------------------------------------------------------------------
 
 void TinyController::start(){
-	Manager::Create();
-	Manager::Get()->AddWatcher(OnNotification, NULL);
+	if(isLaunched){
+		Log::Write(LogLevel_Info, "TinyController::start() : the serial port %s is already added...", port);
+		return;
+	}
+	isLaunched = true;
+	Log::Write(LogLevel_Info, "TinyController::start() : adding serial port %s...", port);
+	ZWave_AddSerialPort(port);
 }
 
 //-----------------------------------------------------------------------------
@@ -387,11 +330,32 @@ TinyController::~TinyController() {
 	for(list<Device*>::iterator it = devices.begin(); it != devices.end(); ++it){
 		(*it)->Destroy();
 	}
-	ZWave_Destroy();
-	Manager::Get()->RemoveWatcher(OnNotification, NULL);
-	Manager::Get()->Destroy();
-	Options::Get()->Destroy();
 }
 
+//-----------------------------------------------------------------------------
+// <TinyController::update>
+// observer update
+//-----------------------------------------------------------------------------
+void TinyController::update(ControllerSubject* subject){
+	Notification const* notification = subject->getNotification();
+	switch(notification->GetType()){
+		case Notification::Type_DriverReady:
+			Log::Write(LogLevel_Info, "TinyController::update() : setUp...");
+			this->setUp(subject->getControllerInfo());
+			break;
+		default:
+			Log::Write(LogLevel_Info, "TinyController::update() : not handled case...");
+			break;
+	}
+}
+
+//-----------------------------------------------------------------------------
+// <TinyController::setUp>
+//-----------------------------------------------------------------------------
+void TinyController::setUp(m_structCtrl* _ctrInfo){
+	controllerInfo = _ctrInfo;
+	controllerHomeId = _ctrInfo->m_homeId;
+	controllerNodeId = _ctrInfo->m_nodeId;
+}
 
 

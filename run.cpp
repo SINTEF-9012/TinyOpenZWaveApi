@@ -52,14 +52,15 @@ void exit_main_handler(int s){
 	//Log::Write(LogLevel_Info, "Caught signal %d",s);
 	//Log::Write(LogLevel_Info, "We have registered %d nodes", ZNode::getNodeCount());
 
-	TinyController* api = TinyController::Get();
-	api->Destroy();
+	//TinyController* api = TinyController::Get();
+	//api->Destroy();
+	OpenZWaveFacade::Quite();
     exit(1);
 }
 
 void f_function(void *param, ...){
 	cout<< "f_function network is ready" << endl;
-	OpenZWaveFacade::Get()->setCurrentController(port);
+	//OpenZWaveFacade::Get()->setCurrentController(port);
 }
 
 int main(int argc, char* argv[]){
@@ -81,8 +82,10 @@ int main(int argc, char* argv[]){
 		if(ch == 'k'){
 			//ThingMLCallback *callback = new ThingMLCallback(f_function, NULL);
 			//OpenZWaveFacade::Init(config, zwdir, domo_log, enableLog, enableZWLog, polltime, callback);
-			OpenZWaveFacade::Get()->start();
-			OpenZWaveFacade::Get()->AddController(port);
+			//OpenZWaveFacade::Get()->start();
+			//OpenZWaveFacade::Get()->AddController(port);
+			TinyController* controller = OpenZWaveFacade::CreateController(port);
+			controller->start();
 
 		}
 		if(ch == 'i'){
@@ -93,8 +96,8 @@ int main(int argc, char* argv[]){
 			ThingMLCallback* no_change = new ThingMLCallback(no_change_callback, NULL);
 			s = new BinarySwitch(turned_on, turned_off, no_change);
 
-			ThingMLCallback *callback = new ThingMLCallback(f_function, NULL);
-			OpenZWaveFacade::Init(config, zwdir, domo_log, enableLog, enableZWLog, polltime, callback);
+			//ThingMLCallback *callback = new ThingMLCallback(f_function, NULL);
+			OpenZWaveFacade::Init(config, zwdir, domo_log, enableLog, enableZWLog, polltime);
 
 			//s = s->Init(OpenZWaveFacade::Get(),2,1,0);
 		}
@@ -104,7 +107,7 @@ int main(int argc, char* argv[]){
 			ThingMLCallback* turned_off = new ThingMLCallback(turned_off_callback, NULL);
 			ThingMLCallback* no_change = new ThingMLCallback(no_change_callback, NULL);
 			s = new BinarySwitch(turned_on, turned_off, no_change);
-			s = s->Init(OpenZWaveFacade::Get(),2,1,0);
+			s = s->Init(OpenZWaveFacade::GetController(port),2,1,0);
 		}
 		if(ch == 'g'){
 			cout << "BinarySwitch: the poll interval is " << Manager::Get()->GetPollInterval() <<endl;
@@ -113,7 +116,7 @@ int main(int argc, char* argv[]){
 		if(ch == 'e'){
 			cout << "BinarySwitch: enabling  poll" <<endl;
 			//Log::Write(LogLevel_Info, "BinarySwitch: enabling  poll");
-			ValueID valueId = ZWave_GetValueID(s->controller->currentControllerHomeId, s->getComandClass(), s->node->m_nodeId, s->instance, s->index);
+			ValueID valueId = ZWave_GetValueID(s->controller->controllerHomeId, s->getComandClass(), s->node->m_nodeId, s->instance, s->index);
 			Manager::Get()->EnablePoll(valueId, 1);
 		}
 		if(ch == 's'){
@@ -122,7 +125,7 @@ int main(int argc, char* argv[]){
 			Manager::Get()->SetPollInterval(5000, false);
 		}
 		if(ch == 'q'){
-			ValueID valueId = ZWave_GetValueID(s->controller->currentControllerHomeId, s->getComandClass(), s->node->m_nodeId, s->instance, s->index);
+			ValueID valueId = ZWave_GetValueID(s->controller->controllerHomeId, s->getComandClass(), s->node->m_nodeId, s->instance, s->index);
 			DummyValueID dummy;
 			if(valueId != *dummy.valueId){
 				bool isTurnedOn;

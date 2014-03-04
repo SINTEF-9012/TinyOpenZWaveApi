@@ -9,9 +9,6 @@
 #define NODEOBSERVER_H_
 
 #include "openzwave/Defs.h"
-#include "openzwave/Notification.h"
-
-#include "../libs/Utility.h"
 
 using namespace OpenZWave;
 

@@ -29,12 +29,18 @@ namespace TinyOpenZWaveApi {
 
 	class OpenZWaveFacade {
 		public:
-			static TinyController* Init(char const* config_name, char const* zw_dir,
-					char const* domo_log, bool const enableLog,
-					bool const enableOZdebug, int polltime, ThingMLCallback* callback);
-			static TinyController* Get();
+			static bool isInitialized;
+			static std::map<char const*, TinyController*> controllers;
 
-			static void DeviceCreated(Device* device);
+		public:
+			static void Init(char const* config_name, char const* zw_dir,
+					char const* domo_log, bool const enableLog,
+					bool const enableOZdebug, int polltime);
+			static void Quite();
+
+			static TinyController* CreateController(char const* port);
+			static TinyController* GetController(char const* port);
+
 	};
 
 };

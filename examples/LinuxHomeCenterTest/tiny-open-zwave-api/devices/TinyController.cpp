@@ -23,8 +23,8 @@
 using namespace OpenZWave;
 
 TinyController* TinyController::s_instance = NULL;
-uint32 TinyController::currentControllerHomeId = 0;
-uint8 TinyController::currentControllerNodeId = 0;
+uint32 TinyController::controllerHomeId = 0;
+uint8 TinyController::controllerNodeId = 0;
 Manager::pfnOnNotification_t TinyController::callback = NULL;
 
 //-----------------------------------------------------------------------------
@@ -63,13 +63,13 @@ void TinyController::setCurrentController(char const* port){
 		string controllerPath = Manager::Get()->GetControllerPath(homeId);
 		string portName = port;
 		if(portName == controllerPath){
-			TinyController::currentControllerHomeId = homeId;
-			TinyController::currentControllerNodeId = (*it)->m_nodeId;
-			Log::Write(LogLevel_Info, "TinyController::setCurrentController : %s controller with homeId %08x is set as default", port, currentControllerHomeId);
+			TinyController::controllerHomeId = homeId;
+			TinyController::controllerNodeId = (*it)->m_nodeId;
+			Log::Write(LogLevel_Info, "TinyController::setCurrentController : %s controller with homeId %08x is set as default", port, controllerHomeId);
 			break;
 		}
 	}
-	if(currentControllerHomeId == 0){
+	if(controllerHomeId == 0){
 		Log::Write(LogLevel_Info, "TinyController::setCurrentController : %s controller is not found", port);
 	}
 }

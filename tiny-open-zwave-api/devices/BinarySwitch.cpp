@@ -71,7 +71,7 @@ uint8 BinarySwitch::getComandClass(){
 void BinarySwitch::turnOn(){
 	Log::Write(LogLevel_Info, "BinarySwitch::turnOn(): turning on...");
 	if(this->node != NULL){
-		ZWave_SetValue((int) controller->currentControllerHomeId, (int) this->node->m_nodeId, this->instance, 255);
+		ZWave_SetValue((int) controller->controllerHomeId, (int) this->node->m_nodeId, this->instance, 255);
 	}else{
 		Log::Write(LogLevel_Info, "BinarySwitch::turnOn(): node is NULL, ignoring...");
 	};
@@ -80,7 +80,7 @@ void BinarySwitch::turnOn(){
 void BinarySwitch::turnOff(){
 	Log::Write(LogLevel_Info, "BinarySwitch::turnOff(): turning off...");
 	if(this->node != NULL){
-		ZWave_SetValue((int) controller->currentControllerHomeId, (int) this->node->m_nodeId, this->instance, 0);
+		ZWave_SetValue((int) controller->controllerHomeId, (int) this->node->m_nodeId, this->instance, 0);
 	}else{
 		Log::Write(LogLevel_Info, "BinarySwitch::turnOff(): node is NULL, ignoring...");
 	};
@@ -162,7 +162,7 @@ void BinarySwitch::setUp(NodeInfo* nodeInfo){
 	}else{
 		Log::Write(LogLevel_Info, "BinarySwitch::setUp(): ValueID is not known yet for"
 				"Home 0x%08x Node %d Class %s Instance %d Index %d",
-				controller->currentControllerHomeId, this->node->m_nodeId,
+				controller->controllerHomeId, this->node->m_nodeId,
 				getComandClass(), this->instance, this->index);
 	}
 }

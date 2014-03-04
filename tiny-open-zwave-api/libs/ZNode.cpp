@@ -24,11 +24,23 @@
 #include "Utility.h"
 #include "../devices/TinyController.h"
 #include "../observer/NodeSubject.h"
+#include "../observer/ControllerSubject.h"
 #include "../devices/Device.h"
+#include "../TinyZWaveFacade.h"
 
-using namespace OpenZWave;
+
+using namespace TinyOpenZWaveApi;
 
 std::map<int, NodeSubject*> m_nodeSub;
+std::map<uint32, ControllerSubject*> m_ctrlSub;
+
+void ZNode::zwaveInit(const char* logname, bool enableLog){
+	ZWave_Init(logname, enableLog);
+}
+
+void ZNode::zwaveDetroy(){
+	ZWave_Destroy();
+}
 
 void ZNode::deviceAdded(Device* device){
 	Log::Write(LogLevel_Info,"ZNode::deviceAdded() is called");
@@ -36,7 +48,7 @@ void ZNode::deviceAdded(Device* device){
 	NodeInfo *node = NULL;
 	for(list<NodeInfo*>::iterator it = g_nodes.begin(); it != g_nodes.end(); ++it){
 
-		if(device->nodeId == (*it)->m_nodeId && device->controller->currentControllerHomeId == (*it)->m_homeId){
+		if(device->nodeId == (*it)->m_nodeId && device->controller->controllerHomeId == (*it)->m_homeId){
 			node = (*it);
 			break;
 		}
@@ -56,13 +68,19 @@ void ZNode::addNode(Notification const* _notification){
 	nodeInfo->m_homeId = _notification->GetHomeId();
 	nodeInfo->m_DeviceState = DZType_Unknown;
 	nodeInfo->m_LastSeen = 0;
+	Log::Write(LogLevel_Info, "ZNode::addNode() : adding node value %d", nodeInfo->m_nodeId);
 	ZWave_GetGNodes().push_back(nodeInfo);
-	Log::Write(LogLevel_Info, "ZNode(): adding node value %d", nodeInfo->m_nodeId);
-	NodeSubject* nodeSubject = new NodeSubject(nodeInfo, _notification);
 
-	list<Device*> devices = TinyController::Get()->getDevices();
+	string controllerPath = Manager::Get()->GetControllerPath(nodeInfo->m_homeId);
+	TinyController* controller = OpenZWaveFacade::GetController(controllerPath.c_str());
+	if(controller == NULL){
+		Log::Write(LogLevel_Error, "ZNode::addNode() : can not find proper controller with homeID 0x%08x", nodeInfo->m_homeId);
+		return;
+	}
+	NodeSubject* nodeSubject = new NodeSubject(nodeInfo, _notification);
+	list<Device*> devices = controller->getDevices();
 	for(list<Device*>::iterator it = devices.begin(); it != devices.end(); ++it){
-		if(nodeInfo->m_nodeId == (*it)->nodeId  && nodeInfo->m_homeId == (*it)->controller->currentControllerHomeId){
+		if(nodeInfo->m_nodeId == (*it)->nodeId  && nodeInfo->m_homeId == (*it)->controller->controllerHomeId){
 			nodeSubject->attach((*it));
 		}
 	}
@@ -151,7 +169,7 @@ void ZNode::changeValue(Notification const* _data){
 		nodeSubject->notify();
 	}else{
 		Log::Write(LogLevel_Error, "ZNode::changeValue: value changes, can not find subject for the given node"
-				"(nidoId %d, homeID 0x%08x) in the list", (int)_data->GetNodeId(), (int)_data->GetHomeId());
+				"(nodeId %d, homeID 0x%08x) in the list", (int)_data->GetNodeId(), (int)_data->GetHomeId());
 	}
 }
 
@@ -165,6 +183,18 @@ void ZNode::typeGroup(Notification const* _data){
 
 void ZNode::controllerReady(Notification const* _data){
 	ZWave_RPC_DriverReady(_data->GetHomeId(), _data->GetNodeId());
+	string controllerPath = Manager::Get()->GetControllerPath(_data->GetHomeId());
+	TinyController* controller = OpenZWaveFacade::GetController(controllerPath.c_str());
+	if(controller == NULL){
+		Log::Write(LogLevel_Error, " ZNode::controllerReady : can not find proper controller with homeID 0x%08x", _data->GetHomeId());
+		return;
+	}
+	m_structCtrl* info = ZWave_GetControllerInfo(_data->GetHomeId());
+	ControllerSubject* subject = new ControllerSubject(info, _data);
+	subject->attach(controller);
+	m_ctrlSub[_data->GetHomeId()] = subject;
+	subject->notify();
+
 }
 
 m_structCtrl* ZNode::getControllerInfo(uint32 const homeId){

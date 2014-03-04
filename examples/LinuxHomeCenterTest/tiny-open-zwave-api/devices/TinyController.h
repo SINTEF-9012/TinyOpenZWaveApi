@@ -31,8 +31,8 @@ using namespace OpenZWave;
 
 
 		public:
-			static uint32 currentControllerHomeId;
-			static uint8 currentControllerNodeId;
+			static uint32 controllerHomeId;
+			static uint8 controllerNodeId;
 			static Manager::pfnOnNotification_t callback;
 			list<Device*> devices;
 			ThingMLCallback* controllerReadyCallback;

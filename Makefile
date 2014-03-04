@@ -25,11 +25,11 @@ DYNAMIC_LIB_LOCATION = $(TINYOPENZWAVE)/libtinyozw.so
 
 SRC := $(TINYOPENZWAVE)/libs/ZNode.cpp $(TINYOPENZWAVE)/TinyZWaveFacade.cpp $(TINYOPENZWAVE)/libs/Utility.cpp $(TINYOPENZWAVE)/libs/DomoZWave.cpp \
 	$(TINYOPENZWAVE)/devices/TinyController.cpp $(TINYOPENZWAVE)/devices/Device.cpp $(TINYOPENZWAVE)/devices/BinarySwitch.cpp \
-	$(TINYOPENZWAVE)/observer/NodeSubject.cpp
+	$(TINYOPENZWAVE)/observer/NodeSubject.cpp $(TINYOPENZWAVE)/observer/ControllerSubject.cpp
 
 OBJ := $(TINYOPENZWAVE)/libs/ZNode.o $(TINYOPENZWAVE)/TinyZWaveFacade.o $(TINYOPENZWAVE)/libs/Utility.o $(TINYOPENZWAVE)/libs/DomoZWave.o \
 	$(TINYOPENZWAVE)/devices/TinyController.o $(TINYOPENZWAVE)/devices/Device.o $(TINYOPENZWAVE)/devices/BinarySwitch.o \
-	$(TINYOPENZWAVE)/observer/NodeSubject.cpp
+	$(TINYOPENZWAVE)/observer/NodeSubject.o $(TINYOPENZWAVE)/observer/ControllerSubject.o
 
 LIBUSB := -ludev
 LIBS := $(GNUTLS) $(LIBMICROHTTPD) -pthread -lopenzwave $(LIBUSB)
@@ -61,5 +61,5 @@ install: staticlib dynamiclib
 	cp -r $(TINYOPENZWAVE)/libs/*.h /usr/local/include/tinyozw/libs
 
 clean :
-	rm -rf run *.o $(TINYOPENZWAVE)/*.o $(TINYOPENZWAVE)/libs/*.o $(TINYOPENZWAVE)/devices/*.o \
+	rm -rf run *.o $(TINYOPENZWAVE)/*.o $(TINYOPENZWAVE)/libs/*.o $(TINYOPENZWAVE)/devices/*.o $(TINYOPENZWAVE)/observer/*.o \
 		$(TINYOPENZWAVE)/*.xml  $(TINYOPENZWAVE)/*.txt $(TINYOPENZWAVE)/*.log *.xml *.txt *.log \

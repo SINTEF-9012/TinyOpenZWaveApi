@@ -17,6 +17,8 @@ using namespace OpenZWave;
 
 class ZNode {
 	public:
+		static void zwaveInit(const char* logname, bool enableLog);
+		static void zwaveDetroy();
 		static int32 getNodeCount();
 		static ZNode* getNode(int32 const _node_id);
 		static NodeInfo* getNodeInfo(Notification const* _data);

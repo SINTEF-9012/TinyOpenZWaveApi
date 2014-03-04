@@ -13,28 +13,28 @@
 #include "openzwave/Defs.h"
 #include "openzwave/Driver.h"
 #include "openzwave/ValueID.h"
-#include "../libs/Utility.h"
 
+#include "../libs/Utility.h"
+#include "../observer/ControllerObserver.h"
+#include "../observer/ControllerSubject.h"
 
 using namespace OpenZWave;
 
 	class Device;
 
-	class TinyController
-	{
+	class TinyController : public ControllerObserver {
 		private:
-			TinyController(char const* config_name, char const* zw_dir,
-					char const* domo_log, bool const enableLog,
-					bool const enableOZdebug, int polltime);
-			virtual ~TinyController();
-			static TinyController* s_instance;
 			list<Device*> devices;
-
+			m_structCtrl* controllerInfo;
+			bool isLaunched;
 
 		public:
-			static uint32 currentControllerHomeId;
-			static uint8 currentControllerNodeId;
-			static Manager::pfnOnNotification_t callback;
+			static Manager::pfnOnNotification_t OnNotificationCallback;
+
+			uint32 controllerHomeId;
+			uint8 controllerNodeId;
+			char const* port;
+
 			ThingMLCallback* controllerReadyCallback;
 			ThingMLCallback* controllerResetCallback;
 			ThingMLCallback* controllerFailedCallback;
@@ -43,14 +43,13 @@ using namespace OpenZWave;
 			ThingMLCallback* allNodesQueriedSomeDeadCallback;
 
 		public:
-			static TinyController* Get() {return s_instance;};
-			static TinyController* SetConfiguration(char const* config_name, char const* zw_dir,
-					char const* domo_log, bool const enableLog,
-					bool const enableOZdebug, int polltime);
+			TinyController(char const* _port);
+			virtual ~TinyController();
 
 			void start();
 			list<Device*> getDevices();
 			void addDevice(Device* device);
+			void setUp(m_structCtrl* _controllerInfo);
 
 			//callbacks
 			void setControllerReadyCallback(ThingMLCallback* callback) {controllerReadyCallback = callback;};
@@ -60,9 +59,11 @@ using namespace OpenZWave;
 			void setAwakedNodesQueriedCallback(ThingMLCallback* callback) {awakedNodesQueriedCallback = callback;};
 			void setAllNodesQueriedSomeDeadCallback(ThingMLCallback* callback) {allNodesQueriedSomeDeadCallback = callback;};
 
-			static void AddController(char const* port);
-			static void setCurrentController(char const* port);
-			static void Destroy();
+			void addController(char const* _port);
+			void Destroy();
+
+			//observer
+			virtual void update(ControllerSubject* subject);
 	};
 
 
