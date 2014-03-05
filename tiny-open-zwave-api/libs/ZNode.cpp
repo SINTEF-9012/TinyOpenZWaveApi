@@ -26,23 +26,37 @@
 #include "../observer/NodeSubject.h"
 #include "../observer/ControllerSubject.h"
 #include "../devices/Device.h"
-#include "../TinyZWaveFacade.h"
 
 
-using namespace TinyOpenZWaveApi;
+using namespace OpenZWave;
 
-std::map<uint8, NodeSubject*> m_nodeSub;
-std::map<uint32, ControllerSubject*> m_ctrlSub;
+map<char const*, TinyController*> ZNode::controllers;
+map<uint8, NodeSubject*> ZNode::m_nodeSub;
+map<uint32, ControllerSubject*> ZNode::m_ctrlSub;
 
-void ZNode::zwaveInit(const char* logname, bool enableLog){
+void ZNode::Init(const char* logname, bool enableLog){
 	ZWave_Init(logname, enableLog);
+	controllers.clear();
+	m_nodeSub.clear();
+	m_ctrlSub.clear();
 }
 
-void ZNode::zwaveDetroy(){
+void ZNode::Destroy(){
 	ZWave_Destroy();
+	controllers.clear();
+	m_nodeSub.clear();
+	m_ctrlSub.clear();
 }
 
-void ZNode::deviceAdded(Device* device){
+TinyController* ZNode::FindController(char const* port){
+	for(std::map<char const*, TinyController*>::iterator it = ZNode::controllers.begin(); it != ZNode::controllers.end(); ++it){
+		if(std::strcmp(it->first, port) == 0)
+			return ZNode::controllers[it->first];
+	}
+	return NULL;
+}
+
+void ZNode::DeviceAdded(Device* device){
 	Log::Write(LogLevel_Info,"ZNode::deviceAdded() is called");
 	list<NodeInfo*>& g_nodes = ZWave_GetGNodes();
 	NodeInfo *node = NULL;
@@ -62,7 +76,7 @@ void ZNode::deviceAdded(Device* device){
 	}
 }
 
-void ZNode::addNode(Notification const* _notification){
+void ZNode::AddNode(Notification const* _notification){
 	NodeInfo* nodeInfo = new NodeInfo();
 	nodeInfo->m_nodeId = _notification->GetNodeId();
 	nodeInfo->m_homeId = _notification->GetHomeId();
@@ -72,7 +86,7 @@ void ZNode::addNode(Notification const* _notification){
 	ZWave_GetGNodes().push_back(nodeInfo);
 
 	string controllerPath = Manager::Get()->GetControllerPath(nodeInfo->m_homeId);
-	TinyController* controller = OpenZWaveFacade::GetController(controllerPath.c_str());
+	TinyController* controller = FindController(controllerPath.c_str());
 	if(controller == NULL){
 		Log::Write(LogLevel_Error, "ZNode::addNode() : can not find proper controller with homeID 0x%08x", nodeInfo->m_homeId);
 		return;
@@ -88,24 +102,24 @@ void ZNode::addNode(Notification const* _notification){
 	nodeSubject->notify();
 }
 
-int32 ZNode::getNodeCount(){
+int32 ZNode::GetNodeCount(){
 	return ZWave_GetGNodes().size();
 }
 
-NodeInfo *ZNode::getNodeInfo(Notification const* _data){
+NodeInfo *ZNode::GetNodeInfo(Notification const* _data){
 	NodeInfo* info = ZWave_GetNodeInfo(_data);
 	return info;
 }
 
-void ZNode::addValue(Notification const* _data){
-	NodeInfo *nodeInfo = getNodeInfo(_data);
+void ZNode::AddValue(Notification const* _data){
+	NodeInfo *nodeInfo = GetNodeInfo(_data);
 	if(nodeInfo != NULL){
 		nodeInfo->m_values.push_back(_data->GetValueID());
 	}
 	ZWave_RPC_ValueChanged( (int)_data->GetHomeId(), (int)_data->GetNodeId(), _data->GetValueID(), true );
 }
 
-void ZNode::removeNode(Notification const* _data){
+void ZNode::RemoveNode(Notification const* _data){
 	uint32 const homeId = _data->GetHomeId();
 	uint8 const nodeId = _data->GetNodeId();
 	list<NodeInfo*>& g_nodes = ZWave_GetGNodes();
@@ -120,12 +134,12 @@ void ZNode::removeNode(Notification const* _data){
 	ZWave_RPC_NodeRemoved( (int)_data->GetHomeId(), (int)_data->GetNodeId() );
 }
 
-void ZNode::newNode(Notification const* _data){
+void ZNode::NewNode(Notification const* _data){
 
 }
 
-void ZNode::removeValue(Notification const* _data){
-	NodeInfo* nodeInfo = ZNode::getNodeInfo(_data);
+void ZNode::RemoveValue(Notification const* _data){
+	NodeInfo* nodeInfo = ZNode::GetNodeInfo(_data);
 	if (nodeInfo != NULL){
 		// Remove the value from out list
 		for (list<ValueID>::iterator it = nodeInfo->m_values.begin(); it != nodeInfo->m_values.end(); ++it) {
@@ -139,10 +153,10 @@ void ZNode::removeValue(Notification const* _data){
 	ZWave_RPC_ValueRemoved((int)_data->GetHomeId(), (int)_data->GetNodeId(), _data->GetValueID());
 }
 
-void ZNode::changeValue(Notification const* _data){
+void ZNode::ChangeValue(Notification const* _data){
 	ZWave_RPC_ValueChanged((int)_data->GetHomeId(), (int)_data->GetNodeId(), _data->GetValueID(), false);
 
-	NodeInfo* nodeInfo = ZNode::getNodeInfo(_data);
+	NodeInfo* nodeInfo = ZNode::GetNodeInfo(_data);
 	// Update LastSeen and DeviceState
 	if (nodeInfo != NULL){
 		nodeInfo->m_LastSeen = time(NULL);
@@ -173,18 +187,18 @@ void ZNode::changeValue(Notification const* _data){
 	}
 }
 
-void ZNode::refreshedValue(Notification const* _data){
+void ZNode::RefreshedValue(Notification const* _data){
 
 }
 
-void ZNode::typeGroup(Notification const* _data){
+void ZNode::TypeGroup(Notification const* _data){
 
 }
 
-void ZNode::controllerReady(Notification const* _data){
+void ZNode::ControllerReady(Notification const* _data){
 	ZWave_RPC_DriverReady(_data->GetHomeId(), _data->GetNodeId());
 	string controllerPath = Manager::Get()->GetControllerPath(_data->GetHomeId());
-	TinyController* controller = OpenZWaveFacade::GetController(controllerPath.c_str());
+	TinyController* controller = FindController(controllerPath.c_str());
 	if(controller == NULL){
 		Log::Write(LogLevel_Error, " ZNode::controllerReady : can not find proper controller with homeID 0x%08x", _data->GetHomeId());
 		return;
@@ -197,16 +211,16 @@ void ZNode::controllerReady(Notification const* _data){
 
 }
 
-m_structCtrl* ZNode::getControllerInfo(uint32 const homeId){
+m_structCtrl* ZNode::GetControllerInfo(uint32 const homeId){
 	m_structCtrl* info = ZWave_GetControllerInfo(homeId);
 	return info;
 }
 
-void ZNode::updateNodeProtocolInfo(uint32 const homeId, uint8 const nodeId){
+void ZNode::UpdateNodeProtocolInfo(uint32 const homeId, uint8 const nodeId){
 	ZWave_RPC_NodeProtocolInfo((int)homeId, (int)nodeId);
 }
 
-void ZNode::updateNodeEvent(Notification const* _data){
+void ZNode::UpdateNodeEvent(Notification const* _data){
 	// Event caused by basic set or hail
 	ZWave_RPC_NodeEvent((int)_data->GetHomeId(), (int)_data->GetNodeId(), _data->GetValueID(), (int)_data->GetEvent());
 	NodeInfo* nodeInfo = ZWave_GetNodeInfo(_data);
@@ -216,7 +230,7 @@ void ZNode::updateNodeEvent(Notification const* _data){
 	}
 }
 
-void ZNode::allNodeQueriedSomeDead(Notification const* _data){
+void ZNode::AllNodeQueriedSomeDead(Notification const* _data){
 	m_structCtrl* ctrl = ZWave_GetControllerInfo((int)_data->GetHomeId());
 
 	if(_data->GetType() == Notification::Type_AllNodesQueried ) ZWave_WriteLog( LogLevel_Debug, true, "AllNodesQueried: HomeId=%d", (int)_data->GetHomeId());
@@ -239,7 +253,7 @@ void ZNode::allNodeQueriedSomeDead(Notification const* _data){
 	ctrl->m_controllerAllQueried++;
 }
 
-void ZNode::allNodeQueried(Notification const* _data){
+void ZNode::AllNodeQueried(Notification const* _data){
 	list<m_structCtrl*>& g_allControllers = ZWave_GetGControllers();
 	for(list<m_structCtrl*>::iterator it = g_allControllers.begin(); it != g_allControllers.end(); ++it){
 		uint32 homeId = (*it)->m_homeId;
@@ -249,7 +263,7 @@ void ZNode::allNodeQueried(Notification const* _data){
 	Log::Write(LogLevel_Info, "ZNode::allNodeQueried(): calling");
 }
 
-void ZNode::messageComplete(Notification const* _data){
+void ZNode::MessageComplete(Notification const* _data){
 	NodeInfo* nodeInfo = ZWave_GetNodeInfo(_data);
 	if (nodeInfo != NULL){
 		nodeInfo->m_LastSeen = time(NULL);
@@ -257,7 +271,7 @@ void ZNode::messageComplete(Notification const* _data){
 	}
 }
 
-void ZNode::messageAwake(Notification const* _data){
+void ZNode::MessageAwake(Notification const* _data){
 	NodeInfo* nodeInfo = ZWave_GetNodeInfo(_data);
 	if (nodeInfo != NULL){
 		nodeInfo->m_LastSeen = time(NULL);
@@ -265,7 +279,7 @@ void ZNode::messageAwake(Notification const* _data){
 	}
 }
 
-void ZNode::messageAlive(Notification const* _data){
+void ZNode::MessageAlive(Notification const* _data){
 	NodeInfo* nodeInfo = ZWave_GetNodeInfo(_data);
 	if (nodeInfo != NULL){
 		nodeInfo->m_LastSeen = time(NULL);

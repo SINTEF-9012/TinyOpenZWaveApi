@@ -89,24 +89,24 @@ using namespace OpenZWave;
 
 	class ZNode {
 		public:
-			static int32 getNodeCount();
-			static ZNode* getNode(int32 const _node_id);
-			static NodeInfo* getNodeInfo(Notification const* _data);
-			static void addNode(Notification const* _data);
-			static void addValue(Notification const* _data);
-			static void removeNode(Notification const* _data);
-			static void removeValue(Notification const* _data);
-			static void changeValue(Notification const* _data);
-			static void controllerReady(Notification const* _data);
-			static m_structCtrl* getControllerInfo(uint32 const homeId);
-			static void updateNodeProtocolInfo(uint32 const homeId, uint8 const nodeId);
-			static void updateNodeEvent(Notification const* _data);
-			static void allNodeQueriedSomeDead(Notification const* _data);
-			static void allNodeQueried(Notification const* _data);
+			static int32 GetNodeCount();
+			static ZNode* GetNode(int32 const _node_id);
+			static NodeInfo* GetNodeInfo(Notification const* _data);
+			static void AddNode(Notification const* _data);
+			static void AddValue(Notification const* _data);
+			static void RemoveNode(Notification const* _data);
+			static void RemoveValue(Notification const* _data);
+			static void ChangeValue(Notification const* _data);
+			static void ControllerReady(Notification const* _data);
+			static m_structCtrl* GetControllerInfo(uint32 const homeId);
+			static void UpdateNodeProtocolInfo(uint32 const homeId, uint8 const nodeId);
+			static void UpdateNodeEvent(Notification const* _data);
+			static void AllNodeQueriedSomeDead(Notification const* _data);
+			static void AllNodeQueried(Notification const* _data);
 
-			static void messageComplete(Notification const* _data);
-			static void messageAwake(Notification const* _data);
-			static void messageAlive(Notification const* _data);
+			static void MessageComplete(Notification const* _data);
+			static void MessageAwake(Notification const* _data);
+			static void MessageAlive(Notification const* _data);
 	};
 
 	struct DummyValueID {

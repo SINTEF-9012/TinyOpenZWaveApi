@@ -30,7 +30,6 @@ namespace TinyOpenZWaveApi {
 	class OpenZWaveFacade {
 		public:
 			static bool isInitialized;
-			static std::map<char const*, TinyController*> controllers;
 
 		public:
 			static void Init(char const* config_name, char const* zw_dir,

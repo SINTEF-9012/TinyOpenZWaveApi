@@ -25,7 +25,7 @@ void OnNotification (Notification const* _notification, void* _context)
 			   genreToStr(id.GetGenre()), cclassToStr(id.GetCommandClassId()), id.GetInstance(),
 			   id.GetIndex(), typeToStr(id.GetType()));
 		pthread_mutex_lock(&nlock);;
-		ZNode::addValue(_notification);
+		ZNode::AddValue(_notification);
 		pthread_mutex_unlock(&nlock);
 		break;
 	  case Notification::Type_ValueRemoved:
@@ -34,7 +34,7 @@ void OnNotification (Notification const* _notification, void* _context)
 			   genreToStr(id.GetGenre()), cclassToStr(id.GetCommandClassId()), id.GetInstance(),
 			   id.GetIndex(), typeToStr(id.GetType()));
 		pthread_mutex_lock(&nlock);
-		ZNode::removeValue(_notification);
+		ZNode::RemoveValue(_notification);
 		pthread_mutex_unlock(&nlock);
 		break;
 	  case Notification::Type_ValueChanged:
@@ -43,7 +43,7 @@ void OnNotification (Notification const* _notification, void* _context)
 			   genreToStr(id.GetGenre()), cclassToStr(id.GetCommandClassId()), id.GetInstance(),
 			   id.GetIndex(), typeToStr(id.GetType()));
 		pthread_mutex_lock(&nlock);
-		ZNode::changeValue(_notification);
+		ZNode::ChangeValue(_notification);
 		pthread_mutex_unlock(&nlock);
 		break;
 	  case Notification::Type_ValueRefreshed:
@@ -70,7 +70,7 @@ void OnNotification (Notification const* _notification, void* _context)
 			   genreToStr(id.GetGenre()), cclassToStr(id.GetCommandClassId()), id.GetInstance(),
 			   id.GetIndex(), typeToStr(id.GetType()));
 	    pthread_mutex_lock(&nlock);
-	    ZNode::addNode(_notification);
+	    ZNode::AddNode(_notification);
 	    pthread_mutex_unlock(&nlock);
 		break;
 	  case Notification::Type_NodeRemoved:
@@ -79,7 +79,7 @@ void OnNotification (Notification const* _notification, void* _context)
 			   genreToStr(id.GetGenre()), cclassToStr(id.GetCommandClassId()), id.GetInstance(),
 			   id.GetIndex(), typeToStr(id.GetType()));
 		pthread_mutex_lock(&nlock);
-		ZNode::removeNode(_notification);
+		ZNode::RemoveNode(_notification);
 		pthread_mutex_unlock(&nlock);
 		break;
 	  case Notification::Type_NodeProtocolInfo:
@@ -88,7 +88,7 @@ void OnNotification (Notification const* _notification, void* _context)
 			   genreToStr(id.GetGenre()), cclassToStr(id.GetCommandClassId()), id.GetInstance(),
 			   id.GetIndex(), typeToStr(id.GetType()));
 		pthread_mutex_lock(&nlock);
-		ZNode::updateNodeProtocolInfo(_notification->GetHomeId(), _notification->GetNodeId());
+		ZNode::UpdateNodeProtocolInfo(_notification->GetHomeId(), _notification->GetNodeId());
 		pthread_mutex_unlock(&nlock);
 		break;
 	  case Notification::Type_NodeNaming:
@@ -103,7 +103,7 @@ void OnNotification (Notification const* _notification, void* _context)
 			   genreToStr(id.GetGenre()), cclassToStr(id.GetCommandClassId()), id.GetInstance(),
 			   id.GetIndex(), typeToStr(id.GetType()));
 		pthread_mutex_lock(&nlock);
-		ZNode::updateNodeEvent(_notification);
+		ZNode::UpdateNodeEvent(_notification);
 		pthread_mutex_unlock(&nlock);
 		break;
 	  case Notification::Type_PollingDisabled:
@@ -144,7 +144,7 @@ void OnNotification (Notification const* _notification, void* _context)
 		Log::Write(LogLevel_Info, "Notification: Driver Ready, homeId %08x, nodeId %d", _notification->GetHomeId(),
 			   _notification->GetNodeId());
 		pthread_mutex_lock(&nlock);
-		ZNode::controllerReady(_notification);
+		ZNode::ControllerReady(_notification);
 		pthread_mutex_unlock(&nlock);
 		break;
 	  case Notification::Type_DriverFailed:
@@ -165,13 +165,13 @@ void OnNotification (Notification const* _notification, void* _context)
 	  case Notification::Type_AllNodesQueriedSomeDead:
 		Log::Write(LogLevel_Info, "Notification: Awake Nodes Queried Some Dead");
 		pthread_mutex_lock(&nlock);
-		ZNode::allNodeQueriedSomeDead(_notification);
+		ZNode::AllNodeQueriedSomeDead(_notification);
 		pthread_mutex_unlock(&nlock);
 		break;
 	  case Notification::Type_AllNodesQueried:
 		Log::Write(LogLevel_Info, "Notification: All Nodes Queried");
 		pthread_mutex_lock(&nlock);
-		ZNode::allNodeQueried(_notification);
+		ZNode::AllNodeQueried(_notification);
 		OpenZWaveFacade::Get()->controllerReadyCallback->fn_callback(OpenZWaveFacade::Get()->controllerReadyCallback->instance);
 		pthread_mutex_unlock(&nlock);
 		break;
@@ -181,7 +181,7 @@ void OnNotification (Notification const* _notification, void* _context)
 			  Log::Write(LogLevel_Info, "Notification: Notification home %08x node %d Message Complete",
 				_notification->GetHomeId(), _notification->GetNodeId(), _notification->GetNotification());
 			  pthread_mutex_lock(&nlock);
-			  ZNode::messageComplete(_notification);
+			  ZNode::MessageComplete(_notification);
 			  pthread_mutex_unlock(&nlock);
 			  break;
 			case Notification::Code_Timeout:
@@ -196,7 +196,7 @@ void OnNotification (Notification const* _notification, void* _context)
 			  Log::Write(LogLevel_Info, "Notification: Notification home %08x node %d Awake",
 				_notification->GetHomeId(), _notification->GetNodeId(), _notification->GetNotification());
 			  pthread_mutex_lock(&nlock);
-			  ZNode::messageAwake(_notification);
+			  ZNode::MessageAwake(_notification);
 			  pthread_mutex_unlock(&nlock);
 			  break;
 			case Notification::Code_Sleep:
@@ -211,7 +211,7 @@ void OnNotification (Notification const* _notification, void* _context)
 				Log::Write(LogLevel_Info, "Notification: Notification home %08x node %d Alive",
 								_notification->GetHomeId(), _notification->GetNodeId(), _notification->GetNotification());
 				pthread_mutex_lock(&nlock);
-				ZNode::messageAlive(_notification);
+				ZNode::MessageAlive(_notification);
 				pthread_mutex_unlock(&nlock);
 				break;
 			default:

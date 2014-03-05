@@ -15,7 +15,6 @@
 using namespace TinyOpenZWaveApi;
 
 bool OpenZWaveFacade::isInitialized = false;
-std::map<char const*, TinyController*> OpenZWaveFacade::controllers;
 
 void OpenZWaveFacade::Init(char const* config_name, char const* zw_dir,
 		char const* domo_log, bool const enableLog,
@@ -26,8 +25,7 @@ void OpenZWaveFacade::Init(char const* config_name, char const* zw_dir,
 	}
 
 	Log::Write(LogLevel_Info, "OpenZWaveFacade::Init() : initializing OpenZWave ...");
-	OpenZWaveFacade::controllers.clear();
-	ZNode::zwaveInit(domo_log, enableLog);
+	ZNode::Init(domo_log, enableLog);
 	Options::Create(config_name, zw_dir, "");
 
 	if (enableOZdebug)
@@ -54,10 +52,9 @@ void OpenZWaveFacade::Quite(){
 	if(!isInitialized)
 		return;
 	Log::Write(LogLevel_Info, "OpenZWaveFacade::Quite() : destroying OpenZWave ...");
-	for(std::map<char const*, TinyController*>::iterator it = controllers.begin(); it != controllers.end(); ++it)
+	for(std::map<char const*, TinyController*>::iterator it = ZNode::controllers.begin(); it != ZNode::controllers.end(); ++it)
 		it->second->Destroy();
-	OpenZWaveFacade::controllers.clear();
-	ZNode::zwaveDetroy();
+	ZNode::Destroy();
 	Manager::Get()->RemoveWatcher(TinyController::OnNotificationCallback, NULL);
 	Manager::Get()->Destroy();
 	Options::Get()->Destroy();
@@ -71,15 +68,13 @@ TinyController* OpenZWaveFacade::CreateController(char const* port){
 	}
 
 	TinyController *controller = new TinyController(port);
-	OpenZWaveFacade::controllers[port] = controller;
+	ZNode::controllers[port] = controller;
 	return controller;
 }
 
 TinyController* OpenZWaveFacade::GetController(char const* port){
-	for(std::map<char const*, TinyController*>::iterator it = OpenZWaveFacade::controllers.begin(); it != OpenZWaveFacade::controllers.end(); ++it){
-		if(std::strcmp(it->first, port) == 0)
-			return OpenZWaveFacade::controllers[it->first];
-	}
-	Log::Write(LogLevel_Info, "OpenZWaveFacade::GetController(): can not find controller for %s", port);
-	return NULL;
+	TinyController* controller = ZNode::FindController(port);
+	if(controller == NULL)
+		Log::Write(LogLevel_Info, "OpenZWaveFacade::GetController(): can not find controller for %s", port);
+	return controller;
 }

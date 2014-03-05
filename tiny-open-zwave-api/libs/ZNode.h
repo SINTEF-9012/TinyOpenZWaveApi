@@ -12,39 +12,47 @@
 #include "openzwave/Notification.h"
 
 #include "Utility.h"
+#include "../devices/TinyController.h"
+#include "../observer/NodeSubject.h"
+#include "../observer/ControllerSubject.h"
 
 using namespace OpenZWave;
 
 class ZNode {
 	public:
-		static void zwaveInit(const char* logname, bool enableLog);
-		static void zwaveDetroy();
-		static int32 getNodeCount();
-		static ZNode* getNode(int32 const _node_id);
-		static NodeInfo* getNodeInfo(Notification const* _data);
-		static void addNode(Notification const* _data);
-		static void removeNode(Notification const* _data);
-		static void newNode(Notification const* _data);
+		static map<char const*, TinyController*> controllers;
+		static map<uint8, NodeSubject*> m_nodeSub;
+		static map<uint32, ControllerSubject*> m_ctrlSub;
 
-		static void addValue(Notification const* _data);
-		static void removeValue(Notification const* _data);
-		static void changeValue(Notification const* _data);
-		static void refreshedValue(Notification const* _data);
+		static void Init(const char* logname, bool enableLog);
+		static void Destroy();
+		static TinyController* FindController(char const* port);
+		static int32 GetNodeCount();
+		static ZNode* GetNode(int32 const _node_id);
+		static NodeInfo* GetNodeInfo(Notification const* _data);
+		static void AddNode(Notification const* _data);
+		static void RemoveNode(Notification const* _data);
+		static void NewNode(Notification const* _data);
 
-		static void controllerReady(Notification const* _data);
-		static m_structCtrl* getControllerInfo(uint32 const homeId);
-		static void updateNodeProtocolInfo(uint32 const homeId, uint8 const nodeId);
-		static void updateNodeEvent(Notification const* _data);
-		static void allNodeQueriedSomeDead(Notification const* _data);
-		static void allNodeQueried(Notification const* _data);
+		static void AddValue(Notification const* _data);
+		static void RemoveValue(Notification const* _data);
+		static void ChangeValue(Notification const* _data);
+		static void RefreshedValue(Notification const* _data);
 
-		static void messageComplete(Notification const* _data);
-		static void messageAwake(Notification const* _data);
-		static void messageAlive(Notification const* _data);
+		static void ControllerReady(Notification const* _data);
+		static m_structCtrl* GetControllerInfo(uint32 const homeId);
+		static void UpdateNodeProtocolInfo(uint32 const homeId, uint8 const nodeId);
+		static void UpdateNodeEvent(Notification const* _data);
+		static void AllNodeQueriedSomeDead(Notification const* _data);
+		static void AllNodeQueried(Notification const* _data);
 
-		static void typeGroup(Notification const* _data);
+		static void MessageComplete(Notification const* _data);
+		static void MessageAwake(Notification const* _data);
+		static void MessageAlive(Notification const* _data);
 
-		static void deviceAdded(Device* device);
+		static void TypeGroup(Notification const* _data);
+
+		static void DeviceAdded(Device* device);
 	};
 
 
