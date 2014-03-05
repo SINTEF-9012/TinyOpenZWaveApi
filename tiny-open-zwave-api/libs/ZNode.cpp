@@ -211,6 +211,14 @@ void ZNode::ControllerReady(Notification const* _data){
 
 }
 
+void ZNode::ControllerFailed(Notification const* _data){
+
+}
+
+void ZNode::ControllerReset(Notification const* _data){
+
+}
+
 m_structCtrl* ZNode::GetControllerInfo(uint32 const homeId){
 	m_structCtrl* info = ZWave_GetControllerInfo(homeId);
 	return info;
@@ -231,6 +239,8 @@ void ZNode::UpdateNodeEvent(Notification const* _data){
 }
 
 void ZNode::AllNodeQueriedSomeDead(Notification const* _data){
+	Log::Write(LogLevel_Info, "ZNode::AllNodeQueriedSomeDead(): calling");
+
 	m_structCtrl* ctrl = ZWave_GetControllerInfo((int)_data->GetHomeId());
 
 	if(_data->GetType() == Notification::Type_AllNodesQueried ) ZWave_WriteLog( LogLevel_Debug, true, "AllNodesQueried: HomeId=%d", (int)_data->GetHomeId());
@@ -251,16 +261,47 @@ void ZNode::AllNodeQueriedSomeDead(Notification const* _data){
 		}
 	}
 	ctrl->m_controllerAllQueried++;
+
+	if(m_ctrlSub.find(_data->GetHomeId()) != m_ctrlSub.end()){
+		ControllerSubject* subject = m_ctrlSub[_data->GetHomeId()];
+		subject->setControllerInfo(ctrl);
+		subject->setNotification(_data);
+		subject->notify();
+	}else{
+		Log::Write(LogLevel_Info, "ZNode::AllNodeQueriedSomeDead(): can not find controller to notify for homeID 0x%08x", _data->GetHomeId());
+	}
 }
 
 void ZNode::AllNodeQueried(Notification const* _data){
+	Log::Write(LogLevel_Info, "ZNode::AllNodeQueried(): calling");
 	list<m_structCtrl*>& g_allControllers = ZWave_GetGControllers();
 	for(list<m_structCtrl*>::iterator it = g_allControllers.begin(); it != g_allControllers.end(); ++it){
 		uint32 homeId = (*it)->m_homeId;
 		ZWave_WriteConfig(homeId);
 		(*it)->m_lastWriteXML = time(NULL);
 	}
-	Log::Write(LogLevel_Info, "ZNode::allNodeQueried(): calling");
+	m_structCtrl* ctrl = ZWave_GetControllerInfo(_data->GetHomeId());
+	if(m_ctrlSub.find(_data->GetHomeId()) != m_ctrlSub.end()){
+		ControllerSubject* subject = m_ctrlSub[_data->GetHomeId()];
+		subject->setControllerInfo(ctrl);
+		subject->setNotification(_data);
+		subject->notify();
+	}else{
+		Log::Write(LogLevel_Info, "ZNode::AllNodeQueried(): can not find controller to notify for homeID 0x%08x", _data->GetHomeId());
+	}
+}
+
+void ZNode::AwakeNodesQueried(Notification const* _data){
+	Log::Write(LogLevel_Info, "ZNode::AwakeNodesQueried(): calling");
+	m_structCtrl* ctrl = ZWave_GetControllerInfo(_data->GetHomeId());
+	if(m_ctrlSub.find(_data->GetHomeId()) != m_ctrlSub.end()){
+		ControllerSubject* subject = m_ctrlSub[_data->GetHomeId()];
+		subject->setControllerInfo(ctrl);
+		subject->setNotification(_data);
+		subject->notify();
+	}else{
+		Log::Write(LogLevel_Info, "ZNode::AwakeNodesQueried(): can not find controller to notify for homeID 0x%08x", _data->GetHomeId());
+	}
 }
 
 void ZNode::MessageComplete(Notification const* _data){

@@ -169,14 +169,19 @@ void OnNotification (Notification const* _notification, void* _context)
 			   _notification->GetNodeId());
 		pthread_mutex_lock(&nlock);
 		ZNode::ControllerReady(_notification);
-		//TinyController::Get()->controllerReadyCallback->fn_callback(TinyController::Get()->controllerReadyCallback->instance);
 		pthread_mutex_unlock(&nlock);
 		break;
 	  case Notification::Type_DriverFailed:
 		Log::Write(LogLevel_Info, "Notification: Driver Failed, homeId %08x", _notification->GetHomeId());
+		pthread_mutex_lock(&nlock);
+		ZNode::ControllerFailed(_notification);
+		pthread_mutex_unlock(&nlock);
 		break;
 	  case Notification::Type_DriverReset:
 		Log::Write(LogLevel_Info, "Notification: Driver Reset, homeId %08x", _notification->GetHomeId());
+		pthread_mutex_lock(&nlock);
+		ZNode::ControllerReset(_notification);
+		pthread_mutex_unlock(&nlock);
 		break;
 	  case Notification::Type_EssentialNodeQueriesComplete:
 		Log::Write(LogLevel_Info, "Notification: Essential Node %d Queries Complete", _notification->GetNodeId());
@@ -186,6 +191,9 @@ void OnNotification (Notification const* _notification, void* _context)
 		break;
 	  case Notification::Type_AwakeNodesQueried:
 		Log::Write(LogLevel_Info, "Notification: Awake Nodes Queried");
+		pthread_mutex_lock(&nlock);
+		ZNode::AwakeNodesQueried(_notification);
+		pthread_mutex_unlock(&nlock);
 		break;
 	  case Notification::Type_AllNodesQueriedSomeDead:
 		Log::Write(LogLevel_Info, "Notification: Awake Nodes Queried Some Dead");
@@ -340,8 +348,35 @@ void TinyController::update(ControllerSubject* subject){
 	Notification const* notification = subject->getNotification();
 	switch(notification->GetType()){
 		case Notification::Type_DriverReady:
-			Log::Write(LogLevel_Info, "TinyController::update() : setUp...");
+			Log::Write(LogLevel_Info, "TinyController::update() : Type_DriverReady...");
 			this->setUp(subject->getControllerInfo());
+			if(controllerReadyCallback)
+				controllerReadyCallback->fn_callback(controllerReadyCallback->instance);
+			break;
+		case Notification::Type_DriverFailed:
+			Log::Write(LogLevel_Info, "TinyController::update() : Type_DriverFailed...");
+			if(controllerFailedCallback)
+				controllerFailedCallback->fn_callback(controllerFailedCallback->instance);
+			break;
+		case Notification::Type_DriverReset:
+			Log::Write(LogLevel_Info, "TinyController::update() : Type_DriverReset...");
+			if(controllerResetCallback)
+				controllerResetCallback->fn_callback(controllerResetCallback->instance);
+			break;
+		case Notification::Type_AllNodesQueried:
+			Log::Write(LogLevel_Info, "TinyController::update() : Type_AllNodesQueried...");
+			if(allNodeQueriedCallback)
+				allNodeQueriedCallback->fn_callback(allNodeQueriedCallback->instance);
+			break;
+		case Notification::Type_AllNodesQueriedSomeDead:
+			Log::Write(LogLevel_Info, "TinyController::update() : Type_AllNodesQueriedSomeDead...");
+			if(allNodesQueriedSomeDeadCallback)
+				allNodesQueriedSomeDeadCallback->fn_callback(allNodesQueriedSomeDeadCallback->instance);
+			break;
+		case Notification::Type_AwakeNodesQueried:
+			if(awakedNodesQueriedCallback)
+				awakedNodesQueriedCallback->fn_callback(awakedNodesQueriedCallback->instance);
+			Log::Write(LogLevel_Info, "TinyController::update() : Type_AwakeNodesQueried...");
 			break;
 		default:
 			Log::Write(LogLevel_Info, "TinyController::update() : not handled case...");

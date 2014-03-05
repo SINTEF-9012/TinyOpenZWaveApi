@@ -40,11 +40,15 @@ class ZNode {
 		static void RefreshedValue(Notification const* _data);
 
 		static void ControllerReady(Notification const* _data);
+		static void ControllerReset(Notification const* _data);
+		static void ControllerFailed(Notification const* _data);
+
 		static m_structCtrl* GetControllerInfo(uint32 const homeId);
 		static void UpdateNodeProtocolInfo(uint32 const homeId, uint8 const nodeId);
 		static void UpdateNodeEvent(Notification const* _data);
 		static void AllNodeQueriedSomeDead(Notification const* _data);
 		static void AllNodeQueried(Notification const* _data);
+		static void AwakeNodesQueried(Notification const* _data);
 
 		static void MessageComplete(Notification const* _data);
 		static void MessageAwake(Notification const* _data);
