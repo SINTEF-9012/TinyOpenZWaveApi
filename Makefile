@@ -54,11 +54,13 @@ install: staticlib dynamiclib
 	install -d /usr/local/include/tinyozw
 	install -d /usr/local/include/tinyozw/devices
 	install -d /usr/local/include/tinyozw/libs
+	install -d /usr/local/include/tinyozw/observer
 	install $(DYNAMIC_LIB_LOCATION) /usr/local/lib
 	install $(STATIC_LIB_LOCATION) /usr/local/lib
 	cp -r $(TINYOPENZWAVE)/*.h /usr/local/include/tinyozw
 	cp -r $(TINYOPENZWAVE)/devices/*.h /usr/local/include/tinyozw/devices
 	cp -r $(TINYOPENZWAVE)/libs/*.h /usr/local/include/tinyozw/libs
+	cp -r $(TINYOPENZWAVE)/observer/*.h /usr/local/include/tinyozw/observer
 
 clean :
 	rm -rf run *.o $(TINYOPENZWAVE)/*.o $(TINYOPENZWAVE)/libs/*.o $(TINYOPENZWAVE)/devices/*.o $(TINYOPENZWAVE)/observer/*.o \
