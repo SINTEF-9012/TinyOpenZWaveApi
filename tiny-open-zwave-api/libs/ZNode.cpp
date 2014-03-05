@@ -31,7 +31,7 @@
 
 using namespace TinyOpenZWaveApi;
 
-std::map<int, NodeSubject*> m_nodeSub;
+std::map<uint8, NodeSubject*> m_nodeSub;
 std::map<uint32, ControllerSubject*> m_ctrlSub;
 
 void ZNode::zwaveInit(const char* logname, bool enableLog){
