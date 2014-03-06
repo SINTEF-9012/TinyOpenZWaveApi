@@ -50,6 +50,7 @@ using namespace OpenZWave;
 
 			static void TestValueIDCallback(NodeInfo *nodeInfo, ValueID valueID, list<ValueCallback*> callbacks);
 			static void CallValueCallback(NodeInfo *nodeInfo, ValueID valueId, Notification const* notification);
+			static void RemoveValueIDCallback(NodeInfo *nodeInfo, ValueID valueID);
 	};
 
 

@@ -57,7 +57,6 @@ TinyController* ZNode::FindController(char const* port){
 }
 
 void ZNode::DeviceAdded(Device* device){
-	Log::Write(LogLevel_Info,"ZNode::DeviceAdded() is called");
 	list<NodeInfo*>& g_nodes = ZWave_GetGNodes();
 	NodeInfo *node = NULL;
 	for(list<NodeInfo*>::iterator it = g_nodes.begin(); it != g_nodes.end(); ++it){

@@ -144,6 +144,10 @@ void BinarySwitch::update(NodeSubject* subject){
 			Log::Write(LogLevel_Info, "BinarySwitch::update(): value changed, calling callback...");
 			Device::CallValueCallback(this->node, valueId, notification);
 			break;
+		case Notification::Type_ValueRemoved:
+			Device::RemoveValueIDCallback(this->node, valueId);
+			this->value = NULL;
+			break;
 		default:
 			Log::Write(LogLevel_Info, "BinarySwitch::update(): not handled case...");
 			break;
@@ -151,7 +155,7 @@ void BinarySwitch::update(NodeSubject* subject){
 }
 
 void BinarySwitch::setUp(NodeInfo* nodeInfo){
-	if(this->node != NULL)
+	if(this->node != NULL || this->value == NULL)
 		return;
 	ValueID valueId = findValueID(nodeInfo->m_values, getComandClass(), this->instance, this->index);
 	if(!NullValueID::isNull(valueId)){

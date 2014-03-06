@@ -86,6 +86,23 @@ void Device::TestValueIDCallback(NodeInfo *nodeInfo, ValueID valueID, list<Value
 	}
 }
 
+void Device::RemoveValueIDCallback(NodeInfo *nodeInfo, ValueID valueID) {
+	if(nodeInfo->m_value_callback.find(valueID) != nodeInfo->m_value_callback.end()){
+		nodeInfo->m_value_callback.erase(valueID);
+		Log::Write(LogLevel_Info, true, "Device::RemoveValueIDCallback() : Removing value and its callbacks : "
+				"Home 0x%08x Node %d Genre %s Class %s Instance %d Index %d Type %s",
+				valueID.GetHomeId(), valueID.GetNodeId(),
+				genreToStr(valueID.GetGenre()), cclassToStr(valueID.GetCommandClassId()), valueID.GetInstance(),
+				valueID.GetIndex(), typeToStr(valueID.GetType()));
+	}else{
+		Log::Write(LogLevel_Info, true, "Device::RemoveValueIDCallback() : Can not find any callback for the value : "
+				"Home 0x%08x Node %d Genre %s Class %s Instance %d Index %d Type %s",
+				valueID.GetHomeId(), valueID.GetNodeId(),
+				genreToStr(valueID.GetGenre()), cclassToStr(valueID.GetCommandClassId()), valueID.GetInstance(),
+				valueID.GetIndex(), typeToStr(valueID.GetType()));
+	}
+}
+
 void  Device::CallValueCallback(NodeInfo *nodeInfo, ValueID valueId, Notification const* notification){
 	if(nodeInfo->m_value_callback.find(valueId) != nodeInfo->m_value_callback.end()){
 		for(list<ValueCallback*>::iterator it = nodeInfo->m_value_callback[valueId].begin(); it != nodeInfo->m_value_callback[valueId].end(); ++it){
