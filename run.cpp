@@ -120,8 +120,11 @@ int main(int argc, char* argv[]){
 
 			ThingMLCallback* device_init = new ThingMLCallback(init_callback, NULL);
 
-			s = new BinarySwitch(turned_on, turned_off, no_change);
+			s = new BinarySwitch();
 			s->setDeviceInitCallback(device_init);
+			s->setTurnedOnCallback(turned_on);
+			s->setTurnedOffCallback(turned_off);
+			s->setNoChangeCallback(no_change);
 			s = s->Init(OpenZWaveFacade::GetController(port),2,1,0);
 		}
 		if(ch == 'g'){

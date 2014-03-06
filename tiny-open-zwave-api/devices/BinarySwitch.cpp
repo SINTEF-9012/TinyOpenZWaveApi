@@ -35,22 +35,14 @@ void BinarySwitch::Destroy() {
 // <BinarySwitch::BinarySwitch>
 // Constructor
 //-----------------------------------------------------------------------------
-BinarySwitch::BinarySwitch(ThingMLCallback* turnedOnCallback, ThingMLCallback* turnedOffCallback, ThingMLCallback* noChangeCallback) {
-	Device();
-	isTurnedOn = false;
-	callbacksOnOff.push_back(new ValueCallback(BinarySwitch::callback_turnOnOff, this));
-	this->turnedOnCallback = turnedOnCallback;
-	this->turnedOffCallback = turnedOffCallback;
-	this->noChangeCallback = noChangeCallback;
-}
 
 BinarySwitch::BinarySwitch(){
 	Device();
 	isTurnedOn = false;
+	turnedOnCallback = NULL;
+	turnedOffCallback = NULL;
+	noChangeCallback = NULL;
 	callbacksOnOff.push_back(new ValueCallback(BinarySwitch::callback_turnOnOff, this));
-	this->turnedOnCallback = NULL;
-	this->turnedOffCallback = NULL;
-	this->noChangeCallback = NULL;
 }
 
 BinarySwitch* BinarySwitch::Init(TinyController* const controller, uint8 const _nodeId, uint8 const _instance, uint8 const _index){

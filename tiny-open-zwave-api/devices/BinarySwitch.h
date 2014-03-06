@@ -38,9 +38,13 @@ using namespace OpenZWave;
 			BinarySwitch* Init(TinyController* const controller, uint8 const _nodeId, uint8 const _instance, uint8 const _index);
 
 			BinarySwitch();
-			BinarySwitch(ThingMLCallback* turnedOnCallback, ThingMLCallback* turnedOffCallback, ThingMLCallback* noChangeCallback);
 			virtual void Destroy();
 			virtual ~BinarySwitch();
+
+			//callbacks
+			void setTurnedOnCallback(ThingMLCallback* _callback){turnedOnCallback = _callback;};
+			void setTurnedOffCallback(ThingMLCallback* _callback){turnedOffCallback = _callback;};
+			void setNoChangeCallback(ThingMLCallback* _callback){noChangeCallback = _callback;};
 
 			//commands
 			void turnOn();
