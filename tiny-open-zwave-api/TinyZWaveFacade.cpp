@@ -59,6 +59,7 @@ void OpenZWaveFacade::Quite(){
 	Manager::Get()->Destroy();
 	Options::Get()->Destroy();
 	isInitialized = false;
+	NullValueID::Destroy();
 }
 
 TinyController* OpenZWaveFacade::CreateController(char const* port){

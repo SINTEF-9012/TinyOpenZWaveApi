@@ -2095,8 +2095,7 @@ bool ZWave_RequestNodeMeter( int32 home, int32 node )
 //------------------------------------------------------------------------------
 
 ValueID ZWave_GetValueID(uint32 home, uint8 command_class, uint8 node, uint8 instance, uint8 index){
-	DummyValueID d_valueID;
-	if(ZWave_HomeIdPresent( home, "ZWave_GetValueID" ) == false) return *d_valueID.valueId;
+	if(ZWave_HomeIdPresent( home, "ZWave_GetValueID" ) == false) return NullValueID::getValue();
 
 	if(NodeInfo* nodeInfo = ZWave_GetNodeInfo(home, node)) {
 		for (list<ValueID>::iterator it = nodeInfo->m_values.begin(); it != nodeInfo->m_values.end(); ++it){
@@ -2108,7 +2107,7 @@ ValueID ZWave_GetValueID(uint32 home, uint8 command_class, uint8 node, uint8 ins
 			}
 		}
 	}
-	return *d_valueID.valueId;
+	return NullValueID::getValue();
 }
 
 //-----------------------------------------------------------------------------

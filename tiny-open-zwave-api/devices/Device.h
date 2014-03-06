@@ -21,8 +21,7 @@ using namespace OpenZWave;
 	class Device : public NodeObserver
 	{
 		protected:
-			ThingMLCallback* nodeAddedCallback;
-			ThingMLCallback* nodeQuiriedCallback;
+			ThingMLCallback* deviceInitCallback;
 
 		public:
 			static uint8 COMMAND_CLASS;
@@ -34,16 +33,18 @@ using namespace OpenZWave;
 			ValueID* value;
 
 		public:
+			Device();
+			virtual ~Device();
+
 			virtual ValueID* getValueId() {return value;};
 			virtual uint8 getComandClass();
 			virtual void setUp(NodeInfo* nodeInfo);
 			Device* Init(TinyController* const controller, uint8 const _nodeId, uint8 const _instance, uint8 const _index);
 
 			//callbacks
-			virtual void setNodeQuiriedCallback(ThingMLCallback* _callback) {nodeQuiriedCallback = _callback;};
+			virtual void setDeviceInitCallback(ThingMLCallback* _callback) {deviceInitCallback = _callback;}; //called when a valueID is added with the corresponds COMMAND CLASS
 
 			virtual void Destroy();
-			virtual ~Device();
 
 			virtual void update(NodeSubject* subject);
 

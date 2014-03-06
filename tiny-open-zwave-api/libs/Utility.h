@@ -107,17 +107,20 @@ using namespace OpenZWave;
 		std::map<ValueID, list<ValueCallback*> > m_value_callback;
 	} NodeInfo;
 
-	struct DummyValueID {
-		ValueID* valueId;
-		uint32 home_id;
-		uint8 node_id;
-		uint8 command_class;
-		uint8 instance;
-		uint8 index;
+	class NullValueID {
+		private:
+			static ValueID* nullValueID;
 
-		DummyValueID() : home_id(0), node_id(0), command_class(0), instance(0), index(0) {
-			valueId = new ValueID(home_id , node_id, ValueID::ValueGenre_Basic, command_class, instance, index ,ValueID::ValueType_Bool);
-		}
+		public:
+			static const uint32 home_id = 0;
+			static const uint8 node_id = 0;
+			static const uint8 command_class = 0;
+			static const uint8 instance = 0;
+			static const uint8 index = 0;
+
+			static bool isNull(ValueID valueID);
+			static ValueID getValue();
+			static void Destroy();
 	};
 
 	typedef void (*pthingMLCallback)(void* _instance, ...);

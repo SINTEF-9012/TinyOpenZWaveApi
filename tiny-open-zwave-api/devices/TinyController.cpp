@@ -188,6 +188,9 @@ void OnNotification (Notification const* _notification, void* _context)
 		break;
 	  case Notification::Type_NodeQueriesComplete:
 		Log::Write(LogLevel_Info, "Notification: Node %d Queries Complete", _notification->GetNodeId());
+		pthread_mutex_lock(&nlock);
+		ZNode::NodeQueriesComplete(_notification);
+		pthread_mutex_unlock(&nlock);
 		break;
 	  case Notification::Type_AwakeNodesQueried:
 		Log::Write(LogLevel_Info, "Notification: Awake Nodes Queried");
@@ -205,7 +208,6 @@ void OnNotification (Notification const* _notification, void* _context)
 		Log::Write(LogLevel_Info, "Notification: All Nodes Queried");
 		pthread_mutex_lock(&nlock);
 		ZNode::AllNodeQueried(_notification);
-		//TinyController::Get()->controllerReadyCallback->fn_callback(TinyController::Get()->controllerReadyCallback->instance);
 		pthread_mutex_unlock(&nlock);
 		break;
 	  case Notification::Type_Notification:
@@ -291,6 +293,7 @@ TinyController::TinyController(char const* _port) {
 	allNodeQueriedCallback = NULL;
 	awakedNodesQueriedCallback = NULL;
 	allNodesQueriedSomeDeadCallback = NULL;
+	nodeQueriesCompleteCallback = NULL;
 }
 
 //-----------------------------------------------------------------------------
@@ -374,9 +377,14 @@ void TinyController::update(ControllerSubject* subject){
 				allNodesQueriedSomeDeadCallback->fn_callback(allNodesQueriedSomeDeadCallback->instance);
 			break;
 		case Notification::Type_AwakeNodesQueried:
+			Log::Write(LogLevel_Info, "TinyController::update() : Type_AwakeNodesQueried...");
 			if(awakedNodesQueriedCallback)
 				awakedNodesQueriedCallback->fn_callback(awakedNodesQueriedCallback->instance);
-			Log::Write(LogLevel_Info, "TinyController::update() : Type_AwakeNodesQueried...");
+			break;
+		case Notification::Type_NodeQueriesComplete:
+			Log::Write(LogLevel_Info, "TinyController::update() : Type_NodeQueriesComplete...");
+			if(nodeQueriesCompleteCallback)
+				nodeQueriesCompleteCallback->fn_callback(nodeQueriesCompleteCallback->instance, notification->GetNodeId());
 			break;
 		default:
 			Log::Write(LogLevel_Info, "TinyController::update() : not handled case...");

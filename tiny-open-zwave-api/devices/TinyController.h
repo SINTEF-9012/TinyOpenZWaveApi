@@ -38,6 +38,7 @@ using namespace OpenZWave;
 			ThingMLCallback* controllerReadyCallback;
 			ThingMLCallback* controllerResetCallback;
 			ThingMLCallback* controllerFailedCallback;
+			ThingMLCallback* nodeQueriesCompleteCallback;
 			ThingMLCallback* allNodeQueriedCallback;
 			ThingMLCallback* awakedNodesQueriedCallback;
 			ThingMLCallback* allNodesQueriedSomeDeadCallback;
@@ -58,6 +59,7 @@ using namespace OpenZWave;
 			void setAllNodeQueriedCallback(ThingMLCallback* callback) {allNodeQueriedCallback = callback;};
 			void setAwakedNodesQueriedCallback(ThingMLCallback* callback) {awakedNodesQueriedCallback = callback;};
 			void setAllNodesQueriedSomeDeadCallback(ThingMLCallback* callback) {allNodesQueriedSomeDeadCallback = callback;};
+			void setNodeQueriesCompleteCallback(ThingMLCallback* callback) {nodeQueriesCompleteCallback = callback;};
 
 			void addController(char const* _port);
 			void Destroy();

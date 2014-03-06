@@ -2155,7 +2155,7 @@ bool DomoZWave_RequestNodeMeter( int32 home, int32 node )
 
 ValueID DomoZWave_GetValueID(uint32 home, uint8 command_class, uint8 node, uint8 instance, uint8 index){
 	DummyValueID d_valueID;
-	if(DomoZWave_HomeIdPresent( home, "DomoZWave_GetValueID" ) == false) return *d_valueID.valueId;
+	if(DomoZWave_HomeIdPresent( home, "DomoZWave_GetValueID" ) == false) return *d_valueID.valueID;
 
 	if(NodeInfo* nodeInfo = DomoZWave_GetNodeInfo(home, node)) {
 		for (list<ValueID>::iterator it = nodeInfo->m_values.begin(); it != nodeInfo->m_values.end(); ++it){
@@ -2167,7 +2167,7 @@ ValueID DomoZWave_GetValueID(uint32 home, uint8 command_class, uint8 node, uint8
 			}
 		}
 	}
-	return *d_valueID.valueId;
+	return *d_valueID.valueID;
 }
 
 //-----------------------------------------------------------------------------

@@ -500,7 +500,6 @@ const char *controllerErrorToStr (Driver::ControllerError err)
 }
 
 ValueID findValueID(list<ValueID> values, uint8 command_class, uint8 instance, uint8 index){
-	DummyValueID d_valueID;
 	for (list<ValueID>::iterator it = values.begin(); it != values.end(); ++it){
 		uint8 id = (*it).GetCommandClassId();
 		uint8 inst = (*it).GetInstance();
@@ -509,7 +508,25 @@ ValueID findValueID(list<ValueID> values, uint8 command_class, uint8 instance, u
 			return (*it);
 		}
 	}
-	return *d_valueID.valueId;
+	return NullValueID::getValue();
+}
+
+ValueID* NullValueID::nullValueID = NULL;
+
+bool NullValueID::isNull(ValueID valueID) {
+	return (valueID == getValue()) ? true : false;
+}
+ValueID NullValueID::getValue() {
+	if(nullValueID == NULL)
+		nullValueID = new ValueID(home_id , node_id, ValueID::ValueGenre_Basic, command_class, instance, index ,ValueID::ValueType_Bool);
+	return *nullValueID;
+};
+
+void NullValueID::Destroy() {
+	if(nullValueID == NULL)
+		return;
+	delete nullValueID;
+	nullValueID = NULL;
 }
 
 

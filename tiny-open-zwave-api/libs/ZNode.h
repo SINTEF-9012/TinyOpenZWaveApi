@@ -49,6 +49,7 @@ class ZNode {
 		static void AllNodeQueriedSomeDead(Notification const* _data);
 		static void AllNodeQueried(Notification const* _data);
 		static void AwakeNodesQueried(Notification const* _data);
+		static void NodeQueriesComplete(Notification const* _data);
 
 		static void MessageComplete(Notification const* _data);
 		static void MessageAwake(Notification const* _data);

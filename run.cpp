@@ -2,6 +2,7 @@
 #include <string>
 #include <iostream>
 
+#include <cstdarg>
 
 #include <signal.h>
 #include <stdlib.h>
@@ -46,6 +47,9 @@ void no_change_callback(void *_instance, ...) {
 	printf("THINGML: -> FibaroPlug_send_switch_no_change\n");
 }
 
+void init_callback(void *_instance, ...) {
+	printf("?????????????????????????????????THINGML: -> BinarySwitsh is initialized\n");
+}
 
 void exit_main_handler(int s){
 	cout << "Caught signal on exit" <<endl;
@@ -59,6 +63,14 @@ void controller_ready(void *param, ...){
 
 void all_nodes_quiried(void *param, ...){
 	cout<< "!!!!!!!!!!!!!! all_nodes_quiried" << endl;
+}
+
+void node_quiries_completed(void *param, ...){
+    va_list arguments;
+    va_start(arguments, param);
+    int node_id = va_arg(arguments, int);
+    va_end(arguments);
+	cout<< "!!!!!!!!!!!!!! node_quiries_completed " << node_id << endl;
 }
 
 int main(int argc, char* argv[]){
@@ -89,20 +101,14 @@ int main(int argc, char* argv[]){
 			cout << "Controller init" <<endl;
 			ThingMLCallback* controller_ready_callback = new ThingMLCallback(controller_ready, NULL);
 			ThingMLCallback* all_nodes_quiried_callback = new ThingMLCallback(all_nodes_quiried, NULL);
+			ThingMLCallback* node_quiries_complete_callback = new ThingMLCallback(node_quiries_completed, NULL);
 			TinyController* controller = OpenZWaveFacade::CreateController(port);
 			controller->setControllerReadyCallback(controller_ready_callback);
 			controller->setAllNodeQueriedCallback(all_nodes_quiried_callback);
-
+			controller->setNodeQueriesCompleteCallback(node_quiries_complete_callback);
 		}
 		if(ch == 'i'){
 			cout << "OpenZWave init" <<endl;
-			//OpenZWaveFacade::Get()->setCurrentController(port);
-			/*ThingMLCallback* turned_on = new ThingMLCallback(turned_on_callback, NULL);
-			ThingMLCallback* turned_off = new ThingMLCallback(turned_off_callback, NULL);
-			ThingMLCallback* no_change = new ThingMLCallback(no_change_callback, NULL);
-			s = new BinarySwitch(turned_on, turned_off, no_change);*/
-
-			//ThingMLCallback *callback = new ThingMLCallback(f_function, NULL);
 			OpenZWaveFacade::Init(config, zwdir, domo_log, enableLog, enableZWLog, polltime);
 
 		}
@@ -111,7 +117,11 @@ int main(int argc, char* argv[]){
 			ThingMLCallback* turned_on = new ThingMLCallback(turned_on_callback, NULL);
 			ThingMLCallback* turned_off = new ThingMLCallback(turned_off_callback, NULL);
 			ThingMLCallback* no_change = new ThingMLCallback(no_change_callback, NULL);
+
+			ThingMLCallback* device_init = new ThingMLCallback(init_callback, NULL);
+
 			s = new BinarySwitch(turned_on, turned_off, no_change);
+			s->setDeviceInitCallback(device_init);
 			s = s->Init(OpenZWaveFacade::GetController(port),2,1,0);
 		}
 		if(ch == 'g'){
@@ -126,8 +136,7 @@ int main(int argc, char* argv[]){
 		}
 		if(ch == 'q'){
 			ValueID valueId = ZWave_GetValueID(s->controller->controllerHomeId, s->getComandClass(), s->node->m_nodeId, s->instance, s->index);
-			DummyValueID dummy;
-			if(valueId != *dummy.valueId){
+			if(!NullValueID::isNull(valueId)){
 				bool isTurnedOn;
 				bool result = Manager::Get()->GetValueAsBool(valueId, &isTurnedOn);
 				if(!result){

@@ -19,9 +19,17 @@ using namespace OpenZWave;
 
 uint8 Device::COMMAND_CLASS = COMMAND_CLASS_NON_UNKNOWN;
 
-Device* Device::Init(TinyController* const controller, uint8 const _nodeId, uint8 const _instance, uint8 const _index) {
+Device::Device(){
+	this->deviceInitCallback = NULL;
 	this->node = NULL;
 	this->value = NULL;
+	this->controller = 0;
+	this->nodeId = 0;
+	this->instance = 0;
+	this->index = 0;
+}
+
+Device* Device::Init(TinyController* const controller, uint8 const _nodeId, uint8 const _instance, uint8 const _index) {
 	this->controller = controller;
 	this->nodeId = _nodeId;
 	this->instance = _instance;
@@ -42,9 +50,7 @@ Device::~Device(){
 	Log::Write(LogLevel_Info, "Device::~Device(): 0x%08x", this);
 }
 
-void Device::update(NodeSubject* subject){
-
-}
+void Device::update(NodeSubject* subject){}
 
 void Device::setUp(NodeInfo* nodeInfo){
 	this->node = nodeInfo;

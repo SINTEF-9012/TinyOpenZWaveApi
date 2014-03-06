@@ -53,7 +53,7 @@ BinarySwitch* BinarySwitch::Init(TinyController* const controller, uint8 const _
 	BinarySwitch* bswitch = (BinarySwitch*)Device::Init(controller, _nodeId, _instance, _index);
 	ValueID valueId = DomoZWave_GetValueID(controller->controllerHomeId, getComandClass(), this->node->m_nodeId, this->instance, this->index);
 	DummyValueID dummy;
-	if(valueId != *dummy.valueId){
+	if(valueId != *dummy.valueID){
 		bool result = Manager::Get()->GetValueAsBool(valueId, &isTurnedOn);
 		if(!result){
 			Log::Write(LogLevel_Error, "BinarySwitch::BinarySwitch(): default value is not requested...");

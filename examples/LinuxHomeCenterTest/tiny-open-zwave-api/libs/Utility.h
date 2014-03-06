@@ -110,7 +110,7 @@ using namespace OpenZWave;
 	};
 
 	struct DummyValueID {
-		ValueID* valueId;
+		ValueID* valueID;
 		uint32 home_id;
 		uint8 node_id;
 		uint8 command_class;
@@ -118,7 +118,7 @@ using namespace OpenZWave;
 		uint8 index;
 
 		DummyValueID() : home_id(0), node_id(0), command_class(0), instance(0), index(0) {
-			valueId = new ValueID(home_id , node_id, ValueID::ValueGenre_Basic, command_class, instance, index ,ValueID::ValueType_Bool);
+			valueID = new ValueID(home_id , node_id, ValueID::ValueGenre_Basic, command_class, instance, index ,ValueID::ValueType_Bool);
 		}
 	};
 

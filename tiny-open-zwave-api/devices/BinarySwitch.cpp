@@ -36,6 +36,7 @@ void BinarySwitch::Destroy() {
 // Constructor
 //-----------------------------------------------------------------------------
 BinarySwitch::BinarySwitch(ThingMLCallback* turnedOnCallback, ThingMLCallback* turnedOffCallback, ThingMLCallback* noChangeCallback) {
+	Device();
 	isTurnedOn = false;
 	callbacksOnOff.push_back(new ValueCallback(BinarySwitch::callback_turnOnOff, this));
 	this->turnedOnCallback = turnedOnCallback;
@@ -44,6 +45,7 @@ BinarySwitch::BinarySwitch(ThingMLCallback* turnedOnCallback, ThingMLCallback* t
 }
 
 BinarySwitch::BinarySwitch(){
+	Device();
 	isTurnedOn = false;
 	callbacksOnOff.push_back(new ValueCallback(BinarySwitch::callback_turnOnOff, this));
 	this->turnedOnCallback = NULL;
@@ -52,7 +54,7 @@ BinarySwitch::BinarySwitch(){
 }
 
 BinarySwitch* BinarySwitch::Init(TinyController* const controller, uint8 const _nodeId, uint8 const _instance, uint8 const _index){
-	BinarySwitch* bswitch = (BinarySwitch*)Device::Init(controller, _nodeId, _instance, _index);
+	BinarySwitch* bswitch = (BinarySwitch*) Device::Init(controller, _nodeId, _instance, _index);
 	return bswitch;
 }
 
@@ -149,16 +151,18 @@ void BinarySwitch::update(NodeSubject* subject){
 }
 
 void BinarySwitch::setUp(NodeInfo* nodeInfo){
-	Log::Write(LogLevel_Info, "BinarySwitch::setUp(): is called for the node %d 0x%08x", this->nodeId, this);
-	Device::setUp(nodeInfo);
-	list<ValueID> values = node->m_values;
-	ValueID valueId = findValueID(node->m_values, getComandClass(), this->instance, this->index);
-	DummyValueID dummy;
-	if(valueId != *dummy.valueId){
+	if(this->node != NULL)
+		return;
+	ValueID valueId = findValueID(nodeInfo->m_values, getComandClass(), this->instance, this->index);
+	if(!NullValueID::isNull(valueId)){
+		Log::Write(LogLevel_Info, "BinarySwitch::setUp(): is called for the node %d 0x%08x", this->nodeId, this);
+		Device::setUp(nodeInfo);
 		bool result = Manager::Get()->GetValueAsBool(valueId, &isTurnedOn);
 		if(!result) Log::Write(LogLevel_Info, "BinarySwitch::setUp(): default value is not requested yet...");
 		this->value = &valueId;
 		Device::TestValueIDCallback(this->node, valueId, callbacksOnOff);
+		if(deviceInitCallback)
+			deviceInitCallback->fn_callback(deviceInitCallback->instance);
 	}else{
 		Log::Write(LogLevel_Info, "BinarySwitch::setUp(): ValueID is not known yet for"
 				"Home 0x%08x Node %d Class %s Instance %d Index %d",
