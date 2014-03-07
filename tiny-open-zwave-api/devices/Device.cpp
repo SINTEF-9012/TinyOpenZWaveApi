@@ -15,6 +15,7 @@
 #include "../libs/DomoZWave.h"
 #include "../libs/Utility.h"
 
+
 using namespace OpenZWave;
 
 uint8 Device::COMMAND_CLASS = COMMAND_CLASS_NON_UNKNOWN;
@@ -22,7 +23,7 @@ uint8 Device::COMMAND_CLASS = COMMAND_CLASS_NON_UNKNOWN;
 Device::Device(){
 	this->deviceInitCallback = NULL;
 	this->node = NULL;
-	this->value = NULL;
+	this->valueID = NullValueID::GreateInstance();
 	this->controller = 0;
 	this->nodeId = 0;
 	this->instance = 0;
@@ -43,11 +44,13 @@ uint8 Device::getComandClass(){
 }
 
 void Device::Destroy(){
+	Log::Write(LogLevel_Info, "Device::Destroy() : 0x%08x", this);
 	delete this;
 }
 
 Device::~Device(){
 	Log::Write(LogLevel_Info, "Device::~Device(): 0x%08x", this);
+	delete this->valueID;
 }
 
 void Device::update(NodeSubject* subject){}

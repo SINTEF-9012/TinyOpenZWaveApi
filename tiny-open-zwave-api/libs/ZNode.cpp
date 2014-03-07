@@ -355,4 +355,131 @@ void ZNode::MessageAlive(Notification const* _data){
 	}
 }
 
+char* ZNode::GetValueIDValue(ValueID valueID){
+	static char dev_value[1024] = "";
+	int type = valueID.GetType();
+	uint8 byte_value;
+	bool bool_value;
+	string decimal_value;
+	string list_value;
+	string string_value;
+	int int_value;
+	int16 short_value;
+	switch ( type ) {
+		case ValueID::ValueType_Bool:
+			Manager::Get()->GetValueAsBool( valueID, &bool_value );
+			snprintf( dev_value, 1024, "%i", bool_value );
+			Log::Write(LogLevel_Info, "ZNode::getValueIDValue() : Type=Bool (raw value=%s)", dev_value);
+			break;
+		case ValueID::ValueType_Byte:
+			Manager::Get()->GetValueAsByte( valueID, &byte_value );
+			snprintf( dev_value, 1024, "%i", byte_value );
+			Log::Write(LogLevel_Info, "ZNode::getValueIDValue() : Type=Byte (raw value=%s)", dev_value);
+			break;
+		case ValueID::ValueType_Decimal:
+			Manager::Get()->GetValueAsString( valueID, &decimal_value );
+			snprintf( dev_value, 1024, "%s", strdup( decimal_value.c_str() ) );
+			Log::Write(LogLevel_Info, "ZNode::getValueIDValue() : Type=Decimal (raw value=%s)", dev_value );
+			break;
+		case ValueID::ValueType_Int:
+			Manager::Get()->GetValueAsInt( valueID, &int_value );
+			snprintf( dev_value, 1024, "%d", int_value );
+			Log::Write(LogLevel_Info, "ZNode::getValueIDValue() : Type=Integer (raw value=%s)", dev_value );
+			break;
+		case ValueID::ValueType_Short:
+			Manager::Get()->GetValueAsShort( valueID, &short_value );
+			snprintf( dev_value, 1024, "%d", short_value );
+			Log::Write(LogLevel_Info, "ZNode::getValueIDValue() : Type=Short (raw value=%s)", dev_value );
+			break;
+		case ValueID::ValueType_Schedule:
+			Log::Write(LogLevel_Info, "ZNode::getValueIDValue() : Type=Schedule (not implemented)" );
+			break;
+		case ValueID::ValueType_String:
+			Manager::Get()->GetValueAsString( valueID, &string_value );
+			snprintf( dev_value, 1024, "%s", strdup( string_value.c_str() ) );
+			Log::Write(LogLevel_Info, "Type=String (raw value=%s)", dev_value );
+			break;
+		case ValueID::ValueType_Button:
+			Log::Write(LogLevel_Info, "ZNode::getValueIDValue() : Type=Button (not implemented)");
+			break;
+		case ValueID::ValueType_List:
+			Manager::Get()->GetValueListSelection( valueID, &list_value );
+			snprintf( dev_value, 1024, "%s", strdup( list_value.c_str() ) );
+			Log::Write(LogLevel_Info, "ZNode::getValueIDValue() : Type=List (raw value=%s)", dev_value);
+			break;
+		case ValueID::ValueType_Raw:
+			// We can use AsString on a Raw
+			Manager::Get()->GetValueAsString( valueID, &string_value );
+			snprintf( dev_value, 1024, "%s", strdup( string_value.c_str() ) );
+			Log::Write(LogLevel_Info, "ZNode::getValueIDValue() : Type=Raw (raw value=%s)", dev_value);
+			break;
+		default:
+			Log::Write(LogLevel_Info, "ZNode::getValueIDValue() : Type=Unknown");
+			break;
+	}
+	return dev_value;
+}
+
+void ZNode::SetValueIDValue(ValueID valueID, int32 value){
+	int command_class = valueID.GetCommandClassId();
+	string label = Manager::Get()->GetValueLabel(valueID);
+	if (command_class == COMMAND_CLASS_SWITCH_MULTILEVEL || command_class == COMMAND_CLASS_SWITCH_BINARY) {
+		switch (command_class) {
+			case COMMAND_CLASS_SWITCH_BINARY:
+				// "Switch" is mandatory, otherwise not a switch and value should be 0(off) or 255(on)
+				if (!(label == "Switch" && (value == 0 || value == 255))){
+					Log::Write(LogLevel_Info, "ZNode::SetValueIDValue() : value is COMMAND_CLASS_SWITCH_BINARY,"
+							"but is not labeled as a Switch or value is not 0 either 255 : Label '%s', %d ", label.c_str(), value);
+					return;
+				}
+				break;
+			case COMMAND_CLASS_SWITCH_MULTILEVEL:
+				// label="Level" is mandatory, otherwise not a dimmer type device
+				if (label != "Level") {
+					Log::Write(LogLevel_Info, "ZNode::SetValueIDValue() : value is COMMAND_CLASS_SWITCH_MULTILEVEL,"
+							"but is not labeled as a Level : Label '%s', %d ", label.c_str(), value);
+					return;
+				}
+				break;
+			default:
+				Log::Write(LogLevel_Info, "ZNode::SetValueIDValue() : unsupported command class of the ValueID to set a value"
+						"Genre %s Class %s Instance %d Index %d Type %s", genreToStr(valueID.GetGenre()),
+						cclassToStr(valueID.GetCommandClassId()), valueID.GetInstance(),
+						valueID.GetIndex(), typeToStr(valueID.GetType()));
+		}
+
+		bool response = false;
+		switch(valueID.GetType()){
+			case ValueID::ValueType_Bool :
+				response = Manager::Get()->SetValue(valueID, (bool) value);
+				break;
+			case ValueID::ValueType_Byte :
+				response = Manager::Get()->SetValue(valueID, (uint8) value);
+				break;
+			case ValueID::ValueType_Short :
+				response = Manager::Get()->SetValue(valueID, (uint16) value);
+				break;
+			case ValueID::ValueType_Int :
+				response = Manager::Get()->SetValue(valueID, value);
+				break;
+			case ValueID::ValueType_List :
+				response = Manager::Get()->SetValue(valueID, value );
+				break;
+			default:
+				Log::Write(LogLevel_Info, "ZNode::SetValueIDValue() : unknown ValueType");
+		}
+
+		if(!response)
+			Log::Write(LogLevel_Info, "ZNode::SetValueIDValue() : cannot set value for the given value"
+					"Genre %s Class %s Instance %d Index %d Type %s", genreToStr(valueID.GetGenre()),
+					cclassToStr(valueID.GetCommandClassId()), valueID.GetInstance(),
+					valueID.GetIndex(), typeToStr(valueID.GetType()));
+	}else{
+		Log::Write(LogLevel_Info, "ZNode::SetValueIDValue() : unsupported command class, cannot set value"
+				"Genre %s Class %s Instance %d Index %d Type %s", genreToStr(valueID.GetGenre()),
+				cclassToStr(valueID.GetCommandClassId()), valueID.GetInstance(),
+				valueID.GetIndex(), typeToStr(valueID.GetType()));
+	}
+}
+
 

@@ -58,6 +58,8 @@ class ZNode {
 		static void TypeGroup(Notification const* _data);
 
 		static void DeviceAdded(Device* device);
+		static char* GetValueIDValue(ValueID valueID);
+		static void SetValueIDValue(ValueID valueID, int32 value);
 	};
 
 

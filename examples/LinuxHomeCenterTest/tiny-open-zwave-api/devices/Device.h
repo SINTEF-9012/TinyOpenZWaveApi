@@ -24,11 +24,11 @@ using namespace OpenZWave;
 			uint8 index;
 			TinyController* controller;
 			NodeInfo* node;
-			ValueID* value;
+			ValueID* valueID;
 			virtual uint8 getComandClass();
 
 		public:
-			virtual ValueID* getValueId() {return value;};
+			virtual ValueID* getValueID() {return valueID;};
 			static uint8 COMMAND_CLASS;
 			Device* Init(TinyController* const controller, uint8 const _nodeId, uint8 const _instance, uint8 const _index);
 

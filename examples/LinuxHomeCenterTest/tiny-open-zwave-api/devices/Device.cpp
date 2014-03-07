@@ -21,7 +21,7 @@ uint8 Device::COMMAND_CLASS = COMMAND_CLASS_NON_UNKNOWN;
 
 Device* Device::Init(TinyController* const controller, uint8 const _nodeId, uint8 const _instance, uint8 const _index) {
 	this->node = NULL;
-	this->value = NULL;
+	this->valueID = NULL;
 	this->controller = controller;
 	this->nodeId = _nodeId;
 	this->instance = _instance;

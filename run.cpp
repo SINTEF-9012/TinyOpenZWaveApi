@@ -109,6 +109,22 @@ int main(int argc, char* argv[]){
 		}
 		if(ch == 'i'){
 			cout << "OpenZWave init" <<endl;
+			/*char value[1024] = "hello";
+			char* value_char;
+			value_char = (char*) malloc((strlen(value) +1)*sizeof(char));
+			snprintf(value_char, strlen(value) +1, "%s\0", value);
+			cout << strlen(value_char)  << endl;
+			cout << value_char  << endl;
+			char dev_value[1024];
+			snprintf(dev_value, 1024, "%s", strdup(value));
+			cout << strlen(dev_value)  << endl;
+			cout << dev_value  << endl;*/
+			 /*char szOrbits[] = "686.97 365.24";
+			  char* pEnd;
+			  float f1, f2;
+			  f1 = strtof (szOrbits, NULL);
+			  f2 = strtof (pEnd, NULL);
+			  printf ("One martian year takes %.2f %.2f Earth years.\n", f1, f2);*/
 			OpenZWaveFacade::Init(config, zwdir, domo_log, enableLog, enableZWLog, polltime);
 
 		}

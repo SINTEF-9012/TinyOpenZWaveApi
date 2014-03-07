@@ -522,6 +522,10 @@ ValueID NullValueID::getValue() {
 	return *nullValueID;
 };
 
+ValueID* NullValueID::GreateInstance(){
+	return new ValueID(home_id , node_id, ValueID::ValueGenre_Basic, command_class, instance, index ,ValueID::ValueType_Bool);
+}
+
 void NullValueID::Destroy() {
 	if(nullValueID == NULL)
 		return;

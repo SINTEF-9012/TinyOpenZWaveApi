@@ -108,7 +108,7 @@ using namespace OpenZWave;
 	} NodeInfo;
 
 	class NullValueID {
-		private:
+		public:
 			static ValueID* nullValueID;
 
 		public:
@@ -120,6 +120,7 @@ using namespace OpenZWave;
 
 			static bool isNull(ValueID valueID);
 			static ValueID getValue();
+			static ValueID* GreateInstance();
 			static void Destroy();
 	};
 

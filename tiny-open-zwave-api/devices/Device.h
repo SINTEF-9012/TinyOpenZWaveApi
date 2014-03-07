@@ -30,13 +30,13 @@ using namespace OpenZWave;
 			uint8 index;
 			TinyController* controller;
 			NodeInfo* node;
-			ValueID* value;
+			ValueID* valueID;
 
 		public:
 			Device();
 			virtual ~Device();
 
-			virtual ValueID* getValueId() {return value;};
+			virtual ValueID getValueID() {return *valueID;};
 			virtual uint8 getComandClass();
 			virtual void setUp(NodeInfo* nodeInfo);
 			Device* Init(TinyController* const controller, uint8 const _nodeId, uint8 const _instance, uint8 const _index);
