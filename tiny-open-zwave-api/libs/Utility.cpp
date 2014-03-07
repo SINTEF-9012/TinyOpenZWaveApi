@@ -508,15 +508,15 @@ ValueID findValueID(list<ValueID> values, uint8 command_class, uint8 instance, u
 			return (*it);
 		}
 	}
-	return NullValueID::getValue();
+	return NullValueID::GetValue();
 }
 
 ValueID* NullValueID::nullValueID = NULL;
 
-bool NullValueID::isNull(ValueID valueID) {
-	return (valueID == getValue()) ? true : false;
+bool NullValueID::IsNull(ValueID valueID) {
+	return (valueID == GetValue()) ? true : false;
 }
-ValueID NullValueID::getValue() {
+ValueID NullValueID::GetValue() {
 	if(nullValueID == NULL)
 		nullValueID = new ValueID(home_id , node_id, ValueID::ValueGenre_Basic, command_class, instance, index ,ValueID::ValueType_Bool);
 	return *nullValueID;

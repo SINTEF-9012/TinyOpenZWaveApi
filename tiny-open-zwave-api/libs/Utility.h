@@ -118,8 +118,8 @@ using namespace OpenZWave;
 			static const uint8 instance = 0;
 			static const uint8 index = 0;
 
-			static bool isNull(ValueID valueID);
-			static ValueID getValue();
+			static bool IsNull(ValueID valueID);
+			static ValueID GetValue();
 			static ValueID* GreateInstance();
 			static void Destroy();
 	};

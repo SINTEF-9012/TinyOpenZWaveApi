@@ -155,7 +155,7 @@ int main(int argc, char* argv[]){
 		}
 		if(ch == 'q'){
 			ValueID valueId = ZWave_GetValueID(s->controller->controllerHomeId, s->getComandClass(), s->node->m_nodeId, s->instance, s->index);
-			if(!NullValueID::isNull(valueId)){
+			if(!NullValueID::IsNull(valueId)){
 				bool isTurnedOn;
 				bool result = Manager::Get()->GetValueAsBool(valueId, &isTurnedOn);
 				if(!result){

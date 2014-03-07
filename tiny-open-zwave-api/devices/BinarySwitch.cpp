@@ -141,7 +141,7 @@ void BinarySwitch::update(NodeSubject* subject){
 			break;
 		case Notification::Type_ValueRemoved:
 			Device::RemoveValueIDCallback(this->node, valueId);
-			this->valueID = NULL;
+			*this->valueID = NullValueID::GetValue();
 			break;
 		default:
 			Log::Write(LogLevel_Info, "BinarySwitch::update(): not handled case...");
@@ -150,9 +150,9 @@ void BinarySwitch::update(NodeSubject* subject){
 }
 
 void BinarySwitch::setUp(NodeInfo* nodeInfo){
-	if(this->node == NULL || NullValueID::isNull(*this->valueID)){
+	if(this->node == NULL || NullValueID::IsNull(*this->valueID)){
 		ValueID valueId = findValueID(nodeInfo->m_values, getComandClass(), this->instance, this->index);
-		if(!NullValueID::isNull(valueId)){
+		if(!NullValueID::IsNull(valueId)){
 			Log::Write(LogLevel_Info, "BinarySwitch::setUp(): is called for the node %d 0x%08x", this->nodeId, this);
 			Device::setUp(nodeInfo);
 			isTurnedOn = (bool) atoi(ZNode::GetValueIDValue(valueId));
