@@ -30,6 +30,7 @@ using namespace OpenZWave;
 			NodeInfo* node;
 			ValueID* valueID;
 			list<ValueCallback*> callbacks;
+			time_t valueLastSeen;
 
 		public:
 			static uint8 COMMAND_CLASS;

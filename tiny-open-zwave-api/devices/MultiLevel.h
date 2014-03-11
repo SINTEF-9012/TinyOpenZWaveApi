@@ -22,7 +22,6 @@ class MultiLevel : public Device {
 	private:
 		ThingMLCallback* valueUpdatedCallback;
 		char* currentValue;
-		time_t valueLastSeen;
 
 	public:
 		static uint8 COMMAND_CLASS;
@@ -46,7 +45,7 @@ class MultiLevel : public Device {
 		void refresh();
 
 		//commands callback
-		static void callback_value_refresh(Device* _context, Notification const* _data);
+		static void callback_value_updated(Device* _context, Notification const* _data);
 
 		virtual void update(NodeSubject* subject);
 };

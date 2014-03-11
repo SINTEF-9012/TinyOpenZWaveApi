@@ -57,6 +57,14 @@ void init_callback_multilevel(void *_instance, ...) {
 	printf("********************************THINGML: -> MultiLevel is initialized\n");
 }
 
+void value_change_callback_multilevel(void *_instance, ...) {
+    va_list arguments;
+    va_start(arguments, _instance);
+    const char* value = va_arg(arguments, const char*);
+    va_end(arguments);
+	cout<< "!!!!!!!!!!!!!! value_change_callback_multilevel is " << value << endl;
+}
+
 void exit_main_handler(int s){
 	cout << "Caught signal on exit" <<endl;
 	OpenZWaveFacade::Quite();
@@ -99,9 +107,6 @@ int main(int argc, char* argv[]){
 			cout << "Start controller" <<endl;
 			TinyController* controller = OpenZWaveFacade::GetController(port);
 			controller->start();
-			//cout << "BinarySwitch: setting poll interval" <<endl;
-			//Log::Write(LogLevel_Info, "BinarySwitch: setting poll interval");
-			//Manager::Get()->SetPollInterval(5000, false);
 		}
 		if(ch == 'c'){
 			cout << "Controller init" <<endl;
@@ -152,42 +157,20 @@ int main(int argc, char* argv[]){
 		if(ch == 'm'){
 			cout << "A multisensor created" <<endl;
 			ThingMLCallback* device_init = new ThingMLCallback(init_callback_multilevel, NULL);
+			ThingMLCallback* value_change = new ThingMLCallback(value_change_callback_multilevel, NULL);
 
 			m = new MultiLevel();
 			m->setDeviceInitCallback(device_init);
+			m->setValueUpdatedCallback(value_change);
 			m = m->Init(OpenZWaveFacade::GetController(port),2,1,4);
 		}
 		if(ch == 'g'){
 			cout << "A multisensor data" <<endl;
 			cout << "the value is " << m->getCurrentValue() << endl;
-			//cout << "BinarySwitch: the poll interval is " << Manager::Get()->GetPollInterval() <<endl;
-			//Log::Write(LogLevel_Info, "BinarySwitch: the poll interval is  %d ...", Manager::Get()->GetPollInterval());
 		}
-		if(ch == 'e'){
-			cout << "BinarySwitch: enabling  poll" <<endl;
-			//Log::Write(LogLevel_Info, "BinarySwitch: enabling  poll");
-			ValueID valueId = ZWave_GetValueID(s->getController()->homeId, s->getComandClass(), s->getNodeId(), s->getInstance(), s->getIndex());
-			Manager::Get()->EnablePoll(valueId, 1);
-		}
-		if(ch == 'q'){
-			ValueID valueId = ZWave_GetValueID(s->getController()->homeId, s->getComandClass(), s->getNodeId(), s->getInstance(), s->getIndex());
-			if(!NullValueID::IsNull(valueId)){
-				bool isTurnedOn;
-				bool result = Manager::Get()->GetValueAsBool(valueId, &isTurnedOn);
-				if(!result){
-					cout << "default value is not requested..." <<endl;
-					//Log::Write(LogLevel_Error, "default value is not requested...");
-				}else{
-					cout << "the value is..." << isTurnedOn <<endl;
-					//Log::Write(LogLevel_Error, "the value is %i...", isTurnedOn);
-				}
-			}else{
-				cout << "can not find ValueID for" << endl;
-				/*Log::Write(LogLevel_Error, "can not find ValueID for"
-						"Home 0x%08x Node %d Class %s Instance %d Index %d",
-						s->controller->currentControllerHomeId, s->node->m_nodeId,
-						s->getComandClass(), s->instance, s->index);*/
-			}
+		if(ch == 'r'){
+			cout << "A multisensor data refresh" <<endl;
+			m->refresh();
 		}
 	}
 	return 0;

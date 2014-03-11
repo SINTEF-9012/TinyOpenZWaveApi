@@ -70,7 +70,6 @@ uint8 BinarySwitch::getComandClass(){
 void BinarySwitch::turnOn(){
 	Log::Write(LogLevel_Info, "BinarySwitch::turnOn(): turning on...");
 	if(this->node != NULL){
-		//ZWave_SetValue((int) controller->controllerHomeId, (int) this->node->m_nodeId, this->instance, 255);
 		ZNode::SetValueIDValue(*this->valueID, 255);
 	}else{
 		Log::Write(LogLevel_Info, "BinarySwitch::turnOn(): node is NULL, ignoring...");
@@ -80,7 +79,6 @@ void BinarySwitch::turnOn(){
 void BinarySwitch::turnOff(){
 	Log::Write(LogLevel_Info, "BinarySwitch::turnOff(): turning off...");
 	if(this->node != NULL){
-		//ZWave_SetValue((int) controller->controllerHomeId, (int) this->node->m_nodeId, this->instance, 0);
 		ZNode::SetValueIDValue(*this->valueID, 0);
 	}else{
 		Log::Write(LogLevel_Info, "BinarySwitch::turnOff(): node is NULL, ignoring...");
@@ -88,42 +86,51 @@ void BinarySwitch::turnOff(){
 }
 
 void BinarySwitch::callback_turn_on_off(Device* _context, Notification const* _data){
-	Log::Write(LogLevel_Info, "BinarySwitch::callback_turnOnOff(): is called");
-	ValueID valueID = _data->GetValueID();
+	Log::Write(LogLevel_Info, "BinarySwitch::callback_turn_on_off(): is called");
 	BinarySwitch *bs = (BinarySwitch*) _context;
-	if(ValueID::ValueType_Bool == valueID.GetType()){
-		bool result;
-		Manager::Get()->GetValueAsBool(valueID, &result);
-		ZWave_WriteLog(LogLevel_Debug, true, "BinarySwitch::callback_turnOnOff(): check value : "
-				"Home 0x%08x Node %d Genre %s Class %s Instance %d Index %d Type %s IS %i",
-				valueID.GetHomeId(), valueID.GetNodeId(), genreToStr(valueID.GetGenre()),
-				cclassToStr(valueID.GetCommandClassId()), valueID.GetInstance(),
-				valueID.GetIndex(), typeToStr(valueID.GetType()), result);
-		if(bs->isTurnedOn != result){
-			if(result){
-				if(bs->turnedOnCallback != NULL){
-					Log::Write(LogLevel_Info, "BinarySwitch::callback_turnOnOff(): calling ThingML_binary_switch_turned_on()");
-					bs->turnedOnCallback->fn_callback(bs->turnedOnCallback->instance);
-				}
-			}else{
-				if(bs->turnedOffCallback != NULL){
-					Log::Write(LogLevel_Info, "BinarySwitch::callback_turnOnOff(): calling ThingML_binary_switch_turned_off()");
-					bs->turnedOffCallback->fn_callback(bs->turnedOffCallback->instance);
-				}
+	ValueID valueID = *bs->valueID;
+	if(NullValueID::IsNull(valueID)){
+		Log::Write(LogLevel_Info, "BinarySwitch::callback_turn_on_off: ValuiID is null, skipping...");
+		return;
+	}
+	ValueID passedValueID = _data->GetValueID();
+	if(passedValueID != valueID){
+		Log::Write(LogLevel_Info, "BinarySwitch::callback_turn_on_off: the passed valueID and BinarySwitch's valueID do not match, skipping...\n"
+			"-->Passed valueID: Home 0x%08x Node %d Genre %s Class %s Instance %d Index %d Type %s\n"
+			"-->MultiLevel's valueID: Home 0x%08x Node %d Genre %s Class %s Instance %d Index %d Type %s",
+			passedValueID.GetHomeId(), passedValueID.GetNodeId(), genreToStr(passedValueID.GetGenre()),
+			cclassToStr(passedValueID.GetCommandClassId()), passedValueID.GetInstance(),
+			passedValueID.GetIndex(), typeToStr(passedValueID.GetType()),
+			valueID.GetHomeId(), valueID.GetNodeId(), genreToStr(valueID.GetGenre()),
+			cclassToStr(valueID.GetCommandClassId()), valueID.GetInstance(),
+			valueID.GetIndex(), typeToStr(valueID.GetType()));
+		return;
+	}
+	bs->valueLastSeen = time(NULL);
+	bool result = (bool) atoi(ZNode::GetValueIDValue(valueID));
+	Log::Write(LogLevel_Info, "BinarySwitch::callback_turn_on_off(): check value : "
+			"Home 0x%08x Node %d Genre %s Class %s Instance %d Index %d Type %s IS %i",
+			valueID.GetHomeId(), valueID.GetNodeId(), genreToStr(valueID.GetGenre()),
+			cclassToStr(valueID.GetCommandClassId()), valueID.GetInstance(),
+			valueID.GetIndex(), typeToStr(valueID.GetType()), result);
+	if(bs->isTurnedOn != result){
+		if(result){
+			if(bs->turnedOnCallback != NULL){
+				Log::Write(LogLevel_Info, "BinarySwitch::callback_turn_on_off(): calling ThingML_binary_switch_turned_on()");
+				bs->turnedOnCallback->fn_callback(bs->turnedOnCallback->instance);
 			}
-			bs->isTurnedOn = result;
 		}else{
-			if(bs->noChangeCallback != NULL){
-				Log::Write(LogLevel_Info, "BinarySwitch::callback_turnOnOff(): calling ThingML_binary_switch_nochange()");
-				bs->noChangeCallback->fn_callback(bs->noChangeCallback->instance);
+			if(bs->turnedOffCallback != NULL){
+				Log::Write(LogLevel_Info, "BinarySwitch::callback_turnOnOff(): calling ThingML_binary_switch_turned_off()");
+				bs->turnedOffCallback->fn_callback(bs->turnedOffCallback->instance);
 			}
 		}
+		bs->isTurnedOn = result;
 	}else{
-		Log::Write(LogLevel_Error, "BinarySwitch::callback_turnOnOff(): there must be a error, value should be of the bool type..."
-				"Home 0x%08x Node %d Genre %s Class %s Instance %d Index %d Type %s",
-				valueID.GetHomeId(), valueID.GetNodeId(),
-				genreToStr(valueID.GetGenre()), cclassToStr(valueID.GetCommandClassId()), valueID.GetInstance(),
-				valueID.GetIndex(), typeToStr(valueID.GetType()));
+		if(bs->noChangeCallback != NULL){
+			Log::Write(LogLevel_Info, "BinarySwitch::callback_turn_on_off(): calling ThingML_binary_switch_nochange()");
+			bs->noChangeCallback->fn_callback(bs->noChangeCallback->instance);
+		}
 	}
 }
 

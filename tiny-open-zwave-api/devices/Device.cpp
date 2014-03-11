@@ -30,6 +30,7 @@ Device::Device(){
 	this->nodeId = 0;
 	this->instance = 0;
 	this->index = 0;
+	this->valueLastSeen = 0;
 }
 
 Device* Device::Init(TinyController* const controller, uint8 const _nodeId, uint8 const _instance, uint8 const _index) {
