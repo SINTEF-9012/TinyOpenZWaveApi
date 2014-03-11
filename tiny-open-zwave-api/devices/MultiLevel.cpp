@@ -5,8 +5,6 @@
  *      Author: vassik
  */
 
-#include <typeinfo>
-
 #include "openzwave/Options.h"
 #include "openzwave/Manager.h"
 #include "openzwave/Node.h"

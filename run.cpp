@@ -18,6 +18,7 @@
 
 #include "tiny-open-zwave-api/devices/BinarySwitch.h"
 #include "tiny-open-zwave-api/devices/MultiLevel.h"
+#include "tiny-open-zwave-api/devices/BinarySensor.h"
 #include "tiny-open-zwave-api/libs/DomoZWave.h"
 
 #include "tiny-open-zwave-api/libs/Utility.h"
@@ -27,6 +28,7 @@ using namespace TinyOpenZWaveApi;
 
 BinarySwitch* s;
 MultiLevel* m;
+BinarySensor* bs;
 const char* port = "/dev/ttyUSB0";
 const char* config = "./tiny-open-zwave-api/config/";
 const char* zwdir = "";
@@ -55,6 +57,18 @@ void init_callback(void *_instance, ...) {
 
 void init_callback_multilevel(void *_instance, ...) {
 	printf("********************************THINGML: -> MultiLevel is initialized\n");
+}
+
+void init_callback_binarysensor(void *_instance, ...) {
+	printf("********************************THINGML: -> BinarySensor is initialized\n");
+}
+
+void value_change_callback_binarysensor(void *_instance, ...) {
+    va_list arguments;
+    va_start(arguments, _instance);
+    int value = va_arg(arguments, int);
+    va_end(arguments);
+	cout<< "!!!!!!!!!!!!!! value_change_callback_binarysensor is " << value << endl;
 }
 
 void value_change_callback_multilevel(void *_instance, ...) {
@@ -94,21 +108,22 @@ int main(int argc, char* argv[]){
 	sigIntHandler.sa_flags = 0;
 	sigaction(SIGINT, &sigIntHandler, NULL);
 
-	char ch;
-	while (1){
-		cin >> ch;
-		if(ch == 'o'){
+	string ch;
+	bool loop = true;
+	while (loop){
+		getline(cin, ch);
+		if(ch == "o"){
 			s->turnOn();
 		}
-		if(ch == 'f'){
+		if(ch == "f"){
 			s->turnOff();
 		}
-		if(ch == 's'){
+		if(ch == "s"){
 			cout << "Start controller" <<endl;
 			TinyController* controller = OpenZWaveFacade::GetController(port);
 			controller->start();
 		}
-		if(ch == 'c'){
+		if(ch == "c"){
 			cout << "Controller init" <<endl;
 			ThingMLCallback* controller_ready_callback = new ThingMLCallback(controller_ready, NULL);
 			ThingMLCallback* all_nodes_quiried_callback = new ThingMLCallback(all_nodes_quiried, NULL);
@@ -118,7 +133,7 @@ int main(int argc, char* argv[]){
 			controller->setAllNodeQueriedCallback(all_nodes_quiried_callback);
 			controller->setNodeQueriesCompleteCallback(node_quiries_complete_callback);
 		}
-		if(ch == 'i'){
+		if(ch == "i"){
 			cout << "OpenZWave init" <<endl;
 			/*char value[1024] = "hello";
 			char* value_char;
@@ -139,7 +154,7 @@ int main(int argc, char* argv[]){
 			OpenZWaveFacade::Init(config, zwdir, domo_log, enableLog, enableZWLog, polltime);
 
 		}
-		if(ch == 'b'){
+		if(ch == "b"){
 			cout << "A binary switch created" <<endl;
 			ThingMLCallback* turned_on = new ThingMLCallback(turned_on_callback, NULL);
 			ThingMLCallback* turned_off = new ThingMLCallback(turned_off_callback, NULL);
@@ -154,7 +169,7 @@ int main(int argc, char* argv[]){
 			s->setNoChangeCallback(no_change);
 			s = s->Init(OpenZWaveFacade::GetController(port),2,1,0);
 		}
-		if(ch == 'm'){
+		if(ch == "m"){
 			cout << "A multisensor created" <<endl;
 			ThingMLCallback* device_init = new ThingMLCallback(init_callback_multilevel, NULL);
 			ThingMLCallback* value_change = new ThingMLCallback(value_change_callback_multilevel, NULL);
@@ -164,13 +179,35 @@ int main(int argc, char* argv[]){
 			m->setValueUpdatedCallback(value_change);
 			m = m->Init(OpenZWaveFacade::GetController(port),2,1,4);
 		}
-		if(ch == 'g'){
+		if(ch == "g"){
 			cout << "A multisensor data" <<endl;
 			cout << "the value is " << m->getCurrentValue() << endl;
 		}
-		if(ch == 'r'){
+		if(ch == "r"){
 			cout << "A multisensor data refresh" <<endl;
 			m->refresh();
+		}
+		if(ch == "bs"){
+			cout << "A binary sensor created" <<endl;
+			ThingMLCallback* device_init = new ThingMLCallback(init_callback_binarysensor, NULL);
+			ThingMLCallback* value_change = new ThingMLCallback(value_change_callback_binarysensor, NULL);
+
+			bs = new BinarySensor();
+			bs->setDeviceInitCallback(device_init);
+			bs->setValueUpdatedCallback(value_change);
+			bs = bs->Init(OpenZWaveFacade::GetController(port),3,1,0);
+		}
+		if(ch == "bsg"){
+			cout << "A binary sensor data" <<endl;
+			cout << "the value is " << bs->getCurrentValue() << endl;
+		}
+		if(ch == "bsr"){
+			cout << "A binary sensor data refresh" <<endl;
+			bs->refresh();
+		}
+		if(ch == "q"){
+			OpenZWaveFacade::Quite();
+			loop = false;
 		}
 	}
 	return 0;
