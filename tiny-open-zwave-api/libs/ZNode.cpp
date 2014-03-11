@@ -61,13 +61,13 @@ void ZNode::DeviceAdded(Device* device){
 	NodeInfo *node = NULL;
 	for(list<NodeInfo*>::iterator it = g_nodes.begin(); it != g_nodes.end(); ++it){
 
-		if(device->nodeId == (*it)->m_nodeId && device->controller->controllerHomeId == (*it)->m_homeId){
+		if(device->getNodeId() == (*it)->m_nodeId && device->getController()->homeId == (*it)->m_homeId){
 			node = (*it);
 			break;
 		}
 	}
-	if(node != NULL && m_nodeSub.find(device->nodeId) != m_nodeSub.end()){
-		NodeSubject* nodeSubject = m_nodeSub[device->nodeId];
+	if(node != NULL && m_nodeSub.find(device->getNodeId()) != m_nodeSub.end()){
+		NodeSubject* nodeSubject = m_nodeSub[device->getNodeId()];
 		if(nodeSubject->getNodeInfo() == node){
 			nodeSubject->attach(device);
 			device->setUp(node);
@@ -93,7 +93,7 @@ void ZNode::AddNode(Notification const* _notification){
 	NodeSubject* nodeSubject = new NodeSubject(nodeInfo, _notification);
 	list<Device*> devices = controller->getDevices();
 	for(list<Device*>::iterator it = devices.begin(); it != devices.end(); ++it){
-		if(nodeInfo->m_nodeId == (*it)->nodeId  && nodeInfo->m_homeId == (*it)->controller->controllerHomeId){
+		if(nodeInfo->m_nodeId == (*it)->getNodeId()  && nodeInfo->m_homeId == (*it)->getController()->homeId){
 			nodeSubject->attach((*it));
 		}
 	}

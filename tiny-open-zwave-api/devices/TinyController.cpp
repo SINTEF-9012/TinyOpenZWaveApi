@@ -282,8 +282,8 @@ TinyController::TinyController(char const* _port) {
 	Log::Write(LogLevel_Info, "TinyController::TinyController() : initializing...");
 
 	port = _port;
-	controllerHomeId = 0;
-	controllerNodeId = 0;
+	homeId = 0;
+	nodeId = 0;
 	isLaunched = false;
 
 	controllerInfo = NULL;
@@ -397,8 +397,8 @@ void TinyController::update(ControllerSubject* subject){
 //-----------------------------------------------------------------------------
 void TinyController::setUp(m_structCtrl* _ctrInfo){
 	controllerInfo = _ctrInfo;
-	controllerHomeId = _ctrInfo->m_homeId;
-	controllerNodeId = _ctrInfo->m_nodeId;
+	homeId = _ctrInfo->m_homeId;
+	nodeId = _ctrInfo->m_nodeId;
 }
 
 

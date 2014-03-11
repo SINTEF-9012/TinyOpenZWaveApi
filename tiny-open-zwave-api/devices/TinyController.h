@@ -31,8 +31,8 @@ using namespace OpenZWave;
 		public:
 			static Manager::pfnOnNotification_t OnNotificationCallback;
 
-			uint32 controllerHomeId;
-			uint8 controllerNodeId;
+			uint32 homeId;
+			uint8 nodeId;
 			char const* port;
 
 			ThingMLCallback* controllerReadyCallback;

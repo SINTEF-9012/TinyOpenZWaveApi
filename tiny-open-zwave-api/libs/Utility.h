@@ -39,6 +39,8 @@ using namespace OpenZWave;
 			fn_callback(_callback),
 			fn_device(_device){
 		};
+
+		~ValueCallback();
 	};
 
 

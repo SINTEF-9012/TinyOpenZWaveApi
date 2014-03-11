@@ -35,7 +35,7 @@ void BinarySwitch::Destroy() {
 //-----------------------------------------------------------------------------
 BinarySwitch::BinarySwitch(ThingMLCallback* turnedOnCallback, ThingMLCallback* turnedOffCallback, ThingMLCallback* noChangeCallback) {
 	isTurnedOn = false;
-	callbacksOnOff.push_back(new ValueCallback(BinarySwitch::callback_turnOnOff, this));
+	callbacks.push_back(new ValueCallback(BinarySwitch::callback_turn_on_off, this));
 	this->turnedOnCallback = turnedOnCallback;
 	this->turnedOffCallback = turnedOffCallback;
 	this->noChangeCallback = noChangeCallback;
@@ -43,7 +43,7 @@ BinarySwitch::BinarySwitch(ThingMLCallback* turnedOnCallback, ThingMLCallback* t
 
 BinarySwitch::BinarySwitch(){
 	isTurnedOn = false;
-	callbacksOnOff.push_back(new ValueCallback(BinarySwitch::callback_turnOnOff, this));
+	callbacks.push_back(new ValueCallback(BinarySwitch::callback_turn_on_off, this));
 	this->turnedOnCallback = NULL;
 	this->turnedOffCallback = NULL;
 	this->noChangeCallback = NULL;
@@ -51,7 +51,7 @@ BinarySwitch::BinarySwitch(){
 
 BinarySwitch* BinarySwitch::Init(TinyController* const controller, uint8 const _nodeId, uint8 const _instance, uint8 const _index){
 	BinarySwitch* bswitch = (BinarySwitch*)Device::Init(controller, _nodeId, _instance, _index);
-	ValueID valueId = DomoZWave_GetValueID(controller->controllerHomeId, getComandClass(), this->node->m_nodeId, this->instance, this->index);
+	ValueID valueId = DomoZWave_GetValueID(controller->homeId, getComandClass(), this->node->m_nodeId, this->instance, this->index);
 	DummyValueID dummy;
 	if(valueId != *dummy.valueID){
 		bool result = Manager::Get()->GetValueAsBool(valueId, &isTurnedOn);
@@ -61,7 +61,7 @@ BinarySwitch* BinarySwitch::Init(TinyController* const controller, uint8 const _
 	}else{
 		Log::Write(LogLevel_Error, "BinarySwitch::BinarySwitch(): can not find ValueID for"
 				"Home 0x%08x Node %d Class %s Instance %d Index %d",
-				controller->controllerHomeId, this->node->m_nodeId,
+				controller->homeId, this->node->m_nodeId,
 				getComandClass(), this->instance, this->index);
 	}
 	return bswitch;
@@ -82,7 +82,7 @@ uint8 BinarySwitch::getComandClass(){
 void BinarySwitch::turnOn(){
 	Log::Write(LogLevel_Info, "BinarySwitch::turnOn(): turning on...");
 	if(this->node != NULL){
-		DomoZWave_SetValue((int) controller->controllerHomeId, (int) this->node->m_nodeId, this->instance, 255, callbacksOnOff);
+		DomoZWave_SetValue((int) controller->homeId, (int) this->node->m_nodeId, this->instance, 255, callbacks);
 	}else{
 		Log::Write(LogLevel_Info, "BinarySwitch::turnOn(): node is NULL, ignoring...");
 	};
@@ -91,13 +91,13 @@ void BinarySwitch::turnOn(){
 void BinarySwitch::turnOff(){
 	Log::Write(LogLevel_Info, "BinarySwitch::turnOff(): turning off...");
 	if(this->node != NULL){
-		DomoZWave_SetValue((int) controller->controllerHomeId, (int) this->node->m_nodeId, this->instance, 0, callbacksOnOff);
+		DomoZWave_SetValue((int) controller->homeId, (int) this->node->m_nodeId, this->instance, 0, callbacks);
 	}else{
 		Log::Write(LogLevel_Info, "BinarySwitch::turnOff(): node is NULL, ignoring...");
 	};
 }
 
-void BinarySwitch::callback_turnOnOff(Device* _context, Notification const* _data){
+void BinarySwitch::callback_turn_on_off(Device* _context, Notification const* _data){
 	Log::Write(LogLevel_Info, "BinarySwitch::callback_turnOnOff(): is called");
 	ValueID valueID = _data->GetValueID();
 	BinarySwitch *bs = (BinarySwitch*) _context;

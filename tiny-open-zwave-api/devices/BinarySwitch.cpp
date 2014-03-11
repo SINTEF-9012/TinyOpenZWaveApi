@@ -4,7 +4,9 @@
  *  Created on: Nov 1, 2013
  *      Author: vassik
  */
+
 #include <stdlib.h>
+#include <typeinfo>
 
 #include "openzwave/Options.h"
 #include "openzwave/Manager.h"
@@ -23,6 +25,7 @@
 
 using namespace OpenZWave;
 
+
 uint8 BinarySwitch::COMMAND_CLASS = COMMAND_CLASS_SWITCH_BINARY;
 //-----------------------------------------------------------------------------
 //	<BinarySwitch::Destroy>
@@ -39,11 +42,12 @@ void BinarySwitch::Destroy() {
 //-----------------------------------------------------------------------------
 
 BinarySwitch::BinarySwitch() : Device() {
+	DEVICE_NAME = "BinarySwitch";
 	isTurnedOn = false;
+	noChangeCallback = NULL;
 	turnedOnCallback = NULL;
 	turnedOffCallback = NULL;
-	noChangeCallback = NULL;
-	callbacksOnOff.push_back(new ValueCallback(BinarySwitch::callback_turnOnOff, this));
+	callbacks.push_back(new ValueCallback(BinarySwitch::callback_turn_on_off, this));
 }
 
 BinarySwitch* BinarySwitch::Init(TinyController* const controller, uint8 const _nodeId, uint8 const _instance, uint8 const _index){
@@ -83,7 +87,7 @@ void BinarySwitch::turnOff(){
 	};
 }
 
-void BinarySwitch::callback_turnOnOff(Device* _context, Notification const* _data){
+void BinarySwitch::callback_turn_on_off(Device* _context, Notification const* _data){
 	Log::Write(LogLevel_Info, "BinarySwitch::callback_turnOnOff(): is called");
 	ValueID valueID = _data->GetValueID();
 	BinarySwitch *bs = (BinarySwitch*) _context;
@@ -124,51 +128,17 @@ void BinarySwitch::callback_turnOnOff(Device* _context, Notification const* _dat
 }
 
 void BinarySwitch::update(NodeSubject* subject){
-	Log::Write(LogLevel_Info, "BinarySwitch::update(): is called for the node %d 0x%08x", this->nodeId, this);
 	Device::update(subject);
-	Notification const* notification = subject->getNotification();
-	if(notification->GetValueID().GetCommandClassId() != getComandClass())
-		return;
-
-	ValueID valueId = notification->GetValueID();
-	switch (notification->GetType()) {
-		case Notification::Type_ValueAdded:
-			this->setUp(subject->getNodeInfo());
-			break;
-		case Notification::Type_ValueChanged:
-			Log::Write(LogLevel_Info, "BinarySwitch::update(): value changed, calling callback...");
-			Device::CallValueCallback(this->node, valueId, notification);
-			break;
-		case Notification::Type_ValueRemoved:
-			Device::RemoveValueIDCallback(this->node, valueId);
-			*this->valueID = NullValueID::GetValue();
-			break;
-		default:
-			Log::Write(LogLevel_Info, "BinarySwitch::update(): not handled case...");
-			break;
-	}
 }
 
-void BinarySwitch::setUp(NodeInfo* nodeInfo){
-	if(this->node == NULL || NullValueID::IsNull(*this->valueID)){
-		ValueID valueId = findValueID(nodeInfo->m_values, getComandClass(), this->instance, this->index);
-		if(!NullValueID::IsNull(valueId)){
-			Log::Write(LogLevel_Info, "BinarySwitch::setUp(): is called for the node %d 0x%08x", this->nodeId, this);
-			Device::setUp(nodeInfo);
-			isTurnedOn = (bool) atoi(ZNode::GetValueIDValue(valueId));
-			//bool result = Manager::Get()->GetValueAsBool(valueId, &isTurnedOn);
-			//if(!result) Log::Write(LogLevel_Info, "BinarySwitch::setUp(): default value is not requested yet...");
-			*this->valueID = valueId;
-			Device::TestValueIDCallback(this->node, valueId, callbacksOnOff);
-			if(deviceInitCallback)
-				deviceInitCallback->fn_callback(deviceInitCallback->instance);
-		}else{
-			Log::Write(LogLevel_Info, "BinarySwitch::setUp(): ValueID is not known yet for"
-					"Home 0x%08x Node %d Class %s Instance %d Index %d",
-					controller->controllerHomeId, this->node->m_nodeId,
-					getComandClass(), this->instance, this->index);
-		}
-	}
+int BinarySwitch::setUp(NodeInfo* nodeInfo){
+	int result = Device::setUp(nodeInfo);
+	if(result != 0)
+		return result;
+
+	isTurnedOn = (bool) atoi(ZNode::GetValueIDValue(*this->valueID));
+	Device::TestValueIDCallback(this->node, *this->valueID, callbacks);
+	return result;
 }
 
 

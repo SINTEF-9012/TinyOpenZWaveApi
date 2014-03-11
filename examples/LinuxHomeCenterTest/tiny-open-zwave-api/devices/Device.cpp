@@ -30,7 +30,7 @@ Device* Device::Init(TinyController* const controller, uint8 const _nodeId, uint
 	for(list<NodeInfo*>::iterator it=g_nodes.begin(); it!=g_nodes.end(); ++it){
 		uint8 nodeId = (*it)->m_nodeId;
 		uint32 homeId = (*it)->m_homeId;
-		if(nodeId == _nodeId && homeId == controller->controllerHomeId){
+		if(nodeId == _nodeId && homeId == controller->homeId){
 			this->node = *it;
 			break;
 		}

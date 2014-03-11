@@ -17,6 +17,7 @@
 #include "tiny-open-zwave-api/TinyZWaveFacade.h"
 
 #include "tiny-open-zwave-api/devices/BinarySwitch.h"
+#include "tiny-open-zwave-api/devices/MultiLevel.h"
 #include "tiny-open-zwave-api/libs/DomoZWave.h"
 
 #include "tiny-open-zwave-api/libs/Utility.h"
@@ -25,6 +26,7 @@
 using namespace TinyOpenZWaveApi;
 
 BinarySwitch* s;
+MultiLevel* m;
 const char* port = "/dev/ttyUSB0";
 const char* config = "./tiny-open-zwave-api/config/";
 const char* zwdir = "";
@@ -49,6 +51,10 @@ void no_change_callback(void *_instance, ...) {
 
 void init_callback(void *_instance, ...) {
 	printf("?????????????????????????????????THINGML: -> BinarySwitsh is initialized\n");
+}
+
+void init_callback_multilevel(void *_instance, ...) {
+	printf("********************************THINGML: -> MultiLevel is initialized\n");
 }
 
 void exit_main_handler(int s){
@@ -143,18 +149,28 @@ int main(int argc, char* argv[]){
 			s->setNoChangeCallback(no_change);
 			s = s->Init(OpenZWaveFacade::GetController(port),2,1,0);
 		}
+		if(ch == 'm'){
+			cout << "A multisensor created" <<endl;
+			ThingMLCallback* device_init = new ThingMLCallback(init_callback_multilevel, NULL);
+
+			m = new MultiLevel();
+			m->setDeviceInitCallback(device_init);
+			m = m->Init(OpenZWaveFacade::GetController(port),2,1,4);
+		}
 		if(ch == 'g'){
-			cout << "BinarySwitch: the poll interval is " << Manager::Get()->GetPollInterval() <<endl;
+			cout << "A multisensor data" <<endl;
+			cout << "the value is " << m->getCurrentValue() << endl;
+			//cout << "BinarySwitch: the poll interval is " << Manager::Get()->GetPollInterval() <<endl;
 			//Log::Write(LogLevel_Info, "BinarySwitch: the poll interval is  %d ...", Manager::Get()->GetPollInterval());
 		}
 		if(ch == 'e'){
 			cout << "BinarySwitch: enabling  poll" <<endl;
 			//Log::Write(LogLevel_Info, "BinarySwitch: enabling  poll");
-			ValueID valueId = ZWave_GetValueID(s->controller->controllerHomeId, s->getComandClass(), s->node->m_nodeId, s->instance, s->index);
+			ValueID valueId = ZWave_GetValueID(s->getController()->homeId, s->getComandClass(), s->getNodeId(), s->getInstance(), s->getIndex());
 			Manager::Get()->EnablePoll(valueId, 1);
 		}
 		if(ch == 'q'){
-			ValueID valueId = ZWave_GetValueID(s->controller->controllerHomeId, s->getComandClass(), s->node->m_nodeId, s->instance, s->index);
+			ValueID valueId = ZWave_GetValueID(s->getController()->homeId, s->getComandClass(), s->getNodeId(), s->getInstance(), s->getIndex());
 			if(!NullValueID::IsNull(valueId)){
 				bool isTurnedOn;
 				bool result = Manager::Get()->GetValueAsBool(valueId, &isTurnedOn);

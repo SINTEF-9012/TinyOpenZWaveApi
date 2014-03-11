@@ -26,7 +26,7 @@ using namespace OpenZWave;
 
 		public:
 			static uint8 COMMAND_CLASS;
-			list<ValueCallback*> callbacksOnOff;
+			list<ValueCallback*> callbacks;
 			bool isTurnedOn;
 
 		public:
@@ -45,7 +45,7 @@ using namespace OpenZWave;
 			void turnOff();
 
 			//commands callback
-			static void callback_turnOnOff(Device* _context, Notification const* _data);
+			static void callback_turn_on_off(Device* _context, Notification const* _data);
 	};
 
 #endif /* BINARYSWITCH_H_ */

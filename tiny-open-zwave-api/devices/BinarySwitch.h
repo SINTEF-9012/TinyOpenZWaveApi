@@ -18,41 +18,41 @@
 
 using namespace OpenZWave;
 
-	class BinarySwitch: public Device {
-		private:
-			ThingMLCallback* turnedOnCallback;
-			ThingMLCallback* turnedOffCallback;
-			ThingMLCallback* noChangeCallback;
+class BinarySwitch: public Device {
+	private:
+		ThingMLCallback* turnedOnCallback;
+		ThingMLCallback* turnedOffCallback;
+		ThingMLCallback* noChangeCallback;
+		bool isTurnedOn;
 
-		public:
-			static uint8 COMMAND_CLASS;
-			list<ValueCallback*> callbacksOnOff;
-			bool isTurnedOn;
+	public:
+		static uint8 COMMAND_CLASS;
 
-		public:
-			virtual uint8 getComandClass();
-			virtual ValueID getValueID() {return *valueID;};
-			virtual void setUp(NodeInfo* nodeInfo);
+	public:
+		BinarySwitch();
+		virtual ~BinarySwitch();
 
-			BinarySwitch* Init(TinyController* const controller, uint8 const _nodeId, uint8 const _instance, uint8 const _index);
+		virtual uint8 getComandClass();
+		virtual int setUp(NodeInfo* nodeInfo);
 
-			BinarySwitch();
-			virtual void Destroy();
-			virtual ~BinarySwitch();
+		BinarySwitch* Init(TinyController* const controller, uint8 const _nodeId, uint8 const _instance, uint8 const _index);
+		bool isOn() {return isTurnedOn;};
 
-			//callbacks
-			void setTurnedOnCallback(ThingMLCallback* _callback){turnedOnCallback = _callback;};
-			void setTurnedOffCallback(ThingMLCallback* _callback){turnedOffCallback = _callback;};
-			void setNoChangeCallback(ThingMLCallback* _callback){noChangeCallback = _callback;};
+		virtual void Destroy();
 
-			//commands
-			void turnOn();
-			void turnOff();
+		//callbacks
+		void setTurnedOnCallback(ThingMLCallback* _callback){turnedOnCallback = _callback;};
+		void setTurnedOffCallback(ThingMLCallback* _callback){turnedOffCallback = _callback;};
+		void setNoChangeCallback(ThingMLCallback* _callback){noChangeCallback = _callback;};
 
-			//commands callback
-			static void callback_turnOnOff(Device* _context, Notification const* _data);
+		//commands
+		void turnOn();
+		void turnOff();
 
-			virtual void update(NodeSubject* subject);
+		//commands callback
+		static void callback_turn_on_off(Device* _context, Notification const* _data);
+
+		virtual void update(NodeSubject* subject);
 	};
 
 #endif /* BINARYSWITCH_H_ */

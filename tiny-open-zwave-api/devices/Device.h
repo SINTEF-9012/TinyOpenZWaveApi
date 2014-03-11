@@ -22,23 +22,31 @@ using namespace OpenZWave;
 	{
 		protected:
 			ThingMLCallback* deviceInitCallback;
-
-		public:
-			static uint8 COMMAND_CLASS;
+			const char* DEVICE_NAME;
 			uint8 nodeId;
 			uint8 instance;
 			uint8 index;
 			TinyController* controller;
 			NodeInfo* node;
 			ValueID* valueID;
+			list<ValueCallback*> callbacks;
+
+		public:
+			static uint8 COMMAND_CLASS;
 
 		public:
 			Device();
 			virtual ~Device();
 
+			virtual uint8 getNodeId() {return nodeId;};
+			virtual uint8 getInstance() {return instance;};
+			virtual uint8 getIndex() {return index;};
+			virtual NodeInfo* getNodeInfo() {return node;};
+			virtual TinyController* getController() {return controller;};
+			virtual const char* getDeviceName() {return DEVICE_NAME;};
 			virtual ValueID getValueID() {return *valueID;};
 			virtual uint8 getComandClass();
-			virtual void setUp(NodeInfo* nodeInfo);
+			virtual int setUp(NodeInfo* nodeInfo);
 			Device* Init(TinyController* const controller, uint8 const _nodeId, uint8 const _instance, uint8 const _index);
 
 			//callbacks

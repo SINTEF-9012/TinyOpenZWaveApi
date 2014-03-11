@@ -7,6 +7,7 @@
 
 #include <string.h>
 
+#include "openzwave/Log.h"
 #include "openzwave/Driver.h"
 #include "openzwave/Notification.h"
 #include "openzwave/ValueStore.h"
@@ -518,7 +519,7 @@ bool NullValueID::IsNull(ValueID valueID) {
 }
 ValueID NullValueID::GetValue() {
 	if(nullValueID == NULL)
-		nullValueID = new ValueID(home_id , node_id, ValueID::ValueGenre_Basic, command_class, instance, index ,ValueID::ValueType_Bool);
+		nullValueID = GreateInstance();
 	return *nullValueID;
 };
 
@@ -531,6 +532,10 @@ void NullValueID::Destroy() {
 		return;
 	delete nullValueID;
 	nullValueID = NULL;
+}
+
+ValueCallback::~ValueCallback(){
+	Log::Write(LogLevel_Info, "ValueCallback::~ValueCallback() : 0x%08x", this);
 }
 
 

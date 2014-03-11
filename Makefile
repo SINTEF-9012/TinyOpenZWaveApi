@@ -25,11 +25,11 @@ DYNAMIC_LIB_LOCATION = $(TINYOPENZWAVE)/libtinyozw.so
 
 SRC := $(TINYOPENZWAVE)/libs/ZNode.cpp $(TINYOPENZWAVE)/TinyZWaveFacade.cpp $(TINYOPENZWAVE)/libs/Utility.cpp $(TINYOPENZWAVE)/libs/DomoZWave.cpp \
 	$(TINYOPENZWAVE)/devices/TinyController.cpp $(TINYOPENZWAVE)/devices/Device.cpp $(TINYOPENZWAVE)/devices/BinarySwitch.cpp \
-	$(TINYOPENZWAVE)/observer/NodeSubject.cpp $(TINYOPENZWAVE)/observer/ControllerSubject.cpp
+	$(TINYOPENZWAVE)/observer/NodeSubject.cpp $(TINYOPENZWAVE)/observer/ControllerSubject.cpp $(TINYOPENZWAVE)/devices/MultiLevel.cpp
 
 OBJ := $(TINYOPENZWAVE)/libs/ZNode.o $(TINYOPENZWAVE)/TinyZWaveFacade.o $(TINYOPENZWAVE)/libs/Utility.o $(TINYOPENZWAVE)/libs/DomoZWave.o \
 	$(TINYOPENZWAVE)/devices/TinyController.o $(TINYOPENZWAVE)/devices/Device.o $(TINYOPENZWAVE)/devices/BinarySwitch.o \
-	$(TINYOPENZWAVE)/observer/NodeSubject.o $(TINYOPENZWAVE)/observer/ControllerSubject.o
+	$(TINYOPENZWAVE)/observer/NodeSubject.o $(TINYOPENZWAVE)/observer/ControllerSubject.o $(TINYOPENZWAVE)/devices/MultiLevel.o
 
 LIBUSB := -ludev
 LIBS := $(GNUTLS) $(LIBMICROHTTPD) -pthread -lopenzwave $(LIBUSB)

@@ -6,6 +6,7 @@
  */
 
 #include <iostream>
+#include <typeinfo>
 
 #include "openzwave/Log.h"
 #include "openzwave/Node.h"
@@ -21,6 +22,7 @@ using namespace OpenZWave;
 uint8 Device::COMMAND_CLASS = COMMAND_CLASS_NON_UNKNOWN;
 
 Device::Device(){
+	this->DEVICE_NAME = "Device";
 	this->deviceInitCallback = NULL;
 	this->node = NULL;
 	this->valueID = NullValueID::GreateInstance();
@@ -50,13 +52,65 @@ void Device::Destroy(){
 
 Device::~Device(){
 	Log::Write(LogLevel_Info, "Device::~Device(): 0x%08x", this);
+	for(list<ValueCallback*>::iterator it = callbacks.begin(); it != callbacks.end(); ++it)
+		delete *it;
+	callbacks.clear();
 	delete this->valueID;
 }
 
-void Device::update(NodeSubject* subject){}
+void Device::update(NodeSubject* subject){
+	Log::Write(LogLevel_Info, "%s::update(): is called for the node %d 0x%08x", getDeviceName(), this->nodeId, this);
+	Notification const* notification = subject->getNotification();
+	if(notification->GetValueID().GetCommandClassId() != getComandClass())
+		return;
 
-void Device::setUp(NodeInfo* nodeInfo){
-	this->node = nodeInfo;
+	ValueID valueId = notification->GetValueID();
+	switch (notification->GetType()) {
+		case Notification::Type_ValueAdded:
+			Log::Write(LogLevel_Info, "%s::update(): value added...", getDeviceName());
+			this->setUp(subject->getNodeInfo());
+			break;
+		case Notification::Type_ValueChanged:
+			Log::Write(LogLevel_Info, "%s::update(): value changed, calling callback...", getDeviceName());
+			Device::CallValueCallback(getNodeInfo(), valueId, notification);
+			break;
+		case Notification::Type_ValueRemoved:
+			Log::Write(LogLevel_Info, "%s::update(): value removed...", getDeviceName());
+			Device::RemoveValueIDCallback(getNodeInfo(), valueId);
+			*this->valueID = NullValueID::GetValue();
+			break;
+		default:
+			Log::Write(LogLevel_Info, "%s::update(): not handled case...", getDeviceName());
+			break;
+	}
+}
+
+int Device::setUp(NodeInfo* nodeInfo){
+	int result = 0;
+	if(getNodeInfo() == NULL || NullValueID::IsNull(*this->valueID)){
+		ValueID valueId = findValueID(nodeInfo->m_values, getComandClass(), this->instance, this->index);
+		if(!NullValueID::IsNull(valueId)){
+			Log::Write(LogLevel_Info, "%s::setUp(): is called for the node %d 0x%08x", getDeviceName(), this->nodeId, this);
+			this->node = nodeInfo;
+			*this->valueID = valueId;
+			if(deviceInitCallback)
+				deviceInitCallback->fn_callback(deviceInitCallback->instance);
+		}else{
+			Log::Write(LogLevel_Info, "%s::setUp(): ValueID is not known yet for"
+					"Home 0x%08x Node %d Class %s Instance %d Index %d", getDeviceName(),
+					controller->homeId, this->nodeId,
+					getComandClass(), this->instance, this->index);
+			result = 1;
+		}
+	}else {
+		Log::Write(LogLevel_Info, "%s::setUp(): node is not NULL and valueID is already set, skipping..."
+			"Value : Home 0x%08x Node %d Genre %s Class %s Instance %d Index %d Type %s", getDeviceName(),
+				controller->homeId, this->node->m_nodeId, genreToStr((*this->valueID).GetGenre()),
+				cclassToStr((*this->valueID).GetCommandClassId()), (*this->valueID).GetInstance(),
+				(*this->valueID).GetIndex(), typeToStr((*this->valueID).GetType()));
+		result = 2;
+	}
+	return result;
 }
 
 void Device::TestValueIDCallback(NodeInfo *nodeInfo, ValueID valueID, list<ValueCallback*> callbacks){
