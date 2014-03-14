@@ -20,8 +20,11 @@ LDFLAGS	:= $(DEBUG_LDFLAGS)
 OPENZWAVE := ./open-zwave
 TINYOPENZWAVE := ./tiny-open-zwave-api
 
-STATIC_LIB_LOCATION = $(TINYOPENZWAVE)/libtinyozw.a
-DYNAMIC_LIB_LOCATION = $(TINYOPENZWAVE)/libtinyozw.so
+STATIC_LIB_NAME = libtinyozw.a
+DYNAMIC_LIB_NAME = libtinyozw.so
+
+STATIC_LIB_LOCATION = $(TINYOPENZWAVE)/$(STATIC_LIB_NAME)
+DYNAMIC_LIB_LOCATION = $(TINYOPENZWAVE)/$(DYNAMIC_LIB_NAME)
 
 SRC := $(TINYOPENZWAVE)/libs/ZNode.cpp $(TINYOPENZWAVE)/TinyZWaveFacade.cpp $(TINYOPENZWAVE)/libs/Utility.cpp $(TINYOPENZWAVE)/libs/DomoZWave.cpp \
 	$(TINYOPENZWAVE)/devices/TinyController.cpp $(TINYOPENZWAVE)/devices/Device.cpp $(TINYOPENZWAVE)/devices/BinarySwitch.cpp \
@@ -50,7 +53,12 @@ staticlib : $(OBJS)
 dynamiclib : $(OBJS)
 	$(CXX) -shared -o $(DYNAMIC_LIB_LOCATION) $(OBJ)
 
-install: staticlib dynamiclib
+uninstall:
+	rm -rf /usr/local/include/tinyozw
+	rm -rf /usr/local/lib/$(STATIC_LIB_NAME)
+	rm -rf /usr/local/lib/$(DYNAMIC_LIB_NAME)
+
+install: staticlib dynamiclib uninstall
 	install -d /usr/local
 	install -d /usr/local/lib
 	install -d /usr/local/include/tinyozw
