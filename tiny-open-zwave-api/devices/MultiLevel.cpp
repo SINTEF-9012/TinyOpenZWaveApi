@@ -4,6 +4,7 @@
  *  Created on: Mar 6, 2014
  *      Author: vassik
  */
+#include <typeinfo>
 
 #include "openzwave/Options.h"
 #include "openzwave/Manager.h"
@@ -99,7 +100,12 @@ int MultiLevel::setUp(NodeInfo* nodeInfo){
 	if(result != 0)
 		return result;
 
-	currentValue = ZNode::GetValueIDValue(*this->valueID);
-	Device::TestValueIDCallback(this->node, *this->valueID, callbacks);
+	this->finalizeSetUp();
 	return result;
+}
+
+void MultiLevel::finalizeSetUp(){
+	currentValue = ZNode::GetValueIDValue(*this->valueID);
+	Log::Write(LogLevel_Info, "MultiLevel::finalizeSetUp(): updating currentValue with value %d of the type %s\n", currentValue, typeid(currentValue).name());
+	Device::finalizeSetUp();
 }

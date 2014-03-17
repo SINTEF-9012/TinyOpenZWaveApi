@@ -32,6 +32,7 @@ class BinarySensor: public Device {
 
 		virtual uint8 getComandClass();
 		virtual int setUp(NodeInfo* nodeInfo);
+		virtual void finalizeSetUp();
 
 		BinarySensor* Init(TinyController* const controller, uint8 const _nodeId, uint8 const _instance, uint8 const _index);
 		int getCurrentValue();

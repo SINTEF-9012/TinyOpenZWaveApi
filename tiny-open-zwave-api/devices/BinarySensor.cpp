@@ -5,6 +5,8 @@
  *      Author: vassik
  */
 
+#include <typeinfo>
+
 #include "openzwave/Options.h"
 #include "openzwave/Manager.h"
 #include "openzwave/Node.h"
@@ -80,7 +82,8 @@ void BinarySensor::callback_value_updated(Device* _context, Notification const* 
 		return;
 	}
 	bs->valueLastSeen = time(NULL);
-	bs->currentValue = (strcmp(ZNode::GetValueIDValue(valueID), "1")) ? 1 : 0;
+	bs->currentValue = (strcmp(ZNode::GetValueIDValue(valueID), "1") == 0) ? 1 : 0;
+	Log::Write(LogLevel_Info, "BinarySensor::callback_value_updated(): updating currentValue with value %d of the type %s\n", bs->currentValue, typeid(bs->currentValue).name());
 	if(bs->valueUpdatedCallback){
 		Log::Write(LogLevel_Info, "BinarySensor::callback_value_updated(): calling value update callback ");
 		bs->valueUpdatedCallback->fn_callback(bs->valueUpdatedCallback->instance, bs->currentValue);
@@ -96,7 +99,12 @@ int BinarySensor::setUp(NodeInfo* nodeInfo){
 	if(result != 0)
 		return result;
 
-	currentValue = (strcmp(ZNode::GetValueIDValue(*this->valueID), "1")) ? 1 : 0;
-	Device::TestValueIDCallback(this->node, *this->valueID, callbacks);
+	this->finalizeSetUp();
 	return result;
+}
+
+void BinarySensor::finalizeSetUp(){
+	currentValue = (strcmp(ZNode::GetValueIDValue(*this->valueID), "1") == 0) ? 1 : 0;
+	Log::Write(LogLevel_Info, "BinarySensor::finalizeSetUp(): updating currentValue with value %d of the type %s\n", currentValue, typeid(currentValue).name());
+	Device::finalizeSetUp();
 }

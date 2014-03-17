@@ -107,7 +107,7 @@ void BinarySwitch::callback_turn_on_off(Device* _context, Notification const* _d
 		return;
 	}
 	bs->valueLastSeen = time(NULL);
-	bool result = (strcmp(ZNode::GetValueIDValue(valueID), "0")) ? true : false;
+	bool result = (strcmp(ZNode::GetValueIDValue(valueID), "0") == 0) ? false : true;
 	Log::Write(LogLevel_Info, "BinarySwitch::callback_turn_on_off(): check value : "
 			"Home 0x%08x Node %d Genre %s Class %s Instance %d Index %d Type %s IS %i",
 			valueID.GetHomeId(), valueID.GetNodeId(), genreToStr(valueID.GetGenre()),
@@ -125,6 +125,7 @@ void BinarySwitch::callback_turn_on_off(Device* _context, Notification const* _d
 				bs->turnedOffCallback->fn_callback(bs->turnedOffCallback->instance);
 			}
 		}
+		Log::Write(LogLevel_Info, "BinarySwitch::callback_turn_on_off(): updating currentValue with value %d of the type %s\n", bs->isTurnedOn, typeid(bs->isTurnedOn).name());
 		bs->isTurnedOn = result;
 	}else{
 		if(bs->noChangeCallback != NULL){
@@ -143,9 +144,13 @@ int BinarySwitch::setUp(NodeInfo* nodeInfo){
 	if(result != 0)
 		return result;
 
-	isTurnedOn = (strcmp(ZNode::GetValueIDValue(*this->valueID), "0")) ? true : false;
-	Device::TestValueIDCallback(this->node, *this->valueID, callbacks);
+	this->finalizeSetUp();
 	return result;
 }
 
+void BinarySwitch::finalizeSetUp(){
+	isTurnedOn = (strcmp(ZNode::GetValueIDValue(*this->valueID), "0") == 0) ? false : true;
+	Log::Write(LogLevel_Info, "BinarySwitch::finalizeSetUp(): updating currentValue with value %d of the type %s\n", isTurnedOn, typeid(isTurnedOn).name());
+	Device::finalizeSetUp();
+}
 

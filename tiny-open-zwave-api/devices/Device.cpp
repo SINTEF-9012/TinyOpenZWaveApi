@@ -94,8 +94,6 @@ int Device::setUp(NodeInfo* nodeInfo){
 			Log::Write(LogLevel_Info, "%s::setUp(): is called for the node %d 0x%08x", getDeviceName(), this->nodeId, this);
 			this->node = nodeInfo;
 			*this->valueID = valueId;
-			if(deviceInitCallback)
-				deviceInitCallback->fn_callback(deviceInitCallback->instance);
 		}else{
 			Log::Write(LogLevel_Info, "%s::setUp(): ValueID is not known yet for"
 					"Home 0x%08x Node %d Class %s Instance %d Index %d", getDeviceName(),
@@ -112,6 +110,13 @@ int Device::setUp(NodeInfo* nodeInfo){
 		result = 2;
 	}
 	return result;
+}
+
+void Device::finalizeSetUp(){
+	valueLastSeen = time(NULL);
+	Device::TestValueIDCallback(this->node, *this->valueID, callbacks);
+	if(deviceInitCallback)
+		deviceInitCallback->fn_callback(deviceInitCallback->instance);
 }
 
 void Device::TestValueIDCallback(NodeInfo *nodeInfo, ValueID valueID, list<ValueCallback*> callbacks){

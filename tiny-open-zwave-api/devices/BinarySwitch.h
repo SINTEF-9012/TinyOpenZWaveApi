@@ -34,6 +34,7 @@ class BinarySwitch: public Device {
 
 		virtual uint8 getComandClass();
 		virtual int setUp(NodeInfo* nodeInfo);
+		virtual void finalizeSetUp();
 
 		BinarySwitch* Init(TinyController* const controller, uint8 const _nodeId, uint8 const _instance, uint8 const _index);
 		bool isOn() {return isTurnedOn;};
