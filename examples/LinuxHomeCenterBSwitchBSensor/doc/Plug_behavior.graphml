@@ -1,0 +1,215 @@
+<graphml xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://www.yworks.com/xml/schema/graphml/1.1/ygraphml.xsd" xmlns:y="http://www.yworks.com/xml/graphml" xmlns:yed="http://www.yworks.com/xml/yed/3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://graphml.graphdrawing.org/xmlns">
+      <key for="node" id="d6" yfiles.type="nodegraphics"></key>
+      <key for="edge" id="d10" yfiles.type="edgegraphics"></key>
+      <graph edgedefault="directed" id="G">
+          <node id="Start">
+        <data key="d6">
+          <y:ShapeNode>
+            <y:Geometry width="200.0" height="70.0"></y:Geometry>
+            <y:Fill transparent="false" color="#FFCC66"></y:Fill>
+            <y:BorderStyle width="1.0" type="line" color="#000000"></y:BorderStyle>
+            <y:NodeLabel autoSizePolicy="content" alignment="center" modelName="internal" modelPosition="c" textColor="#000000" fontStyle="plain" fontSize="12" fontFamily="Dialog" hasLineColor="false" hasBackgroundColor="false" visible="true">Start{i}</y:NodeLabel>
+            <y:Shape type="roundrectangle"></y:Shape>
+          </y:ShapeNode>
+        </data>
+      </node><edge source="Start"  target="Ready">
+      <data key="d10">
+        <y:PolyLineEdge>
+          <y:LineStyle width="1.0" type="line" color="#000000"></y:LineStyle>
+          <y:Arrows source="none" target="standard"></y:Arrows>
+          <y:EdgeLabel alignment="center" preferredPlacement="right" modelName="side_slider" textColor="#000000" fontStyle="plain" distance="2.0" fontSize="12" fontFamily="Dialog" hasLineColor="false" ratio="0.0" hasBackgroundColor="false" visible="true">plugport?init_plug</y:EdgeLabel>
+        </y:PolyLineEdge>
+      </data>
+    </edge><node id="Ready">
+        <data key="d6">
+          <y:ShapeNode>
+            <y:Geometry width="200.0" height="70.0"></y:Geometry>
+            <y:Fill transparent="false" color="#FFCC66"></y:Fill>
+            <y:BorderStyle width="1.0" type="line" color="#000000"></y:BorderStyle>
+            <y:NodeLabel autoSizePolicy="content" alignment="center" modelName="internal" modelPosition="c" textColor="#000000" fontStyle="plain" fontSize="12" fontFamily="Dialog" hasLineColor="false" hasBackgroundColor="false" visible="true">Ready{i}</y:NodeLabel>
+            <y:Shape type="roundrectangle"></y:Shape>
+          </y:ShapeNode>
+        </data>
+      </node><edge source="Ready"  target="TurnedOnOROff">
+      <data key="d10">
+        <y:PolyLineEdge>
+          <y:LineStyle width="1.0" type="line" color="#000000"></y:LineStyle>
+          <y:Arrows source="none" target="standard"></y:Arrows>
+          <y:EdgeLabel alignment="center" preferredPlacement="right" modelName="side_slider" textColor="#000000" fontStyle="plain" distance="2.0" fontSize="12" fontFamily="Dialog" hasLineColor="false" ratio="0.0" hasBackgroundColor="false" visible="true">swintrecport?switch_ready</y:EdgeLabel>
+        </y:PolyLineEdge>
+      </data>
+    </edge><node id="TurnedOnOROff">
+        <data key="d6">
+          <y:ShapeNode>
+            <y:Geometry width="200.0" height="70.0"></y:Geometry>
+            <y:Fill transparent="false" color="#FFCC66"></y:Fill>
+            <y:BorderStyle width="1.0" type="line" color="#000000"></y:BorderStyle>
+            <y:NodeLabel autoSizePolicy="content" alignment="center" modelName="internal" modelPosition="c" textColor="#000000" fontStyle="plain" fontSize="12" fontFamily="Dialog" hasLineColor="false" hasBackgroundColor="false" visible="true">TurnedOnOROff{i}</y:NodeLabel>
+            <y:Shape type="roundrectangle"></y:Shape>
+          </y:ShapeNode>
+        </data>
+      </node><edge source="TurnedOnOROff"  target="TurnedOn">
+      <data key="d10">
+        <y:PolyLineEdge>
+          <y:LineStyle width="1.0" type="line" color="#000000"></y:LineStyle>
+          <y:Arrows source="none" target="standard"></y:Arrows>
+          <y:EdgeLabel alignment="center" preferredPlacement="right" modelName="side_slider" textColor="#000000" fontStyle="plain" distance="2.0" fontSize="12" fontFamily="Dialog" hasLineColor="false" ratio="0.0" hasBackgroundColor="false" visible="true">swintrecport?switch_state(c)</y:EdgeLabel>
+        </y:PolyLineEdge>
+      </data>
+    </edge><edge source="TurnedOnOROff"  target="TurnedOff">
+      <data key="d10">
+        <y:PolyLineEdge>
+          <y:LineStyle width="1.0" type="line" color="#000000"></y:LineStyle>
+          <y:Arrows source="none" target="standard"></y:Arrows>
+          <y:EdgeLabel alignment="center" preferredPlacement="right" modelName="side_slider" textColor="#000000" fontStyle="plain" distance="2.0" fontSize="12" fontFamily="Dialog" hasLineColor="false" ratio="0.0" hasBackgroundColor="false" visible="true">swintrecport?switch_state(c)</y:EdgeLabel>
+        </y:PolyLineEdge>
+      </data>
+    </edge><node id="TurnedOn">
+        <data key="d6">
+          <y:ShapeNode>
+            <y:Geometry width="200.0" height="70.0"></y:Geometry>
+            <y:Fill transparent="false" color="#FFCC66"></y:Fill>
+            <y:BorderStyle width="1.0" type="line" color="#000000"></y:BorderStyle>
+            <y:NodeLabel autoSizePolicy="content" alignment="center" modelName="internal" modelPosition="c" textColor="#000000" fontStyle="plain" fontSize="12" fontFamily="Dialog" hasLineColor="false" hasBackgroundColor="false" visible="true">TurnedOn{i}</y:NodeLabel>
+            <y:Shape type="roundrectangle"></y:Shape>
+          </y:ShapeNode>
+        </data>
+      </node><edge source="TurnedOn"  target="TurningOff">
+      <data key="d10">
+        <y:PolyLineEdge>
+          <y:LineStyle width="1.0" type="line" color="#000000"></y:LineStyle>
+          <y:Arrows source="none" target="standard"></y:Arrows>
+          <y:EdgeLabel alignment="center" preferredPlacement="right" modelName="side_slider" textColor="#000000" fontStyle="plain" distance="2.0" fontSize="12" fontFamily="Dialog" hasLineColor="false" ratio="0.0" hasBackgroundColor="false" visible="true">switchport?turn_off</y:EdgeLabel>
+        </y:PolyLineEdge>
+      </data>
+    </edge><node id="TurningOff">
+        <data key="d6">
+          <y:ShapeNode>
+            <y:Geometry width="200.0" height="70.0"></y:Geometry>
+            <y:Fill transparent="false" color="#FFCC66"></y:Fill>
+            <y:BorderStyle width="1.0" type="line" color="#000000"></y:BorderStyle>
+            <y:NodeLabel autoSizePolicy="content" alignment="center" modelName="internal" modelPosition="c" textColor="#000000" fontStyle="plain" fontSize="12" fontFamily="Dialog" hasLineColor="false" hasBackgroundColor="false" visible="true">TurningOff{i}</y:NodeLabel>
+            <y:Shape type="roundrectangle"></y:Shape>
+          </y:ShapeNode>
+        </data>
+      </node><edge source="TurningOff"  target="TurnedOff">
+      <data key="d10">
+        <y:PolyLineEdge>
+          <y:LineStyle width="1.0" type="line" color="#000000"></y:LineStyle>
+          <y:Arrows source="none" target="standard"></y:Arrows>
+          <y:EdgeLabel alignment="center" preferredPlacement="right" modelName="side_slider" textColor="#000000" fontStyle="plain" distance="2.0" fontSize="12" fontFamily="Dialog" hasLineColor="false" ratio="0.0" hasBackgroundColor="false" visible="true">swintrecport?turned_off(c){a}</y:EdgeLabel>
+        </y:PolyLineEdge>
+      </data>
+    </edge><edge source="TurningOff"  target="Exit">
+      <data key="d10">
+        <y:PolyLineEdge>
+          <y:LineStyle width="1.0" type="line" color="#000000"></y:LineStyle>
+          <y:Arrows source="none" target="standard"></y:Arrows>
+          <y:EdgeLabel alignment="center" preferredPlacement="right" modelName="side_slider" textColor="#000000" fontStyle="plain" distance="2.0" fontSize="12" fontFamily="Dialog" hasLineColor="false" ratio="0.0" hasBackgroundColor="false" visible="true">swintrecport?turned_off(c)</y:EdgeLabel>
+        </y:PolyLineEdge>
+      </data>
+    </edge><edge source="TurningOff"  target="TurningOff">
+      <data key="d10">
+        <y:PolyLineEdge>
+          <y:LineStyle width="1.0" type="line" color="#000000"></y:LineStyle>
+          <y:Arrows source="none" target="standard"></y:Arrows>
+          <y:EdgeLabel alignment="center" preferredPlacement="right" modelName="side_slider" textColor="#000000" fontStyle="plain" distance="2.0" fontSize="12" fontFamily="Dialog" hasLineColor="false" ratio="0.0" hasBackgroundColor="false" visible="true">swintrecport?no_change(c)</y:EdgeLabel>
+        </y:PolyLineEdge>
+      </data>
+    </edge><edge source="TurningOff"  target="TurnedOnOROff">
+      <data key="d10">
+        <y:PolyLineEdge>
+          <y:LineStyle width="1.0" type="line" color="#000000"></y:LineStyle>
+          <y:Arrows source="none" target="standard"></y:Arrows>
+          <y:EdgeLabel alignment="center" preferredPlacement="right" modelName="side_slider" textColor="#000000" fontStyle="plain" distance="2.0" fontSize="12" fontFamily="Dialog" hasLineColor="false" ratio="0.0" hasBackgroundColor="false" visible="true">swintrecport?no_change(c){a}</y:EdgeLabel>
+        </y:PolyLineEdge>
+      </data>
+    </edge><node id="TurnedOff">
+        <data key="d6">
+          <y:ShapeNode>
+            <y:Geometry width="200.0" height="70.0"></y:Geometry>
+            <y:Fill transparent="false" color="#FFCC66"></y:Fill>
+            <y:BorderStyle width="1.0" type="line" color="#000000"></y:BorderStyle>
+            <y:NodeLabel autoSizePolicy="content" alignment="center" modelName="internal" modelPosition="c" textColor="#000000" fontStyle="plain" fontSize="12" fontFamily="Dialog" hasLineColor="false" hasBackgroundColor="false" visible="true">TurnedOff{i}</y:NodeLabel>
+            <y:Shape type="roundrectangle"></y:Shape>
+          </y:ShapeNode>
+        </data>
+      </node><edge source="TurnedOff"  target="TurningOn">
+      <data key="d10">
+        <y:PolyLineEdge>
+          <y:LineStyle width="1.0" type="line" color="#000000"></y:LineStyle>
+          <y:Arrows source="none" target="standard"></y:Arrows>
+          <y:EdgeLabel alignment="center" preferredPlacement="right" modelName="side_slider" textColor="#000000" fontStyle="plain" distance="2.0" fontSize="12" fontFamily="Dialog" hasLineColor="false" ratio="0.0" hasBackgroundColor="false" visible="true">switchport?turn_on</y:EdgeLabel>
+        </y:PolyLineEdge>
+      </data>
+    </edge><node id="TurningOn">
+        <data key="d6">
+          <y:ShapeNode>
+            <y:Geometry width="200.0" height="70.0"></y:Geometry>
+            <y:Fill transparent="false" color="#FFCC66"></y:Fill>
+            <y:BorderStyle width="1.0" type="line" color="#000000"></y:BorderStyle>
+            <y:NodeLabel autoSizePolicy="content" alignment="center" modelName="internal" modelPosition="c" textColor="#000000" fontStyle="plain" fontSize="12" fontFamily="Dialog" hasLineColor="false" hasBackgroundColor="false" visible="true">TurningOn{i}</y:NodeLabel>
+            <y:Shape type="roundrectangle"></y:Shape>
+          </y:ShapeNode>
+        </data>
+      </node><edge source="TurningOn"  target="TurnedOn">
+      <data key="d10">
+        <y:PolyLineEdge>
+          <y:LineStyle width="1.0" type="line" color="#000000"></y:LineStyle>
+          <y:Arrows source="none" target="standard"></y:Arrows>
+          <y:EdgeLabel alignment="center" preferredPlacement="right" modelName="side_slider" textColor="#000000" fontStyle="plain" distance="2.0" fontSize="12" fontFamily="Dialog" hasLineColor="false" ratio="0.0" hasBackgroundColor="false" visible="true">swintrecport?turned_on(c){a}</y:EdgeLabel>
+        </y:PolyLineEdge>
+      </data>
+    </edge><edge source="TurningOn"  target="Exit">
+      <data key="d10">
+        <y:PolyLineEdge>
+          <y:LineStyle width="1.0" type="line" color="#000000"></y:LineStyle>
+          <y:Arrows source="none" target="standard"></y:Arrows>
+          <y:EdgeLabel alignment="center" preferredPlacement="right" modelName="side_slider" textColor="#000000" fontStyle="plain" distance="2.0" fontSize="12" fontFamily="Dialog" hasLineColor="false" ratio="0.0" hasBackgroundColor="false" visible="true">swintrecport?turned_on(c)</y:EdgeLabel>
+        </y:PolyLineEdge>
+      </data>
+    </edge><edge source="TurningOn"  target="TurningOn">
+      <data key="d10">
+        <y:PolyLineEdge>
+          <y:LineStyle width="1.0" type="line" color="#000000"></y:LineStyle>
+          <y:Arrows source="none" target="standard"></y:Arrows>
+          <y:EdgeLabel alignment="center" preferredPlacement="right" modelName="side_slider" textColor="#000000" fontStyle="plain" distance="2.0" fontSize="12" fontFamily="Dialog" hasLineColor="false" ratio="0.0" hasBackgroundColor="false" visible="true">swintrecport?no_change(c)</y:EdgeLabel>
+        </y:PolyLineEdge>
+      </data>
+    </edge><edge source="TurningOn"  target="TurnedOnOROff">
+      <data key="d10">
+        <y:PolyLineEdge>
+          <y:LineStyle width="1.0" type="line" color="#000000"></y:LineStyle>
+          <y:Arrows source="none" target="standard"></y:Arrows>
+          <y:EdgeLabel alignment="center" preferredPlacement="right" modelName="side_slider" textColor="#000000" fontStyle="plain" distance="2.0" fontSize="12" fontFamily="Dialog" hasLineColor="false" ratio="0.0" hasBackgroundColor="false" visible="true">swintrecport?no_change(c){a}</y:EdgeLabel>
+        </y:PolyLineEdge>
+      </data>
+    </edge><node id="Exit">
+        <data key="d6">
+          <y:ShapeNode>
+            <y:Geometry width="200.0" height="70.0"></y:Geometry>
+            <y:Fill transparent="false" color="#FFCC66"></y:Fill>
+            <y:BorderStyle width="1.0" type="line" color="#000000"></y:BorderStyle>
+            <y:NodeLabel autoSizePolicy="content" alignment="center" modelName="internal" modelPosition="c" textColor="#000000" fontStyle="plain" fontSize="12" fontFamily="Dialog" hasLineColor="false" hasBackgroundColor="false" visible="true">Exit{i}</y:NodeLabel>
+            <y:Shape type="roundrectangle"></y:Shape>
+          </y:ShapeNode>
+        </data>
+      </node><node id="Plug::behavior_INIT">
+      <data key="d6">
+        <y:ShapeNode>
+          <y:Fill transparent="false" color="#000000"></y:Fill>
+          <y:BorderStyle width="1.0" type="line" color="#000000"></y:BorderStyle>
+          <y:NodeLabel autoSizePolicy="content" alignment="center" modelName="internal" modelPosition="c" textColor="#FFFFFF" fontStyle="bold" fontSize="12" fontFamily="Dialog" hasLineColor="false" hasBackgroundColor="false" visible="true">I</y:NodeLabel>
+          <y:Shape type="ellipse"></y:Shape>
+        </y:ShapeNode>
+      </data>
+    </node><edge source="Plug::behavior_INIT" id="Plug::behavior_INITT" target="Start">
+      <data key="d10">
+        <y:PolyLineEdge>
+          <y:LineStyle width="1.0" type="line" color="#000000"></y:LineStyle>
+          <y:Arrows source="none" target="standard"></y:Arrows>
+        </y:PolyLineEdge>
+      </data>
+    </edge>
+        </graph>
+    </graphml>

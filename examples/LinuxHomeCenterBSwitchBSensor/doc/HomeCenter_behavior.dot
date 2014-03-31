@@ -1,0 +1,16 @@
+digraph finite_state_machine {
+	rankdir=LR;
+	INIT_STATE [shape=circle label = "", style = filled, color = "black"];
+		INIT_STATE -> Start [label="init"];
+	Start [label="Start{i}", shape = ellipse];
+		Start -> InitDevice [label="ctrlport?initialized"];
+	InitDevice [label="InitDevice{i}\nplugport?plug_init{a}\ndoorwindowport?dw_init{a}", shape = ellipse];
+		InitDevice -> StartController [label="homeintrecport?devicesinitialized"];
+	StartController [label="StartController{i}", shape = ellipse];
+		StartController -> WaitForDevices [label="ctrlport?controller_ready"];
+	WaitForDevices [label="WaitForDevices{i}\nctrlport?node_quiried(c){a}\nctrlport?node_quiried(c){a}", shape = ellipse];
+		WaitForDevices -> DevicesAreReady [label="homeintrecport?devicesquiried"];
+	DevicesAreReady [label="DevicesAreReady{i}\ndoorwindowport?dw_closed{a}\ndoorwindowport?dw_opened{a}", shape = ellipse];
+		DevicesAreReady -> Quit [label="plugport?plug_exit"];
+	Quit [label="Quit{i}", shape = ellipse];
+}

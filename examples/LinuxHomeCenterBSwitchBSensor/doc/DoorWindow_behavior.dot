@@ -1,0 +1,16 @@
+digraph finite_state_machine {
+	rankdir=LR;
+	INIT_STATE [shape=circle label = "", style = filled, color = "black"];
+		INIT_STATE -> Start [label="init"];
+	Start [label="Start{i}", shape = ellipse];
+		Start -> Init [label="doorwindowport?init_dw"];
+	Init [label="Init{i}", shape = ellipse];
+		Init -> Ready [label="dwintrecport?dw_ready{a}"];
+	Ready [label="Ready{i}", shape = ellipse];
+		Ready -> Closed [label="doorwindowport?start_monitoring(c)"];
+		Ready -> Opened [label="doorwindowport?start_monitoring(c)"];
+	Closed [label="Closed{i}", shape = ellipse];
+		Closed -> Opened [label="dwintrecport?dw_changed(c){a}"];
+	Opened [label="Opened{i}", shape = ellipse];
+		Opened -> Closed [label="dwintrecport?dw_changed(c){a}"];
+}

@@ -1,0 +1,27 @@
+digraph finite_state_machine {
+	rankdir=LR;
+	INIT_STATE [shape=circle label = "", style = filled, color = "black"];
+		INIT_STATE -> Start [label="init"];
+	Start [label="Start{i}", shape = ellipse];
+		Start -> Ready [label="plugport?init_plug"];
+	Ready [label="Ready{i}", shape = ellipse];
+		Ready -> TurnedOnOROff [label="swintrecport?switch_ready"];
+	TurnedOnOROff [label="TurnedOnOROff{i}", shape = ellipse];
+		TurnedOnOROff -> TurnedOn [label="swintrecport?switch_state(c)"];
+		TurnedOnOROff -> TurnedOff [label="swintrecport?switch_state(c)"];
+	TurnedOn [label="TurnedOn{i}", shape = ellipse];
+		TurnedOn -> TurningOff [label="switchport?turn_off"];
+	TurningOff [label="TurningOff{i}", shape = ellipse];
+		TurningOff -> TurnedOff [label="swintrecport?turned_off(c){a}"];
+		TurningOff -> Exit [label="swintrecport?turned_off(c)"];
+		TurningOff -> TurningOff [label="swintrecport?no_change(c)"];
+		TurningOff -> TurnedOnOROff [label="swintrecport?no_change(c){a}"];
+	TurnedOff [label="TurnedOff{i}", shape = ellipse];
+		TurnedOff -> TurningOn [label="switchport?turn_on"];
+	TurningOn [label="TurningOn{i}", shape = ellipse];
+		TurningOn -> TurnedOn [label="swintrecport?turned_on(c){a}"];
+		TurningOn -> Exit [label="swintrecport?turned_on(c)"];
+		TurningOn -> TurningOn [label="swintrecport?no_change(c)"];
+		TurningOn -> TurnedOnOROff [label="swintrecport?no_change(c){a}"];
+	Exit [label="Exit{i}", shape = ellipse];
+}

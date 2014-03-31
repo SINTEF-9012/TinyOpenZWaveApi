@@ -1,0 +1,10 @@
+digraph finite_state_machine {
+	rankdir=LR;
+	INIT_STATE [shape=circle label = "", style = filled, color = "black"];
+		INIT_STATE -> Start [label="init"];
+	Start [label="Start{i}", shape = ellipse];
+		Start -> Init [label="ctrlport?initialize"];
+	Init [label="Init{i}", shape = ellipse];
+		Init -> Run [label="ctrlport?start"];
+	Run [label="Run{i}", shape = ellipse];
+}
