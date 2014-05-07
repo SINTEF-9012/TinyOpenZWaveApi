@@ -10,6 +10,7 @@
 
 #include "openzwave/Defs.h"
 
+namespace TinyOpenZWaveApi {
 using namespace OpenZWave;
 
 class NodeSubject;
@@ -21,6 +22,6 @@ class NodeObserver {
 
 		virtual ~NodeObserver(){};
 };
-
+}
 
 #endif /* NODEOBSERVER_H_ */

@@ -28,7 +28,7 @@
 #include "../devices/Device.h"
 
 
-using namespace OpenZWave;
+namespace TinyOpenZWaveApi{
 
 map<char const*, TinyController*> ZNode::controllers;
 map<uint8, NodeSubject*> ZNode::m_nodeSub;
@@ -482,4 +482,4 @@ void ZNode::SetValueIDValue(ValueID valueID, int32 value){
 	}
 }
 
-
+}

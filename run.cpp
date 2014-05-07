@@ -135,6 +135,9 @@ int main(int argc, char* argv[]){
 		}
 		if(ch == "i"){
 			cout << "OpenZWave init" <<endl;
+			char value[1024] = "hello";
+			char dev_value[1024];
+			snprintf(dev_value, 1024, "%s 0x%08x", strdup(value), "asdasd");
 			/*char value[1024] = "hello";
 			char* value_char;
 			value_char = (char*) malloc((strlen(value) +1)*sizeof(char));

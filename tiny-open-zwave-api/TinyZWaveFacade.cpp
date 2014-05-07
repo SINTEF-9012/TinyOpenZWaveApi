@@ -12,7 +12,7 @@
 #include "openzwave/Log.h"
 
 
-using namespace TinyOpenZWaveApi;
+namespace TinyOpenZWaveApi {
 
 bool OpenZWaveFacade::isInitialized = false;
 
@@ -78,4 +78,6 @@ TinyController* OpenZWaveFacade::GetController(char const* port){
 	if(controller == NULL)
 		Log::Write(LogLevel_Info, "OpenZWaveFacade::GetController(): can not find controller for %s", port);
 	return controller;
+}
+
 }

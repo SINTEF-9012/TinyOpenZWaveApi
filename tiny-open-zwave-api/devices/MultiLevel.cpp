@@ -21,7 +21,7 @@
 #include "../observer/NodeSubject.h"
 
 
-using namespace OpenZWave;
+namespace TinyOpenZWaveApi {
 
 
 uint8 MultiLevel::COMMAND_CLASS = COMMAND_CLASS_SENSOR_MULTILEVEL;
@@ -108,4 +108,5 @@ void MultiLevel::finalizeSetUp(){
 	currentValue = ZNode::GetValueIDValue(*this->valueID);
 	Log::Write(LogLevel_Info, "MultiLevel::finalizeSetUp(): updating currentValue with value %d of the type %s\n", currentValue, typeid(currentValue).name());
 	Device::finalizeSetUp();
+}
 }

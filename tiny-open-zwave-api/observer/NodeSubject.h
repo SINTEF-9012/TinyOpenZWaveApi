@@ -8,13 +8,11 @@
 #ifndef NODESUBJECT_H_
 #define NODESUBJECT_H_
 
-#include "openzwave/Notification.h"
-#include "openzwave/Defs.h"
-
-#include "NodeObserver.h"
 #include "../libs/Utility.h"
 
-using namespace OpenZWave;
+namespace TinyOpenZWaveApi {
+
+class NodeObserver;
 
 class NodeSubject {
 
@@ -36,6 +34,5 @@ class NodeSubject {
 		void setNotification(Notification const* _notification);
 		Notification const* getNotification();
 };
-
-
+}
 #endif /* NODESUBJECT_H_ */

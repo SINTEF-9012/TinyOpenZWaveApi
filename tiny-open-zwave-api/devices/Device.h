@@ -8,15 +8,13 @@
 #ifndef DEVICE_H_
 #define DEVICE_H_
 
-#include "openzwave/ValueID.h"
-#include "openzwave/Node.h"
-
-#include "TinyController.h"
 #include "../libs/Utility.h"
 #include "../observer/NodeObserver.h"
-#include "../observer/NodeSubject.h"
 
-using namespace OpenZWave;
+namespace TinyOpenZWaveApi {
+
+	class NodeSubject;
+	class TinyController;
 
 	class Device : public NodeObserver
 	{
@@ -62,6 +60,6 @@ using namespace OpenZWave;
 			static void CallValueCallback(NodeInfo *nodeInfo, ValueID valueId, Notification const* notification);
 			static void RemoveValueIDCallback(NodeInfo *nodeInfo, ValueID valueID);
 	};
-
+}
 
 #endif /* DEVICE_H_ */

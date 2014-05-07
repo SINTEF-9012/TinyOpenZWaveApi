@@ -8,47 +8,45 @@
 #ifndef MULTILEVEL_H_
 #define MULTILEVEL_H_
 
-#include "openzwave/ValueID.h"
-#include "openzwave/Node.h"
-
-#include "TinyController.h"
 #include "../libs/Utility.h"
 #include "Device.h"
-#include "../observer/NodeSubject.h"
 
-using namespace OpenZWave;
+namespace TinyOpenZWaveApi {
 
-class MultiLevel : public Device {
-	private:
-		ThingMLCallback* valueUpdatedCallback;
-		char* currentValue;
+	class TinyController;
+	class NodeSubject;
 
-	public:
-		static uint8 COMMAND_CLASS;
+	class MultiLevel : public Device {
+		private:
+			ThingMLCallback* valueUpdatedCallback;
+			char* currentValue;
 
-	public:
-		MultiLevel();
-		virtual ~MultiLevel();
+		public:
+			static uint8 COMMAND_CLASS;
 
-		virtual uint8 getComandClass();
-		virtual int setUp(NodeInfo* nodeInfo);
-		virtual void finalizeSetUp();
+		public:
+			MultiLevel();
+			virtual ~MultiLevel();
 
-		MultiLevel* Init(TinyController* const controller, uint8 const _nodeId, uint8 const _instance, uint8 const _index);
-		char* getCurrentValue();
+			virtual uint8 getComandClass();
+			virtual int setUp(NodeInfo* nodeInfo);
+			virtual void finalizeSetUp();
 
-		virtual void Destroy();
+			MultiLevel* Init(TinyController* const controller, uint8 const _nodeId, uint8 const _instance, uint8 const _index);
+			char* getCurrentValue();
 
-		//callback
-		void setValueUpdatedCallback(ThingMLCallback* _callback){valueUpdatedCallback = _callback;};
+			virtual void Destroy();
 
-		//commands
-		void refresh();
+			//callback
+			void setValueUpdatedCallback(ThingMLCallback* _callback){valueUpdatedCallback = _callback;};
 
-		//commands callback
-		static void callback_value_updated(Device* _context, Notification const* _data);
+			//commands
+			void refresh();
 
-		virtual void update(NodeSubject* subject);
-};
+			//commands callback
+			static void callback_value_updated(Device* _context, Notification const* _data);
 
+			virtual void update(NodeSubject* subject);
+	};
+}
 #endif /* MULTILEVEL_H_ */

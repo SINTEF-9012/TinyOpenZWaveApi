@@ -12,7 +12,7 @@
 #include "../libs/Utility.h"
 
 
-using namespace OpenZWave;
+namespace TinyOpenZWaveApi {
 
 
 ControllerSubject::ControllerSubject(m_structCtrl* _ctrlInfo, Notification const* _notification){
@@ -53,4 +53,5 @@ void ControllerSubject::setNotification(Notification const* _notification){
 
 Notification const* ControllerSubject::getNotification(){
 	return notification;
+}
 }

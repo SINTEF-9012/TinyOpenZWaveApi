@@ -8,19 +8,15 @@
 #ifndef TINYCONTROLLER_H_
 #define TINYCONTROLLER_H_
 
-#include "openzwave/Notification.h"
 #include "openzwave/Manager.h"
-#include "openzwave/Defs.h"
-#include "openzwave/Driver.h"
-#include "openzwave/ValueID.h"
 
 #include "../libs/Utility.h"
 #include "../observer/ControllerObserver.h"
-#include "../observer/ControllerSubject.h"
 
-using namespace OpenZWave;
+namespace TinyOpenZWaveApi {
 
 	class Device;
+	class ControllerSubject;
 
 	class TinyController : public ControllerObserver {
 		private:
@@ -68,5 +64,5 @@ using namespace OpenZWave;
 			virtual void update(ControllerSubject* subject);
 	};
 
-
+}
 #endif /* TINYCONTROLLER_H_ */

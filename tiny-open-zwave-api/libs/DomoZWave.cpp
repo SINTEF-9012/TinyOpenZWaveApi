@@ -31,7 +31,7 @@
 
 // wrapper
 #include "DomoZWave.h"
-using namespace OpenZWave;
+using namespace TinyOpenZWaveApi;
 
 //-----------------------------------------------------------------------------
 // Variables

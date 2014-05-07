@@ -8,15 +8,13 @@
 #ifndef BINARYSENSOR_H_
 #define BINARYSENSOR_H_
 
-#include "openzwave/ValueID.h"
-#include "openzwave/Node.h"
-
-#include "TinyController.h"
 #include "../libs/Utility.h"
 #include "Device.h"
-#include "../observer/NodeSubject.h"
 
-using namespace OpenZWave;
+namespace TinyOpenZWaveApi {
+
+class NodeSubject;
+class TinyController;
 
 class BinarySensor: public Device {
 	private:
@@ -50,5 +48,5 @@ class BinarySensor: public Device {
 
 		virtual void update(NodeSubject* subject);
 };
-
+}
 #endif /* BINARYSENSOR_H_ */

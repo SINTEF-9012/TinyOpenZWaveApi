@@ -14,6 +14,7 @@
 #include "openzwave/Notification.h"
 #include "openzwave/Log.h"
 
+#include "Device.h"
 #include "TinyController.h"
 #include "../libs/Utility.h"
 #include "../libs/DomoZWave.h"
@@ -21,6 +22,7 @@
 #include "BinarySensor.h"
 #include "../observer/NodeSubject.h"
 
+namespace TinyOpenZWaveApi {
 
 uint8 BinarySensor::COMMAND_CLASS = COMMAND_CLASS_SENSOR_BINARY;
 
@@ -107,4 +109,5 @@ void BinarySensor::finalizeSetUp(){
 	currentValue = (strcmp(ZNode::GetValueIDValue(*this->valueID), "1") == 0) ? 1 : 0;
 	Log::Write(LogLevel_Info, "BinarySensor::finalizeSetUp(): updating currentValue with value %d of the type %s\n", currentValue, typeid(currentValue).name());
 	Device::finalizeSetUp();
+}
 }

@@ -8,9 +8,8 @@
 #ifndef CONTROLLEROBSERVER_H_
 #define CONTROLLEROBSERVER_H_
 
-#include "openzwave/Defs.h"
 
-using namespace OpenZWave;
+namespace TinyOpenZWaveApi {
 
 class ControllerSubject;
 
@@ -23,6 +22,6 @@ class ControllerObserver {
 		virtual void update(ControllerSubject* subject) {};
 };
 
-
+}
 
 #endif /* CONTROLLEROBSERVER_H_ */

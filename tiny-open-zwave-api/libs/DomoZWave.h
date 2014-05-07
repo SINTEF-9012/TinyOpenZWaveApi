@@ -31,7 +31,7 @@
 
 #include "Utility.h"
 
-using namespace OpenZWave;
+using namespace TinyOpenZWaveApi;
 
 
 #define COMMAND_CLASS_NO_OPERATION 0x00

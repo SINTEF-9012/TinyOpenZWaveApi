@@ -13,7 +13,7 @@
 
 #include "../libs/Utility.h"
 
-using namespace OpenZWave;
+namespace TinyOpenZWaveApi {
 
 
 NodeSubject::NodeSubject(NodeInfo* _nodeInfo, Notification const* _notification){
@@ -56,4 +56,4 @@ Notification const* NodeSubject::getNotification(){
 	return notification;
 }
 
-
+}

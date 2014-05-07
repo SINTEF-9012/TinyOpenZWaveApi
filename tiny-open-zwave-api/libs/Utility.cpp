@@ -24,7 +24,7 @@
 #include "DomoZWave.h"
 
 
-using namespace OpenZWave;
+namespace TinyOpenZWaveApi {
 
 
 const char *genreToStr (ValueID::ValueGenre vg)
@@ -538,6 +538,6 @@ ValueCallback::~ValueCallback(){
 	Log::Write(LogLevel_Info, "ValueCallback::~ValueCallback() : 0x%08x", this);
 }
 
-
+}
 
 

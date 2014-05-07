@@ -24,7 +24,7 @@
 #include "../observer/ControllerObserver.h"
 
 
-using namespace OpenZWave;
+namespace TinyOpenZWaveApi {
 
 
 pthread_mutex_t nlock = PTHREAD_MUTEX_INITIALIZER;
@@ -401,4 +401,4 @@ void TinyController::setUp(m_structCtrl* _ctrInfo){
 	nodeId = _ctrInfo->m_nodeId;
 }
 
-
+}

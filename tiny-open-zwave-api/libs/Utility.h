@@ -5,8 +5,8 @@
  *      Author: vassik
  */
 
-#ifndef UTILITY_H_
-#define UTILITY_H_
+#ifndef TINYZWAVEUTILITY_H_
+#define TINYZWAVEUTILITY_H_
 
 #include "openzwave/Driver.h"
 #include "openzwave/Notification.h"
@@ -20,8 +20,8 @@
 #include "openzwave/ValueShort.h"
 #include "openzwave/ValueString.h"
 
-
-using namespace OpenZWave;
+namespace TinyOpenZWaveApi {
+	using namespace OpenZWave;
 
 	//-------------------------------------------------------------------------
 	//Structures for a valueID callback
@@ -148,4 +148,5 @@ using namespace OpenZWave;
 
 	ValueID findValueID(list<ValueID> values, uint8 command_class, uint8 instance, uint8 index);
 
-#endif /* UTILITY_H_ */
+}
+#endif /* TINYZWAVEUTILITY_H_ */

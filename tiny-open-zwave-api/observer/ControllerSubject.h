@@ -8,13 +8,12 @@
 #ifndef CONTROLLERSUBJECT_H_
 #define CONTROLLERSUBJECT_H_
 
-#include "openzwave/Notification.h"
-#include "openzwave/Defs.h"
 
-#include "ControllerObserver.h"
 #include "../libs/Utility.h"
 
-using namespace OpenZWave;
+namespace TinyOpenZWaveApi {
+
+class ControllerObserver;
 
 class ControllerSubject {
 
@@ -36,6 +35,6 @@ class ControllerSubject {
 		void setNotification(Notification const* notification);
 		Notification const* getNotification();
 };
-
+}
 
 #endif /* CONTROLLERSUBJECT_H_ */

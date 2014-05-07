@@ -23,7 +23,7 @@
 #include "../observer/NodeSubject.h"
 
 
-using namespace OpenZWave;
+namespace TinyOpenZWaveApi {
 
 
 uint8 BinarySwitch::COMMAND_CLASS = COMMAND_CLASS_SWITCH_BINARY;
@@ -154,3 +154,4 @@ void BinarySwitch::finalizeSetUp(){
 	Device::finalizeSetUp();
 }
 
+}
