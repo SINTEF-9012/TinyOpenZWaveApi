@@ -85,6 +85,14 @@ void BinarySwitch::turnOff(){
 	};
 }
 
+void BinarySwitch::refresh(){
+	if(NullValueID::IsNull(*this->valueID)){
+		Log::Write(LogLevel_Info, "BinarySwitch::refresh(): can not refresh value since ValuiID is null");
+		return;
+	}
+	Manager::Get()->RefreshValue(*this->valueID);
+}
+
 void BinarySwitch::callback_turn_on_off(Device* _context, Notification const* _data){
 	Log::Write(LogLevel_Info, "BinarySwitch::callback_turn_on_off(): is called");
 	BinarySwitch *bs = (BinarySwitch*) _context;

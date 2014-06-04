@@ -41,7 +41,7 @@ namespace TinyOpenZWaveApi {
 			void setValueUpdatedCallback(ThingMLCallback* _callback){valueUpdatedCallback = _callback;};
 
 			//commands
-			void refresh();
+			virtual void refresh();
 
 			//commands callback
 			static void callback_value_updated(Device* _context, Notification const* _data);

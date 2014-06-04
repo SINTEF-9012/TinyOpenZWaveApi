@@ -47,6 +47,7 @@ namespace TinyOpenZWaveApi {
 			//commands
 			void turnOn();
 			void turnOff();
+			virtual void refresh();
 
 			//commands callback
 			static void callback_turn_on_off(Device* _context, Notification const* _data);

@@ -55,6 +55,7 @@ namespace TinyOpenZWaveApi {
 			virtual void Destroy();
 
 			virtual void update(NodeSubject* subject);
+			virtual void refresh() = 0;
 
 			static void TestValueIDCallback(NodeInfo *nodeInfo, ValueID valueID, list<ValueCallback*> callbacks);
 			static void CallValueCallback(NodeInfo *nodeInfo, ValueID valueId, Notification const* notification);
