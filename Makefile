@@ -26,6 +26,8 @@ DYNAMIC_LIB_NAME = libtinyozw.so
 STATIC_LIB_LOCATION = $(TINYOPENZWAVE)/$(STATIC_LIB_NAME)
 DYNAMIC_LIB_LOCATION = $(TINYOPENZWAVE)/$(DYNAMIC_LIB_NAME)
 
+INCLUDE_FOLDERS = -I /usr/local/include/openzwave/
+
 SRC := $(TINYOPENZWAVE)/libs/ZNode.cpp $(TINYOPENZWAVE)/TinyZWaveFacade.cpp $(TINYOPENZWAVE)/libs/Utility.cpp $(TINYOPENZWAVE)/libs/DomoZWave.cpp \
 	$(TINYOPENZWAVE)/devices/TinyController.cpp $(TINYOPENZWAVE)/devices/Device.cpp $(TINYOPENZWAVE)/devices/BinarySwitch.cpp \
 	$(TINYOPENZWAVE)/observer/NodeSubject.cpp $(TINYOPENZWAVE)/observer/ControllerSubject.cpp $(TINYOPENZWAVE)/devices/MultiLevel.cpp \
@@ -42,7 +44,7 @@ LIBS := $(GNUTLS) $(LIBMICROHTTPD) -pthread -lopenzwave $(LIBUSB)
 all : run staticlib dynamiclib
 
 %.o : %.cpp
-	$(CXX) $(CFLAGS) -o $@ $<
+	$(CXX) $(CFLAGS) $(INCLUDE_FOLDERS) -o $@ $<
 
 run : run.o $(OBJ)
 		$(CXX) -o $@ $(LDFLAGS) run.o $(OBJ) $(LIBS)
